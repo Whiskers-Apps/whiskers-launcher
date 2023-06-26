@@ -4,6 +4,6 @@
 
 # To-Do
 - [ ] App Basics
-- [ ] Extensions
+- [ ] Extensions Support
 - [ ] Website
 - [ ] Documentation
