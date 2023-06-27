@@ -18,6 +18,10 @@
         "open": true
       },
       "window": {
+        "all": true,
+        "setFocus": true
+      },
+      "globalShortcut":{
         "all": true
       }
     },
@@ -40,13 +44,17 @@
     "windows": [
       {
         "fullscreen": false,
-        "resizable": true,
+        "resizable": false,
         "title": "Simple Keyboard Launcher",
         "decorations": false,
         "width": 800,
-        "height": 70,
+        "height": 800,
         "transparent": true
       }
-    ]
+    ],
+    "systemTray":{
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
   }
 }

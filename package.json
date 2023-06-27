@@ -12,7 +12,9 @@
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
     "tauri-plugin-positioner-api": "^0.2.7",
-    "vue": "^3.2.45"
+    "vite-svg-loader": "^4.0.0",
+    "vue": "^3.2.45",
+    "vue-router": "^4.2.2"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.4.0",
