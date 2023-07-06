@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { appWindow, LogicalSize, WebviewWindow } from "@tauri-apps/api/window"
+import { appWindow, LogicalSize, PhysicalSize, WebviewWindow } from "@tauri-apps/api/window"
 import { register } from "@tauri-apps/api/globalShortcut"
 import { event, invoke } from "@tauri-apps/api";
+import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { onMounted, ref, watch } from "vue";
 import SearchSVG from "./assets/icons/search.svg"
 import SettingsSVG from "./assets/icons/settings.svg"
 import { getSettings, getRoundnessInPixels } from "./pages/Settings/Settings";
 import { listen } from "@tauri-apps/api/event"
-
+import { SimpleKlResult, TextResult } from "./data"
 
 
 const showSearchIcon = ref();
@@ -22,7 +23,12 @@ const textColor = ref("")
 const secondaryTextColor = ref("")
 const searchRef = ref();
 const focus = ref();
-const results = ref();
+const results = ref<SimpleKlResult[]>([]);
+const resultsLimit = ref(0)
+const searchBoxHeight = ref("70px");
+const selectedIndex = ref(0);
+const resultsRef = ref([]);
+
 
 appWindow.onFocusChanged(action => {
   if (action.event == "tauri://blur") {
@@ -59,6 +65,7 @@ onMounted(async () => {
   accentColor.value = settings.theming.accent;
   textColor.value = settings.theming.text;
   secondaryTextColor.value = settings.theming.seconday_text;
+  resultsLimit.value = settings.general.limit;
 
   searchRef.value.focus();
 
@@ -69,6 +76,27 @@ onMounted(async () => {
 })
 
 document.addEventListener('keydown', function (event) {
+
+  if (event.key === "ArrowDown") {
+
+    event.preventDefault(); //Prevents cursor from changing position
+
+    if (selectedIndex.value < results.value.length - 1) {
+      selectedIndex.value = selectedIndex.value + 1;
+      resultsRef.value[selectedIndex.value - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
+  if (event.key === "ArrowUp") {
+
+    event.preventDefault(); //Prevents cursor from changing position
+
+    if (selectedIndex.value > 0) {
+      selectedIndex.value = selectedIndex.value - 1;
+      resultsRef.value[selectedIndex.value - 1].scrollIntoView({ behavior: 'smooth' });
+    }
+  }
+
   if (event.ctrlKey && event.key === 's') {
     openSettings();
   }
@@ -82,7 +110,7 @@ document.addEventListener('keydown', function (event) {
   }
 
   if (event.key === "Enter") {
-    invoke("hide_window");
+    runAction();
   }
 
   if (event.altKey && event.key == "Space") {
@@ -90,42 +118,188 @@ document.addEventListener('keydown', function (event) {
   }
 });
 
-const searchBoxHeight = ref(70);
+async function runAction() {
+  if (results.value.length > 0) {
 
-watch(searchText, async (newText, oldText) => {
+    var actionJson = "";
+    var actionType = "";
+    var result = results.value[selectedIndex.value];
 
-  results.value = await invoke("get_results");
-  console.log(JSON.parse(results.value));
+
+    if (result.Text !== undefined) {
+      let action = result.Text.action;
+
+      if (action.OpenApp !== undefined) {
+        actionJson = JSON.stringify(action.OpenApp);
+        actionType = "OpenApp"
+      }
+
+      if (action.OpenInBrowser !== undefined) {
+        actionJson = JSON.stringify(action.OpenInBrowser);
+        actionType = "OpenInBrowser"
+      }
+
+      if (action.CopyToClipboard !== undefined) {
+        actionJson = JSON.stringify(action.CopyToClipboard);
+        actionType = "CopyToClipboard"
+      }
+
+      if (action.ExtensionAction !== undefined) {
+        actionJson = JSON.stringify(action.ExtensionAction);
+        actionType = "ExtensionAction"
+      }
+
+      invoke("run_action", { action_json: actionJson, action_type: actionType })
+    }
+
+    if (result.IconWithText !== undefined) {
+      let action = result.IconWithText.action;
+
+      if (action.OpenApp !== undefined) {
+        actionJson = JSON.stringify(action.OpenApp);
+        actionType = "OpenApp"
+      }
+
+      if (action.OpenInBrowser !== undefined) {
+        actionJson = JSON.stringify(action.OpenInBrowser);
+        actionType = "OpenInBrowser"
+      }
+
+      if (action.CopyToClipboard !== undefined) {
+        actionJson = JSON.stringify(action.CopyToClipboard);
+        actionType = "CopyToClipboard"
+      }
+
+      if (action.ExtensionAction !== undefined) {
+        actionJson = JSON.stringify(action.ExtensionAction);
+        actionType = "ExtensionAction"
+      }
+
+      invoke("run_action", { action_json: actionJson, action_type: actionType })
+    }
+
+    if (result.TitleAndDescription !== undefined) {
+      let action = result.TitleAndDescription.action;
+
+      if (action.OpenApp !== undefined) {
+        actionJson = JSON.stringify(action.OpenApp);
+        actionType = "OpenApp"
+      }
+
+      if (action.OpenInBrowser !== undefined) {
+        actionJson = JSON.stringify(action.OpenInBrowser);
+        actionType = "OpenInBrowser"
+      }
+
+      if (action.CopyToClipboard !== undefined) {
+        actionJson = JSON.stringify(action.CopyToClipboard);
+        actionType = "CopyToClipboard"
+      }
+
+      if (action.ExtensionAction !== undefined) {
+        actionJson = JSON.stringify(action.ExtensionAction);
+        actionType = "ExtensionAction"
+      }
+
+      invoke("run_action", { action_json: actionJson, action_type: actionType })
+    }
+
+    if (result.IconWithTitleAndDescription !== undefined) {
+      let action = result.IconWithTitleAndDescription.action;
+
+      if (action.OpenApp !== undefined) {
+        actionJson = JSON.stringify(action.OpenApp);
+        actionType = "OpenApp"
+      }
+
+      if (action.OpenInBrowser !== undefined) {
+        actionJson = JSON.stringify(action.OpenInBrowser);
+        actionType = "OpenInBrowser"
+      }
+
+      if (action.CopyToClipboard !== undefined) {
+        actionJson = JSON.stringify(action.CopyToClipboard);
+        actionType = "CopyToClipboard"
+      }
+
+      if (action.ExtensionAction !== undefined) {
+        actionJson = JSON.stringify(action.ExtensionAction);
+        actionType = "ExtensionAction"
+      }
+
+      invoke("run_action", { action_json: actionJson, action_type: actionType })
+    }
+  }
+}
+
+watch(searchText, async (_newText, _oldText) => {
+
+  if (searchText.value.trim() === "") {
+
+    results.value = [];
+    appWindow.setSize(new PhysicalSize(800, 70));
+    searchBoxHeight.value = `70px`
+  } else {
+
+    results.value = JSON.parse(await invoke("get_results", { search_text: searchText.value }));
+    var newHeight = 70;
+
+
+    if (results.value.length > resultsLimit.value) {
+      newHeight = newHeight + (resultsLimit.value * 50);
+    } else {
+      newHeight = newHeight + results.value.length * 50;
+    }
+
+    appWindow.setSize(new PhysicalSize(800, newHeight));
+    searchBoxHeight.value = `${newHeight}px`
+  }
+
+  selectedIndex.value = 0;
 })
 
 </script>
 
 <template>
-  <div class="items-center justify-center h-screen w-screen bg-transparent text">
-
-    <div class=" flex flex-col pt-2 pb-2 pl-4 pr-4 overflow-clip searchBox">
-      <div class="flex flex-grow">
-        <button v-if="showSearchIcon">
-          <SearchSVG class="w-5 h-5 mr-4 stroke" />
-        </button>
-
-        <input ref="searchRef" class="flex-grow bg-transparent border-none outline-none h-full placeholder"
-          v-model="searchText" placeholder="Search Anything">
-
-        <button v-if="showSettingsIcon" class="p-1 rounded-full secondaryHover ml-4" @click="openSettings()">
-          <SettingsSVG class="h-5 w-5 stroke" />
+  <div class="items-center justify-center h-screen w-screen max-h-screen text maxHeight">
+    <div class="searchBox pt-2 pb-2 pl-4 pr-4 flex flex-col justify-center">
+      <div class="flex  items-center">
+        <div v-if="showSearchIcon" class="mr-2">
+          <SearchSVG class="w-5 h-5 stroke" />
+        </div>
+        <div class="flex-grow">
+          <input ref="searchRef" class="w-full background outline-none placeholder" placeholder="Search"
+            v-model="searchText" />
+        </div>
+        <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings">
+          <SettingsSVG class="w-5 h-5 stroke" />
         </button>
       </div>
+      <div v-if="results.length > 0" class="overflow-auto mt-2">
+        <div v-for="(result, index) in results" ref="resultsRef">
+          <div :ref="`result-${index}`" class="h-[50px] p-2 flex"
+            :class="index === selectedIndex ? 'selectedResult' : ''">
+            <div v-if="result.Text !== undefined">
 
-      <div class="flex flex-col">
-        <div v-for="char in searchText">
-          {{ char }}
+            </div>
+
+            <div v-if="result.IconWithText !== undefined" class="flex">
+              <img :src="convertFileSrc(result.IconWithText.icon)" class="h-[35px] w-[35px] object-contain">
+              <div class="text-lg ml-2 flex-grow">{{ result.IconWithText.text }}</div>
+            </div>
+
+
+            <div v-if="result.TitleAndDescription !== undefined">
+
+            </div>
+
+            <div v-if="result.IconWithTitleAndDescription !== undefined">
+
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
-
-
   </div>
 </template>
 
@@ -134,12 +308,23 @@ watch(searchText, async (newText, oldText) => {
   color: v-bind(accentColor)
 }
 
+.maxHeight {
+
+  max-height: v-bind(searchBoxHeight);
+}
+
+.selectedResult {
+  background-color: v-bind(secondaryBackgroundColor);
+  border-radius: v-bind(roundnessLevel);
+}
+
 .searchBox {
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   font-size: 1.1rem;
   border-radius: v-bind(roundnessLevel);
-  height: v-bind(searchBoxHeight);
+  min-height: 65px;
+  max-height: v-bind(searchBoxHeight);
 }
 
 .placeholder::placeholder {
@@ -152,6 +337,10 @@ watch(searchText, async (newText, oldText) => {
 
 .secondaryHover:hover {
   background-color: v-bind(secondaryBackgroundColor);
+}
+
+.background {
+  background-color: v-bind(backgroundColor);
 }
 
 .stroke {

@@ -5,6 +5,8 @@ import { invoke } from '@tauri-apps/api';
 import GeneralTab from './GeneralTab.vue';
 import ThemesTab from './ThemesTab.vue';
 import SearchBoxTab from './SearchBoxTab.vue'
+import WebSearchTab from './WebSearchTab.vue';
+import ExtensionsTab from './ExtensionsTab.vue';
 
 const currentCategory = ref(SettingsCategory.GENERAL)
 const backgroundColor = ref()
@@ -47,13 +49,19 @@ async function saveTheme() {
 
 <template>
     <div class=" h-screen w-screen max-h-screen max-w-screen background flex text">
-        <div class=" w-48 h-screen secondaryBackground rounded-r-xl p-2 overflow-auto">
+        <div class=" w-48 h-screen secondaryBackground rounded-r-2xl p-2 overflow-auto">
             <div class="tab" v-bind:class="currentCategory === SettingsCategory.GENERAL ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.GENERAL">General</div>
             <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.SEARCH_BOX ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.SEARCH_BOX">Search Box</div>
             <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.THEMING ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.THEMING">Theming</div>
+
+            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.WEB_SEARCH ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.WEB_SEARCH">Web Search</div>
+
+            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.EXTENSIONS ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.EXTENSIONS">Extensions</div>
         </div>
 
         <div class="flex-grow p-2 overflow-auto">
@@ -77,6 +85,16 @@ async function saveTheme() {
                     @update:text-color="textColor = $event.value" :on-accent-color="onAccentColor"
                     @update:on-accent-color="onAccentColor = $event.value" :secondary-text-color="secondaryTextColor"
                     @update:secondary-text-color="secondaryTextColor = $event.value" @save-theme="saveTheme()" />
+            </div>
+            <div v-if="currentCategory === SettingsCategory.WEB_SEARCH">
+                <WebSearchTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
+                    :text-color="textColor" />
+            </div>
+            <div v-if="currentCategory === SettingsCategory.EXTENSIONS">
+                <ExtensionsTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
+                    :text-color="textColor" />
             </div>
         </div>
     </div>

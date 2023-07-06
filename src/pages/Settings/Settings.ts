@@ -2,14 +2,35 @@ import { invoke } from "@tauri-apps/api"
 
 export const SettingsCategory = {
   GENERAL: "general",
-  SEARCH_BOX: "search",
-  THEMING: "theming"
+  SEARCH_BOX: "search_box",
+  THEMING: "theming",
+  WEB_SEARCH: "web_search",
+  EXTENSIONS: "extensions"
 };
 
 export interface Settings {
-  general: GeneralSettings;
-  search_box: SearchBoxSettings;
-  theming: ThemingSettings;
+  general: GeneralSettings,
+  search_box: SearchBoxSettings,
+  theming: ThemingSettings,
+  web_search: WebSearchSettings,
+  extensions: ExtensionSettings[]
+}
+
+export interface ExtensionSettings{
+  id: string,
+  keyword: string,
+  settings: ExtensionSetting
+}
+
+export interface ExtensionSetting{
+  any: ExtensionOptionSetting[],
+  linux: ExtensionOptionSetting[],
+  windows: ExtensionOptionSetting[]
+}
+
+export interface ExtensionOptionSetting{
+  id: string,
+  current_value: string
 }
 
 export interface GeneralSettings {
@@ -34,6 +55,18 @@ export interface ThemingSettings {
   on_accent: string;
   text: string;
   seconday_text: string;
+}
+
+export interface WebSearchSettings{
+  default: SearchOption[],
+  custom: SearchOption[]
+}
+
+export interface SearchOption{
+  icon: string,
+  name: string,
+  keyword: string,
+  query: string
 }
 
 

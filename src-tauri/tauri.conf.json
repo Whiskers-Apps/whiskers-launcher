@@ -23,6 +23,20 @@
       },
       "globalShortcut":{
         "all": true
+      },
+      "fs":{
+        "all": true,
+        "scope": [
+          "**"
+        ]
+      },
+      "protocol": {
+        "asset": true,
+        "all": true,
+        "assetScope": [
+          "**",
+          "$HOME/.local/**"
+        ]
       }
     },
     "macOSPrivateApi": true,
@@ -48,7 +62,7 @@
         "title": "Simple Keyboard Launcher",
         "decorations": false,
         "width": 800,
-        "height": 800,
+        "height": 70,
         "transparent": true
       }
     ],
