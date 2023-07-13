@@ -8,6 +8,11 @@ const settings = ref<Settings>();
 const installedExtensions = ref<SearchOption[]>();
 const tabExtensions = ref<TabExtensionManifest[]>();
 const os = ref("");
+const extensionsRef = ref([]);
+const extensionSettingsRef = ref([])
+const extensionAnySettingsRef = ref([])
+const extensionLinuxSettingsRef = ref([])
+const extensionWindowsSettingsRef = ref([])
 
 export interface TabExtensionManifest {
     id: string,
@@ -21,7 +26,6 @@ export interface TabExtensionManifest {
     current_settings: SettingsExtensionsSettings[]
 }
 
-const extensionsRef = ref();
 
 defineProps({
     backgroundColor: {
@@ -96,9 +100,7 @@ function getExtensionKeyword(extensionID: string): string {
 }
 
 function loadSettingValue(extensionID:string, settingID: string){
-   
-   
-   //.value = getSettingValue(extensionID, settingID)
+
 }
 
 onMounted(async () => {
@@ -122,9 +124,14 @@ onMounted(async () => {
         }
 
         newTabExtensions.push(newTabExtension);
-    })
+    }) 
 
     tabExtensions.value = newTabExtensions;
+
+    //console.log(extensionsRef.value);
+    //console.log(extensionAnySettingsRef.value);
+    //console.log(extensionLinuxSettingsRef.value);
+    //console.log(extensionWindowsSettingsRef.value);
 })
 
 
@@ -134,12 +141,12 @@ onMounted(async () => {
 <template>
     <div>
         <div class="text-2xl font-bold">Installed Extensions</div>
-        <div v-for="extension in tabExtensions" class="p-2 secondaryBackground  rounded-2xl" :ref="extensionsRef" :key="extension.id">
+        <div  v-for="extension in tabExtensions" class="p-2 secondaryBackground  rounded-2xl" ref="extensionsRef">
             <div class="font-bold text-lg">{{ extension.name }}</div>
-            <div v-for="setting in extension.settings.any">
+            <div v-for="setting in extension.settings.any" ref="extensionAnySettingsRef">
                 <div v-if="canShowSetting(extension.settings, setting.id)"></div>
             </div>
-            <div v-if="os === 'linux'" v-for="setting in extension.settings.linux">
+            <div v-if="os === 'linux'" v-for="setting in extension.settings.linux" ref="extensionLinuxSettingsRef">
                 <div v-if="canShowSetting(extension.settings, setting.id)" class="p-2 tertiaryBackground mb-2">
                     <div class="flex-grow">
                         <div class="flex font-bold">{{ setting.name }}</div>
@@ -162,7 +169,7 @@ onMounted(async () => {
                 </div>
 
             </div>
-            <div v-if="os === 'windows'" v-for="setting in extension.settings.windows">
+            <div v-if="os === 'windows'" v-for="setting in extension.settings.windows" ref="extensionAnySettingsRef">
                 <div v-if="canShowSetting(extension.settings, setting.id)"></div>
             </div>
         </div>

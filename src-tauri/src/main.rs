@@ -1,8 +1,8 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use dirs::home_dir;
 use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
-use freedesktop_icons::lookup;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
@@ -27,8 +27,8 @@ use std::{
 
 use simple_kl_rs::settings::{ExtensionOptionSetting, ExtensionSetting, ExtensionsSettings};
 use tauri::{
-    CustomMenuItem, GlobalShortcutManager, Manager, PhysicalPosition, PhysicalSize, RunEvent,
-    SystemTray, SystemTrayEvent, SystemTrayMenu, WindowEvent,
+    AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, PhysicalPosition, PhysicalSize,
+    RunEvent, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowEvent,
 };
 pub mod extensions;
 pub mod structs;
@@ -176,13 +176,13 @@ fn update_settings(settings_json: String) -> Result<(), String> {
 }
 
 #[tauri::command()]
-fn hide_window(window: tauri::Window) {
-    window.hide().unwrap();
+fn close_search_window(window: tauri::Window) {
+    window.close().unwrap();
 }
 
 #[tauri::command()]
 fn show_window(window: tauri::Window) {
-    window.hide().unwrap();
+    window.show().unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -245,11 +245,10 @@ async fn run_action(
 fn update_extension_setting(
     extension_id: String,
     setting_id: String,
-    new_value: String
-) -> Result<(), String>{
+    new_value: String,
+) -> Result<(), String> {
     return Settings::update_extension_setting(extension_id, setting_id, new_value);
 }
-
 
 /// Searchs for all apps and saves them in a apps json file.
 /// With this it reduces the time the app needs to get all the apps over and over again
@@ -264,18 +263,11 @@ fn init_apps() {
                 if !ids.contains(&entry.appid.to_string()) && !entry.no_display() {
                     ids.push(entry.appid.to_string());
 
-                    let icon = match lookup(entry.icon().unwrap_or("")).find() {
-                        Some(icon_path) => icon_path.into_os_string().into_string().unwrap(),
-                        None => "".to_string(),
-                    };
-
-                    if icon != "" {
-                        apps.push(AppIndex {
-                            icon_path: icon,
-                            desktop_path: path.clone().into_os_string().into_string().unwrap(),
-                            name: entry.name(None).unwrap().to_string(),
-                        });
-                    }
+                    apps.push(AppIndex {
+                        icon_path: "".to_string(),
+                        desktop_path: path.clone().into_os_string().into_string().unwrap(),
+                        name: entry.name(None).unwrap().to_string(),
+                    });
                 }
             }
         }
@@ -409,6 +401,38 @@ fn get_extensions_json() -> String {
     return serde_json::to_string(&extensions).unwrap();
 }
 
+fn spawn_search_window(app: AppHandle) {
+    let search_window =
+        tauri::WindowBuilder::new(&app, "search", tauri::WindowUrl::App("search".into()))
+            .transparent(true)
+            .resizable(false)
+            .decorations(false)
+            .build()
+            .expect("Error building search window");
+
+
+    let screen = search_window.current_monitor().unwrap().unwrap();
+    let screen_position = screen.position();
+    let screen_size = PhysicalSize::<i32> {
+        width: screen.size().width as i32,
+        height: screen.size().height as i32,
+    };
+    let window_size = PhysicalSize::<i32> {
+        width: search_window.outer_size().unwrap().width as i32,
+        height: search_window.outer_size().unwrap().height as i32,
+    };
+
+    let new_position = PhysicalPosition {
+        x: screen_position.x + ((screen_size.width / 2) - (window_size.width / 2)),
+        y: screen_position.y + 100,
+    };
+
+    search_window.set_position(new_position).unwrap();
+    search_window.set_always_on_top(true).unwrap();
+    search_window.show().unwrap();
+    search_window.set_focus().unwrap();
+}
+
 #[tauri::command()]
 fn get_os() -> Result<String, ()> {
     return Ok(String::from(env::consts::OS));
@@ -426,7 +450,7 @@ fn main() {
             get_results,
             get_current_settings,
             update_settings,
-            hide_window,
+            close_search_window,
             show_window,
             run_action,
             get_extensions_json,
@@ -515,35 +539,12 @@ fn main() {
         .expect("")
         .run(|app, e| match e {
             RunEvent::Ready => {
-                let launch_app = app.clone();
+                let spawn_app_clone = app.clone();
 
                 app.clone()
                     .global_shortcut_manager()
                     .register(&Settings::launch_shortcut(), move || {
-                        let main_window = launch_app.get_window("main").unwrap();
-
-                        let screen = main_window.current_monitor().unwrap().unwrap();
-                        let screen_position = screen.position();
-                        let screen_size = PhysicalSize::<i32> {
-                            width: screen.size().width as i32,
-                            height: screen.size().height as i32,
-                        };
-                        let window_size = PhysicalSize::<i32> {
-                            width: main_window.outer_size().unwrap().width as i32,
-                            height: main_window.outer_size().unwrap().height as i32,
-                        };
-
-                        let new_position = PhysicalPosition {
-                            x: screen_position.x
-                                + ((screen_size.width / 2) - (window_size.width / 2)),
-                            y: screen_position.y + 100,
-                        };
-
-                        main_window.set_position(new_position).unwrap();
-                        main_window.set_always_on_top(true).unwrap();
-                        main_window.show().unwrap();
-                        main_window.set_focus().expect("Error trying to focus");
-                        main_window.emit("focus_box", "").unwrap();
+                        spawn_search_window(spawn_app_clone.clone());
                     })
                     .unwrap();
             }
