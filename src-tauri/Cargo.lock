@@ -3166,6 +3166,7 @@ dependencies = [
  "freedesktop-desktop-entry",
  "fuzzy-matcher",
  "open 5.0.0",
+ "rand 0.8.5",
  "serde",
  "serde_json",
  "simple_kl_rs",

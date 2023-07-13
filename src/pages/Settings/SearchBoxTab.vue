@@ -68,7 +68,7 @@ watch(borderWidthInput, async (_, __) => {
                 <SearchSVG class="w-5 h-5 stroke"/>
             </div>
             <div class="flex-grow">
-                Search Anything
+                Search
             </div>
             <div v-if="showSettingsIcon" class="ml-2">
                 <SettingsSVG class="w-5 h-5 stroke"/>
@@ -77,7 +77,7 @@ watch(borderWidthInput, async (_, __) => {
 
         <div class="text-lg font-bold mt-2">Settings</div>
 
-        <div class="tertiaryBackground p-2 rounded-xl border flex">
+        <div class="secondaryBackground p-4 rounded-xl border flex">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Search Icon</div>
                 <div class="text-sm">If enabled it will show a search icon on the left</div>
@@ -90,7 +90,7 @@ watch(borderWidthInput, async (_, __) => {
             </div>
         </div>
 
-        <div class="tertiaryBackground p-2 rounded-xl border flex mt-2">
+        <div class="secondaryBackground p-4 rounded-xl border flex mt-2">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Settings Icon</div>
                 <div class="text-sm">If enabled it will show a settings icon on the right</div>
@@ -103,7 +103,7 @@ watch(borderWidthInput, async (_, __) => {
             </div>
         </div>
 
-        <div class="tertiaryBackground p-2 rounded-xl border mt-2">
+        <div class="secondaryBackground p-4 rounded-xl border mt-2">
 
             <div class=" font-semibold">Roundness</div>
             <div class="text-sm">It changes the roundness of the search box. From no round to fully round</div>
@@ -113,7 +113,7 @@ watch(borderWidthInput, async (_, __) => {
             </div>
         </div>
 
-        <div class="tertiaryBackground p-2 rounded-xl border mt-2">
+        <div class="secondaryBackground p-4 rounded-xl border mt-2">
 
             <div class=" font-semibold">Border Width</div>
             <div class="text-sm">It changes the border width of the search box. From 0px to 6px</div>
@@ -126,12 +126,13 @@ watch(borderWidthInput, async (_, __) => {
 </template>
 
 <style scoped>
-.tertiaryBackground {
-    background-color: v-bind(tertiaryBackgroundColor);
+
+.secondaryBackground {
+    background-color: v-bind(secondaryBackgroundColor);
 }
 
 .border {
-    border-color: v-bind(secondaryBackgroundColor);
+    border-color: v-bind(tertiaryBackgroundColor);
 }
 
 .preview{

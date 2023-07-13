@@ -1,16 +1,13 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use dirs::home_dir;
-use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
     extensions::{ExtensionManifest, Parameters},
     paths::{
         get_apps_index_path, get_extension_parameters_path, get_extension_path,
-        get_extension_results_path, get_extensions_index_path, get_extensions_path,
-        get_temp_folder_path,
+        get_extension_results_path, get_extensions_path,
     },
     results::{IconWithTextResult, SimpleKLResult, TextResult},
     settings::Settings,
@@ -21,15 +18,10 @@ use std::{
     env,
     fs::{self, File},
     io::{Read, Write},
-    path::Path,
     process::Command,
 };
 
-use simple_kl_rs::settings::{ExtensionOptionSetting, ExtensionSetting, ExtensionsSettings};
-use tauri::{
-    AppHandle, CustomMenuItem, GlobalShortcutManager, Manager, PhysicalPosition, PhysicalSize,
-    RunEvent, SystemTray, SystemTrayEvent, SystemTrayMenu, WindowEvent,
-};
+use tauri::{Manager, PhysicalPosition, PhysicalSize, RunEvent, WindowEvent};
 pub mod extensions;
 pub mod structs;
 
@@ -79,11 +71,6 @@ fn get_results(search_text: String) -> Result<String, String> {
 
 fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
     let mut results: Vec<SimpleKLResult> = Vec::new();
-    let indexed_apps_path = &get_apps_index_path();
-
-    if !Path::new(indexed_apps_path).exists() {
-        init_apps();
-    }
 
     let indexed_apps_json = fs::read_to_string(get_apps_index_path()).unwrap();
     let apps: Vec<AppIndex> = serde_json::from_str(&indexed_apps_json).unwrap();
@@ -250,132 +237,6 @@ fn update_extension_setting(
     return Settings::update_extension_setting(extension_id, setting_id, new_value);
 }
 
-/// Searchs for all apps and saves them in a apps json file.
-/// With this it reduces the time the app needs to get all the apps over and over again
-fn init_apps() {
-    let mut apps: Vec<AppIndex> = Vec::new();
-    let mut ids: Vec<String> = Vec::new();
-
-    //Gets All Apps
-    for path in Iter::new(default_paths()) {
-        if let Ok(bytes) = fs::read_to_string(&path) {
-            if let Ok(entry) = DesktopEntry::decode(&path, &bytes) {
-                if !ids.contains(&entry.appid.to_string()) && !entry.no_display() {
-                    ids.push(entry.appid.to_string());
-
-                    apps.push(AppIndex {
-                        icon_path: "".to_string(),
-                        desktop_path: path.clone().into_os_string().into_string().unwrap(),
-                        name: entry.name(None).unwrap().to_string(),
-                    });
-                }
-            }
-        }
-    }
-
-    //Saves the apps in a temporary file
-    let index_path = &get_apps_index_path();
-    let temp_folder = &get_temp_folder_path();
-
-    if !Path::new(temp_folder).exists() {
-        fs::create_dir_all(temp_folder).unwrap();
-    }
-
-    let index_json = serde_json::to_string(&apps).unwrap();
-
-    let mut index_file = File::create(index_path).expect("Error creating index file");
-    index_file
-        .write_all(index_json.as_bytes())
-        .expect("Error writing apps to index");
-    index_file.flush().expect("Error closing index file");
-}
-
-fn init_extensions() {
-    let extension_path = &get_extensions_path();
-    let mut extensions: Vec<ExtensionManifest> = Vec::new();
-
-    if !Path::new(extension_path).exists() {
-        fs::create_dir_all(extension_path).expect("Error creating extensions folder");
-    }
-
-    //Index Extensions
-    if let Ok(folders) = fs::read_dir(&get_extensions_path()) {
-        for folder in folders {
-            if let Ok(folder) = folder {
-                let folder_path = folder.path().into_os_string().into_string().unwrap();
-                let manifest_file_path = &format!("{}/manifest.json", folder_path);
-
-                if let Ok(mut manifest_file) = File::open(manifest_file_path) {
-                    let mut manifest_json = String::from("");
-                    manifest_file.read_to_string(&mut manifest_json).unwrap();
-
-                    let manifest: ExtensionManifest = serde_json::from_str(&manifest_json).unwrap();
-
-                    extensions.push(manifest);
-
-                    let _ = manifest_file.flush();
-                }
-            }
-        }
-    }
-
-    let mut extension_file = File::create(get_extensions_index_path()).unwrap();
-    let _ = extension_file.write_all(serde_json::to_string(&extensions).unwrap().as_bytes());
-
-    let settings_extensions = Settings::current_settings().extensions;
-
-    if settings_extensions.len() < extensions.len() {
-        let mut new_settings_extensions = Settings::current_settings().extensions;
-
-        for extension in extensions {
-            if !settings_extensions
-                .iter()
-                .any(|extension_setting| extension_setting.id == extension.id)
-            {
-                let mut any_settings: Vec<ExtensionOptionSetting> = Vec::new();
-                let mut linux_settings: Vec<ExtensionOptionSetting> = Vec::new();
-                let mut windows_settings: Vec<ExtensionOptionSetting> = Vec::new();
-
-                for any_setting in extension.settings.any {
-                    any_settings.push(ExtensionOptionSetting {
-                        id: any_setting.id,
-                        current_value: any_setting.default_value,
-                    })
-                }
-
-                for linux_setting in extension.settings.linux {
-                    linux_settings.push(ExtensionOptionSetting {
-                        id: linux_setting.id,
-                        current_value: linux_setting.default_value,
-                    })
-                }
-
-                for windows_setting in extension.settings.windows {
-                    windows_settings.push(ExtensionOptionSetting {
-                        id: windows_setting.id,
-                        current_value: windows_setting.default_value,
-                    })
-                }
-
-                new_settings_extensions.push(ExtensionsSettings {
-                    id: extension.id.clone(),
-                    keyword: extension.keyword.clone(),
-                    settings: ExtensionSetting {
-                        any: any_settings,
-                        linux: linux_settings,
-                        windows: windows_settings,
-                    },
-                })
-            }
-        }
-
-        let mut new_settings = Settings::current_settings();
-        new_settings.extensions = new_settings_extensions;
-
-        let _ = Settings::update(serde_json::to_string(&new_settings).unwrap());
-    }
-}
-
 #[tauri::command()]
 fn get_extensions_json() -> String {
     let mut extensions: Vec<ExtensionManifest> = Vec::new();
@@ -401,50 +262,12 @@ fn get_extensions_json() -> String {
     return serde_json::to_string(&extensions).unwrap();
 }
 
-fn spawn_search_window(app: AppHandle) {
-    let search_window =
-        tauri::WindowBuilder::new(&app, "search", tauri::WindowUrl::App("search".into()))
-            .transparent(true)
-            .resizable(false)
-            .decorations(false)
-            .build()
-            .expect("Error building search window");
-
-
-    let screen = search_window.current_monitor().unwrap().unwrap();
-    let screen_position = screen.position();
-    let screen_size = PhysicalSize::<i32> {
-        width: screen.size().width as i32,
-        height: screen.size().height as i32,
-    };
-    let window_size = PhysicalSize::<i32> {
-        width: search_window.outer_size().unwrap().width as i32,
-        height: search_window.outer_size().unwrap().height as i32,
-    };
-
-    let new_position = PhysicalPosition {
-        x: screen_position.x + ((screen_size.width / 2) - (window_size.width / 2)),
-        y: screen_position.y + 100,
-    };
-
-    search_window.set_position(new_position).unwrap();
-    search_window.set_always_on_top(true).unwrap();
-    search_window.show().unwrap();
-    search_window.set_focus().unwrap();
-}
-
 #[tauri::command()]
 fn get_os() -> Result<String, ()> {
     return Ok(String::from(env::consts::OS));
 }
 
 fn main() {
-    //Init Tray
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(CustomMenuItem::new("toggle_visibility", "Hide/Show"))
-        .add_item(CustomMenuItem::new("settings", "Settings"))
-        .add_item(CustomMenuItem::new("quit", "Quit"));
-
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_results,
@@ -458,7 +281,6 @@ fn main() {
             update_extension_setting
         ])
         .setup(|app| {
-            //Centers the window
             let main_window = app.get_window("main").unwrap();
             let screen = main_window.current_monitor().unwrap().unwrap();
             let screen_position = screen.position();
@@ -478,76 +300,15 @@ fn main() {
 
             main_window.set_position(new_position).unwrap();
             main_window.set_always_on_top(true).unwrap();
-            main_window.hide().unwrap();
-
-            //Initiates Apps And Extensions
-            Settings::init();
-            init_apps();
-            init_extensions();
+            main_window.show().unwrap();
+            main_window.set_focus().unwrap();
 
             Ok(())
-        })
-        .system_tray(SystemTray::new().with_menu(tray_menu))
-        .on_system_tray_event(|app, event| match event {
-            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-                "toggle_visibility" => {
-                    let main_window = app.get_window("main").unwrap();
-                    let screen = main_window.current_monitor().unwrap().unwrap();
-                    let screen_position = screen.position();
-                    let screen_size = PhysicalSize::<i32> {
-                        width: screen.size().width as i32,
-                        height: screen.size().height as i32,
-                    };
-                    let window_size = PhysicalSize::<i32> {
-                        width: main_window.outer_size().unwrap().width as i32,
-                        height: main_window.outer_size().unwrap().height as i32,
-                    };
-
-                    let new_position = PhysicalPosition {
-                        x: screen_position.x + ((screen_size.width / 2) - (window_size.width / 2)),
-                        y: screen_position.y + 100,
-                    };
-
-                    main_window.set_position(new_position).unwrap();
-                    main_window.set_always_on_top(true).unwrap();
-
-                    if main_window.is_visible().unwrap() {
-                        main_window.hide().unwrap();
-                    } else {
-                        main_window.show().unwrap();
-                        main_window.emit("focus_box", "").unwrap();
-                    }
-                }
-                "settings" => {
-                    tauri::WindowBuilder::new(
-                        app,
-                        "settings",
-                        tauri::WindowUrl::App("/settings".parse().unwrap()),
-                    )
-                    .build()
-                    .unwrap();
-                }
-                "quit" => {
-                    std::process::exit(0);
-                }
-                _ => {}
-            },
-            _ => {}
         })
         .plugin(tauri_plugin_positioner::init())
         .build(tauri::generate_context!())
         .expect("")
         .run(|app, e| match e {
-            RunEvent::Ready => {
-                let spawn_app_clone = app.clone();
-
-                app.clone()
-                    .global_shortcut_manager()
-                    .register(&Settings::launch_shortcut(), move || {
-                        spawn_search_window(spawn_app_clone.clone());
-                    })
-                    .unwrap();
-            }
             RunEvent::WindowEvent { label, event, .. } => {
                 if label == "main" {
                     match event {
@@ -562,7 +323,6 @@ fn main() {
                     }
                 }
             }
-            RunEvent::Resumed => {}
             _ => {}
         });
 }

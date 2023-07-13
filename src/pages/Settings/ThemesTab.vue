@@ -71,63 +71,63 @@ function saveTheme() {
     <div>
         <div class="text-lg font-bold">Import/Export</div>
         <div class="text-lg font-bold">Settings</div>
-        <div class=" items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Background Color</div>
                 <input v-model="currentBackgroundColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Secondary Background Color</div>
                 <input v-model="currentSecondaryBackgroundColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentSecondaryBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Tertiary Background Color</div>
                 <input v-model="currentTertiaryBackgroundColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentTertiaryBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Accent Color</div>
                 <input v-model="currentAccentColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentAccent previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">On Accent Color</div>
                 <input v-model="currentOnAccentColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentOnAccent previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Text Color</div>
-                <input v-model="currentTextColor" class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                <input v-model="currentTextColor" class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentText previewColor"></div>
             </div>
         </div>
-        <div class=" mt-2 items-center tertiaryBackground p-2 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Secondary Text Color</div>
                 <input v-model="currentSecondaryTextColor"
-                    class="secondaryBackground rounded-lg outline-none w-20 flex text-center">
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentSecondaryText previewColor"></div>
             </div>
         </div>
-        <div class="flex justify-end mt-4">
-            <button class="primaryButton rounded-full pt-1 pb-1 pl-2 pr-2 hover:brightness-90 font-bold"
+        <div class="flex mt-4">
+            <button class="flex-grow primaryButton rounded-xl pt-2 pb-2 pl-3 pr-3 hover:brightness-90 font-bold"
                 @click="saveTheme()">Save Theme</button>
         </div>
     </div>
@@ -135,7 +135,7 @@ function saveTheme() {
 
 <style scoped>
 .card {
-    border: 1px solid v-bind(secondaryBackgroundColor);
+    border: 1px solid v-bind(tertiaryBackgroundColor);
 }
 
 .previewColor {
@@ -182,5 +182,10 @@ function saveTheme() {
 .primaryButton {
     background-color: v-bind(accentColor);
     color: v-bind(onAccentColor);
+    border: 1px solid v-bind(tertiaryBackgroundColor);
+}
+
+.primaryButton:hover{
+    border-radius: 99px;
 }
 </style>

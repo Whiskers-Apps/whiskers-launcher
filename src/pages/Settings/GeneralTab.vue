@@ -71,68 +71,106 @@ async function showKeyOptions(key: 1 | 2 | 3) {
         case 3: { showThirdKeyOptions.value = true; break }
     }
 }
+
+
+function toggleShowKey(key: 1 | 2 | 3) {
+
+    if (key == 1) {
+        showFirstKeyOptions.value = !showFirstKeyOptions.value;
+        showSecondKeyOptions.value = false;
+        showThirdKeyOptions.value = false;
+    }
+
+    if (key == 2) {
+        showFirstKeyOptions.value = false;
+        showSecondKeyOptions.value = !showSecondKeyOptions.value;
+        showThirdKeyOptions.value = false;
+    }
+
+    if (key === 3) {
+        showFirstKeyOptions.value = false;
+        showSecondKeyOptions.value = false;
+        showThirdKeyOptions.value = !showThirdKeyOptions.value;
+    }
+}
+
 </script>
 
 <template>
     <div>
-        <div class=" font-semibold text-lg">Keybinding</div>
-        <div class="">Key combination to launch the search box</div>
+        <div class=" secondaryBackground p-4 border rounded-xl">
+            <div class=" font-semibold text-lg">Keybinding</div>
+            <div class="">Key combination to launch the search box</div>
 
-        <div class="grid grid-cols-11 gap-2 mt-2">
+            <div class="grid grid-cols-11 gap-2 mt-2 ">
 
-            <div class="col-span-3 secondaryBackground rounded-md p-1 flex items-center justify-center"
-                @click="showKeyOptions(1)">
-                {{ firstKey }}
+                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                    @click="toggleShowKey(1)">
+                    {{ firstKey }}
+                </div>
+                <div class="col-span-1 flex items-center justify-center ">+</div>
+                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                    @click="toggleShowKey(2)">
+                    {{ secondKey }}
+                </div>
+                <div class="col-span-1 flex items-center justify-center ">+</div>
+                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                    @click="toggleShowKey(3)">
+                    {{ thirdKey }}
+                </div>
             </div>
-            <div class="col-span-1 flex items-center justify-center tertiaryBackground">+</div>
-            <div class="col-span-3 secondaryBackground rounded-md p-1 flex items-center justify-center"
-                @click="showKeyOptions(2)">
-                {{ secondKey }}
+
+            <div v-if="showFirstKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
+                <div v-for="option in firstKeyOptions">
+                    <button class="p-2 w-full tertiaryBackground flex justify-center rounded-md key border"
+                        @click="updateKey(1, option)">
+                        {{ option }}
+                    </button>
+                </div>
             </div>
-            <div class="col-span-1 flex items-center justify-center tertiaryBackground">+</div>
-            <div class="col-span-3 secondaryBackground rounded-md p-1 flex items-center justify-center"
-                @click="showKeyOptions(3)">
-                {{ thirdKey }}
+
+            <div v-if="showSecondKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
+                <div v-for="option in secondKeyOptions">
+                    <button class="p-2 w-full tertiaryBackground flex justify-center rounded-md key border"
+                        @click="updateKey(2, option)">
+                        {{ option }}
+                    </button>
+                </div>
+            </div>
+
+            <div v-if="showThirdKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
+                <div v-for="option in thirdKeyOptions">
+                    <button class="p-2 w-full tertiaryBackground flex justify-center rounded-md key border"
+                        @click="updateKey(3, option)">
+                        {{ option }}
+                    </button>
+                </div>
             </div>
         </div>
 
-        <div v-if="showFirstKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
-            <div v-for="option in firstKeyOptions">
-                <button class="p-2 w-full secondaryBackground flex justify-center rounded-md" @click="updateKey(1, option)">
-                    {{ option }}
-                </button>
-            </div>
-        </div>
-
-        <div v-if="showSecondKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
-            <div v-for="option in secondKeyOptions">
-                <button class="p-2 w-full secondaryBackground flex justify-center rounded-md" @click="updateKey(2, option)">
-                    {{ option }}
-                </button>
-            </div>
-        </div>
-
-        <div v-if="showThirdKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
-            <div v-for="option in thirdKeyOptions">
-                <button class="p-2 w-full secondaryBackground flex justify-center rounded-md" @click="updateKey(3, option)">
-                    {{ option }}
-                </button>
-            </div>
-        </div>
-
-        <div class=" font-semibold mt-4 text-lg">Results Limit</div>
-        <div class="">The amount of results to show</div>
-        <div class=" flex mt-2">
-            <input type="range" class="flex-grow" step="1" min="1" max="8" :value="resultsLimit"
-                @input="resultsLimit = +($event.target as HTMLInputElement).value">
-            <div class="ml-2  pl-3 pr-3 pt-1 pb-1 secondaryBackground rounded-md">
-                <div>{{ resultsLimit }}</div>
+        <div class="p-4 secondaryBackground border rounded-xl mt-2">
+            <div class=" font-semibold text-lg">Results Limit</div>
+            <div class="">The amount of results to show</div>
+            <div class=" flex">
+                <input type="range" class="flex-grow" step="1" min="1" max="8" :value="resultsLimit"
+                    @input="resultsLimit = +($event.target as HTMLInputElement).value">
+                <div class="ml-2 w-10 flex justify-center pl-3 pr-3 pt-1 pb-1 tertiaryBackground rounded-md">
+                    <div>{{ resultsLimit }}</div>
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.border {
+    border: 1px solid v-bind(tertiaryBackgroundColor);
+}
+
+.key:hover {
+    background: v-bind(secondaryBackgroundColor);
+}
+
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
 }
@@ -142,7 +180,7 @@ async function showKeyOptions(key: 1 | 2 | 3) {
 }
 
 input[type="range"]::-webkit-slider-runnable-track {
-    background: v-bind(secondaryBackgroundColor);
+    background: v-bind(tertiaryBackgroundColor);
     border-radius: 9999px;
     height: 1rem;
 }

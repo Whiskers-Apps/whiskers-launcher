@@ -62,7 +62,7 @@ export interface ExtensionManifest {
     icon: string,
     os: string,
     keyword: string,
-    settings: ExtensionSettings[]
+    settings: ExtensionSettings
 }
 
 export interface ExtensionSettings {

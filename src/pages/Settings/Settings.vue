@@ -49,7 +49,7 @@ async function saveTheme() {
 
 <template>
     <div class=" h-screen w-screen max-h-screen max-w-screen background flex text">
-        <div class=" w-48 h-screen secondaryBackground rounded-r-2xl p-2 overflow-auto">
+        <div class=" w-56 h-screen secondaryBackground p-2 overflow-auto">
             <div class="tab" v-bind:class="currentCategory === SettingsCategory.GENERAL ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.GENERAL">General</div>
             <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.SEARCH_BOX ? 'activeTab' : ''"
@@ -103,7 +103,7 @@ async function saveTheme() {
 
 <style scoped>
 .text {
-    color: v-bind(textColor)
+    color: v-bind(textColor);
 }
 
 .background {
@@ -127,19 +127,21 @@ async function saveTheme() {
 }
 
 .tab {
-    padding: 5px;
+    padding: 10px;
     border-radius: 10px;
+    font-size: 17px;
 }
 
 .tab:hover {
-    background-color: v-bind(backgroundColor);
+    background-color: v-bind(tertiaryBackgroundColor);
     font-weight: 600;
     cursor: pointer;
 }
 
 .activeTab {
-    background-color: v-bind(backgroundColor);
+    background-color: v-bind(tertiaryBackgroundColor);
     font-weight: 600;
+    
 }
 
 .stroke {

@@ -37,9 +37,8 @@ onMounted(async () => {
 
 <template>
     <div>
-        <div class="text-2xl font-bold">Web Search</div>
         <div class="mt-2 text-lg">Default </div>
-        <div class="p-2 mt-2 rounded-lg flex secondaryBackground items-center" v-for="option in defaultSearchOptions">
+        <div class="p-4 mt-2 rounded-lg flex secondaryBackground border items-center" v-for="option in defaultSearchOptions">
             <div class="accentText font-bold mr-2 ">{{ option.keyword }}</div>
             <div>{{ option.name }}</div>
             <div class="flex-grow"></div>
@@ -47,7 +46,7 @@ onMounted(async () => {
         </div>
         <div class="mt-2 text-lg">Custom</div>
         <button class="accentText font-bold hover:underline">Add</button>
-        <div class=" p-2 justify-center flex items-center secondaryBackground rounded-lg">
+        <div class=" p-4 justify-center flex items-center border secondaryBackground rounded-lg">
             <InfoSVG class="h-5 w-5 stroke mr-2" />
             <div>No custom searches</div>
         </div>
@@ -61,6 +60,10 @@ onMounted(async () => {
 
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
+}
+
+.border{
+    border: 1px solid v-bind(tertiaryBackgroundColor);
 }
 
 .stroke {

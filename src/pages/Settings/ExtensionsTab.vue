@@ -14,6 +14,8 @@ const extensionAnySettingsRef = ref([])
 const extensionLinuxSettingsRef = ref([])
 const extensionWindowsSettingsRef = ref([])
 
+const linuxSelectRef = ref()
+
 export interface TabExtensionManifest {
     id: string,
     name: string,
@@ -22,7 +24,7 @@ export interface TabExtensionManifest {
     os: string,
     keyword: string,
     current_keyword: string,
-    settings: ExtensionSettings[],
+    settings: ExtensionSettings,
     current_settings: SettingsExtensionsSettings[]
 }
 
@@ -99,8 +101,9 @@ function getExtensionKeyword(extensionID: string): string {
     return ""
 }
 
-function loadSettingValue(extensionID:string, settingID: string){
+async function loadSettingValue(extensionID: string, settingID: string) {
 
+    linuxSelectRef.value = "kde";
 }
 
 onMounted(async () => {
@@ -109,7 +112,7 @@ onMounted(async () => {
     let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json"));
     let newTabExtensions: TabExtensionManifest[] = [];
 
-    extensions.forEach(extension=>{
+    extensions.forEach(extension => {
 
         let newTabExtension: TabExtensionManifest = {
             id: extension.id,
@@ -124,14 +127,9 @@ onMounted(async () => {
         }
 
         newTabExtensions.push(newTabExtension);
-    }) 
+    })
 
     tabExtensions.value = newTabExtensions;
-
-    //console.log(extensionsRef.value);
-    //console.log(extensionAnySettingsRef.value);
-    //console.log(extensionLinuxSettingsRef.value);
-    //console.log(extensionWindowsSettingsRef.value);
 })
 
 
@@ -140,43 +138,40 @@ onMounted(async () => {
 
 <template>
     <div>
-        <div class="text-2xl font-bold">Installed Extensions</div>
-        <div  v-for="extension in tabExtensions" class="p-2 secondaryBackground  rounded-2xl" ref="extensionsRef">
+        <div v-for="extension in tabExtensions" class="p-4 secondaryBackground border rounded-2xl" ref="extensionsRef">
             <div class="font-bold text-lg">{{ extension.name }}</div>
-            <div v-for="setting in extension.settings.any" ref="extensionAnySettingsRef">
-                <div v-if="canShowSetting(extension.settings, setting.id)"></div>
+
+            <div v-for="setting in extension.settings.any">
+                <div>{{ setting.name }}</div>
             </div>
-            <div v-if="os === 'linux'" v-for="setting in extension.settings.linux" ref="extensionLinuxSettingsRef">
-                <div v-if="canShowSetting(extension.settings, setting.id)" class="p-2 tertiaryBackground mb-2">
-                    <div class="flex-grow">
-                        <div class="flex font-bold">{{ setting.name }}</div>
-                        <div class="text-sm">{{ setting.description }}</div>
-                        <div class="flex">
-                            <select v-if="setting.input == 'select'" class="dropwdown"
-                                :ref="`${extension.id} | ${setting.id}`"
-                                @change="updateSetting(extension.id, setting.id, ($event.target as HTMLSelectElement).value)"
-                                
-                                >
-                                
-                                <option v-for="option in setting.options" :value="option.value">
-                                    {{ option.name }}
-                                </option>
-                            </select>
-                            <input v-if="setting.input == 'text'"
-                                class="rounded-lg p-2 secondaryBackground outline-none input flex-grow">
-                        </div>
-                    </div>
+            <div v-for="setting in extension.settings.linux">
+                <div>{{ setting.name }}</div>
+
+                <div v-if="setting.input === 'select'" class="flex">
+                    <select  class="dropdown flex-grow" v-model="linuxSelectRef" >
+                        <option v-for="option in setting.options" :value="setting.id" :key="setting.id">
+                            <div>{{ option.name }}</div>
+                        </option>
+                    </select>
+                </div>
+
+                <div v-if="setting.input === 'text'" class="flex">
+                    <input class="flex-grow tertiaryBackground rounded-lg p-1 outline-none">
                 </div>
 
             </div>
-            <div v-if="os === 'windows'" v-for="setting in extension.settings.windows" ref="extensionAnySettingsRef">
-                <div v-if="canShowSetting(extension.settings, setting.id)"></div>
+            <div v-for="setting in extension.settings.windows">
+                <div>{{ setting.name }}</div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
+.border {
+    border: 1px solid v-bind(tertiaryBackgroundColor);
+}
+
 .accentText {
     color: v-bind(accentColor);
 }

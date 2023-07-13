@@ -3,8 +3,8 @@ import { appWindow, PhysicalSize, WebviewWindow } from "@tauri-apps/api/window"
 import { invoke } from "@tauri-apps/api";
 import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { onMounted, ref, watch } from "vue";
-import SearchSVG from "../../assets/icons/search.svg?component";
-import SettingsSVG from "../../assets/icons/settings.svg?component";
+import SearchSVG from "../../assets/icons/search.svg";
+import SettingsSVG from "../../assets/icons/settings.svg";
 import { getSettings, getRoundnessInPixels } from "../../pages/Settings/Settings";
 import { listen } from "@tauri-apps/api/event"
 import { SimpleKlResult, TextResult } from "../../data"
@@ -36,10 +36,7 @@ function openSettings() {
     width: 1100
   })
 
-  webview.once('tauri://created', function () { })
-  webview.once('tauri://error', function (e) {
-    console.error(e);
-  })
+  appWindow.close()
 }
 
 
@@ -64,7 +61,7 @@ onMounted(async () => {
   focus.value = await listen("focus_box", (event) => {
     appWindow.show();
     appWindow.setFocus();
-    //searchRef.value.focus();
+    searchRef.value.focus();
   })
 })
 
@@ -76,7 +73,7 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value < results.value.length - 1) {
       selectedIndex.value = selectedIndex.value + 1;
-      resultsRef.value[selectedIndex.value - 1].scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -86,7 +83,7 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value > 0) {
       selectedIndex.value = selectedIndex.value - 1;
-      resultsRef.value[selectedIndex.value - 1].scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -99,15 +96,11 @@ document.addEventListener('keydown', function (event) {
   }
 
   if (event.key === "Escape") {
-    invoke("close_search_window");
+    appWindow.close()
   }
 
   if (event.key === "Enter") {
     runAction();
-  }
-
-  if (event.altKey && event.key == "Space") {
-    invoke("show_window");
   }
 });
 
@@ -273,7 +266,7 @@ watch(searchText, async (_newText, _oldText) => {
           <div :ref="`result-${index}`" class="h-[50px] p-2 flex"
             :class="index === selectedIndex ? 'selectedResult' : ''">
             <div v-if="result.Text !== undefined">
-
+              <div>{{ result.Text.text }}</div>
             </div>
 
             <div v-if="result.IconWithText !== undefined" class="flex">
