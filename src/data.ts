@@ -14,6 +14,7 @@ export interface TextResult {
 
 export interface IconWithTextResult {
     icon: string,
+    icon_color?: string,
     text: string,
     action: ResultAction
 }
@@ -26,6 +27,7 @@ export interface TitleAndDescriptionResult {
 
 export interface IconWithTitleAndDescriptionResult {
     icon: string,
+    icon_color: string,
     title: string,
     description: string,
     action: ResultAction
@@ -35,7 +37,8 @@ export interface ResultAction {
     OpenApp?: OpenAppAction,
     OpenInBrowser?: OpenInBrowserAction,
     CopyToClipboard?: CopyToClipboardAction,
-    ExtensionAction?: ExtensionAction
+    ExtensionAction?: ExtensionAction,
+    DoNothingAction?: DoNothingAction
 }
 
 export interface OpenAppAction {
@@ -54,6 +57,8 @@ export interface ExtensionAction {
     action: string,
     args?: string[]
 }
+
+export interface DoNothingAction { }
 
 export interface ExtensionManifest {
     id: string,
@@ -78,19 +83,19 @@ export interface ExtensionSetting {
     input: string,
     default_value: string,
     options?: ExtensionOption[],
-    show_condition?: ExtensionShowCondition[] 
+    show_condition?: ExtensionShowCondition[]
 }
 
-export interface ExtensionOption{
+export interface ExtensionOption {
     name: string,
     value: string
 }
 
-export interface ExtensionShowCondition{
+export interface ExtensionShowCondition {
     setting: string,
     value: string
 }
 
-export async function getExtensions(): Promise<ExtensionManifest[]>{
+export async function getExtensions(): Promise<ExtensionManifest[]> {
     return JSON.parse(await invoke("get_extensions_json"))
 }

@@ -1,10 +1,12 @@
 import { invoke } from "@tauri-apps/api"
+import { emit } from "@tauri-apps/api/event"
+
 
 export const SettingsCategory = {
   GENERAL: "general",
   SEARCH_BOX: "search_box",
   THEMING: "theming",
-  WEB_SEARCH: "web_search",
+  SEARCH_ENGINES: "search_engines",
   EXTENSIONS: "extensions"
 };
 
@@ -12,23 +14,23 @@ export interface Settings {
   general: GeneralSettings,
   search_box: SearchBoxSettings,
   theming: ThemingSettings,
-  web_search: WebSearchSettings,
+  search_engines: SearchEngine[],
   extensions: ExtensionSettings[]
 }
 
-export interface ExtensionSettings{
+export interface ExtensionSettings {
   id: string,
   keyword: string,
   settings: ExtensionSetting
 }
 
-export interface ExtensionSetting{
+export interface ExtensionSetting {
   any: ExtensionOptionSetting[],
   linux: ExtensionOptionSetting[],
   windows: ExtensionOptionSetting[]
 }
 
-export interface ExtensionOptionSetting{
+export interface ExtensionOptionSetting {
   id: string,
   current_value: string
 }
@@ -53,17 +55,15 @@ export interface ThemingSettings {
   tertiary_background: string;
   accent: string;
   on_accent: string;
+  danger: string;
+  on_danger: string;
   text: string;
   seconday_text: string;
 }
 
-export interface WebSearchSettings{
-  default: SearchOption[],
-  custom: SearchOption[]
-}
-
-export interface SearchOption{
-  icon: string,
+export interface SearchEngine {
+  icon?: string,
+  tint_icon: boolean,
   name: string,
   keyword: string,
   query: string
@@ -95,6 +95,8 @@ export async function updateSetting(setting: string, newValue: any) {
     case "theming_tertiary_background": { settings.theming.tertiary_background = newValue; break }
     case "theming_accent": { settings.theming.accent = newValue; break }
     case "theming_on_accent": { settings.theming.on_accent = newValue; break }
+    case "theming_danger": { settings.theming.danger = newValue; break }
+    case "theming_on_danger": { settings.theming.on_danger = newValue; break }
     case "theming_text": { settings.theming.text = newValue; break }
     case "theming_secondary_text": { settings.theming.seconday_text = newValue; break }
 
@@ -102,6 +104,14 @@ export async function updateSetting(setting: string, newValue: any) {
   }
 
   invoke("update_settings", { settings_json: JSON.stringify(settings) });
+}
+
+
+export async function updateSettings(settings: Settings) {
+
+  let settingsJson = JSON.stringify(settings);
+  invoke("update_settings", { settings_json: settingsJson })
+  emit("updateSettings");
 }
 
 export function getRoundnessInPixels(roundness: number): string {
@@ -114,6 +124,5 @@ export function getRoundnessInPixels(roundness: number): string {
   else if (roundness == 6) { return "24px" }
   else if (roundness == 7) { return "28px" }
   else if (roundness == 8) { return "32px" }
-  else if (roundness == 9) { return "36px" }
-  else { return "9999px" }
+  else { return "36px" }
 }

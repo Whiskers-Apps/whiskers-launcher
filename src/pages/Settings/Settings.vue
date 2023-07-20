@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SettingsCategory, getSettings, updateSetting } from "./Settings"
+import { SettingsCategory, getSettings } from "./Settings"
 import { invoke } from '@tauri-apps/api';
 import GeneralTab from './GeneralTab.vue';
 import ThemesTab from './ThemesTab.vue';
 import SearchBoxTab from './SearchBoxTab.vue'
-import WebSearchTab from './WebSearchTab.vue';
+import SearchEnginesTab from './SearchEnginesTab.vue';
 import ExtensionsTab from './ExtensionsTab.vue';
+import HomeSVG from "../../assets/icons/home.svg"
+import SearchCircleSVG from "../../assets/icons/search-circle.svg"
+import BrushSVG from "../../assets/icons/brush.svg"
+import PuzzleSVG from "../../assets/icons/puzzle.svg"
 
 const currentCategory = ref(SettingsCategory.GENERAL)
 const backgroundColor = ref()
@@ -14,6 +18,8 @@ const secondaryBackgroundColor = ref()
 const tertiaryBackgroundColor = ref()
 const accentColor = ref()
 const onAccentColor = ref()
+const dangerColor = ref()
+const onDangerColor = ref()
 const textColor = ref()
 const secondaryTextColor = ref("")
 
@@ -25,6 +31,8 @@ onMounted(async () => {
     tertiaryBackgroundColor.value = settings.theming.tertiary_background;
     accentColor.value = settings.theming.accent;
     onAccentColor.value = settings.theming.on_accent;
+    dangerColor.value = settings.theming.danger;
+    onDangerColor.value = settings.theming.on_danger;
     textColor.value = settings.theming.text;
     secondaryTextColor.value = settings.theming.seconday_text;
 })
@@ -38,6 +46,8 @@ async function saveTheme() {
     settings.theming.tertiary_background = tertiaryBackgroundColor.value;
     settings.theming.accent = accentColor.value;
     settings.theming.on_accent = onAccentColor.value;
+    settings.theming.danger = dangerColor.value;
+    settings.theming.on_danger = onDangerColor.value;
     settings.theming.text = textColor.value;
     settings.theming.seconday_text = secondaryTextColor.value;
 
@@ -49,25 +59,49 @@ async function saveTheme() {
 
 <template>
     <div class=" h-screen w-screen max-h-screen max-w-screen background flex text">
-        <div class=" w-56 h-screen secondaryBackground p-2 overflow-auto">
-            <div class="tab" v-bind:class="currentCategory === SettingsCategory.GENERAL ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.GENERAL">General</div>
-            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.SEARCH_BOX ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.SEARCH_BOX">Search Box</div>
-            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.THEMING ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.THEMING">Theming</div>
+        <div class=" w-[300px] h-screen secondaryBackground p-2 overflow-auto">
+            <div class="tab flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.GENERAL ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.GENERAL">
+                <HomeSVG class="mr-3 h-7 w-7 fillAccent" />
+                General
+            </div>
+            <div class="tab mt-1 flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.SEARCH_BOX ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.SEARCH_BOX">
+                <SearchCircleSVG class="mr-3 h-7 w-7 strokeAccent" />
+                Search Box
+            </div>
 
-            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.WEB_SEARCH ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.WEB_SEARCH">Web Search</div>
+            <div class="tab mt-1 flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.SEARCH_ENGINES ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.SEARCH_ENGINES">
+                <SearchCircleSVG class="mr-3 h-7 w-7 strokeAccent" />
+                Search Engines
+            </div>
 
-            <div class="tab mt-1" v-bind:class="currentCategory === SettingsCategory.EXTENSIONS ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.EXTENSIONS">Extensions</div>
+            <div class="tab mt-1 flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.THEMING ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.THEMING">
+                <BrushSVG class="mr-3 h-7 w-7 strokeAccent" />
+                Theming
+            </div>
+
+            
+
+            <div class="tab mt-1 flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.EXTENSIONS ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.EXTENSIONS">
+                <PuzzleSVG class="mr-3 h-7 w-7 fillAccent" />
+                Extensions
+            </div>
         </div>
 
         <div class="flex-grow p-2 overflow-auto">
             <div v-if="currentCategory === SettingsCategory.GENERAL">
-                <GeneralTab :secondary-background-color="secondaryBackgroundColor" :accent-color="accentColor"
-                    :text-color="textColor" :tertiary-background-color="tertiaryBackgroundColor" />
+                <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                    :accent-color="accentColor" :text-color="textColor"
+                    :tertiary-background-color="tertiaryBackgroundColor" />
             </div>
 
             <div v-if="currentCategory === SettingsCategory.SEARCH_BOX">
@@ -81,15 +115,17 @@ async function saveTheme() {
                     @update:secondary-background-color="secondaryBackgroundColor = $event.value"
                     :tertiary-background-color="tertiaryBackgroundColor"
                     @update:tertiary-background-color="tertiaryBackgroundColor = $event.value" :accent-color="accentColor"
-                    @update:accent-color="accentColor = $event.value" :text-color="textColor"
+                    @update:accent-color="accentColor = $event.value" :danger-color="dangerColor"
+                    @update:danger-color="dangerColor = $event.value" :on-danger-color="onDangerColor"
+                    @update:on-danger-color="onDangerColor = $event.value" :text-color="textColor"
                     @update:text-color="textColor = $event.value" :on-accent-color="onAccentColor"
                     @update:on-accent-color="onAccentColor = $event.value" :secondary-text-color="secondaryTextColor"
                     @update:secondary-text-color="secondaryTextColor = $event.value" @save-theme="saveTheme()" />
             </div>
-            <div v-if="currentCategory === SettingsCategory.WEB_SEARCH">
-                <WebSearchTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
-                    :text-color="textColor" />
+            <div v-if="currentCategory === SettingsCategory.SEARCH_ENGINES">
+                <SearchEnginesTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" :text-color="textColor"
+                    :on-accent-color="onAccentColor" />
             </div>
             <div v-if="currentCategory === SettingsCategory.EXTENSIONS">
                 <ExtensionsTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
@@ -99,7 +135,6 @@ async function saveTheme() {
         </div>
     </div>
 </template>
-
 
 <style scoped>
 .text {
@@ -141,10 +176,15 @@ async function saveTheme() {
 .activeTab {
     background-color: v-bind(tertiaryBackgroundColor);
     font-weight: 600;
-    
+
 }
 
-.stroke {
+.fillAccent {
+    fill: v-bind(accentColor);
+    stroke: none;
+}
+
+.strokeAccent {
     fill: none;
     stroke: v-bind(accentColor);
     stroke-width: 2;

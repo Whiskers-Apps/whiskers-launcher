@@ -8,7 +8,7 @@ import SettingsSVG from "../../assets/icons/settings.svg";
 import { getSettings, getRoundnessInPixels } from "../../pages/Settings/Settings";
 import { listen } from "@tauri-apps/api/event"
 import { SimpleKlResult, TextResult } from "../../data"
-
+import { hexToCSSFilter } from "hex-to-css-filter"
 
 const showSearchIcon = ref();
 const showSettingsIcon = ref();
@@ -30,7 +30,7 @@ const resultsRef = ref([]);
 
 
 function openSettings() {
-  const webview = new WebviewWindow('settings', {
+  new WebviewWindow('settings', {
     url: 'settings',
     title: "Settings",
     width: 1100
@@ -39,6 +39,25 @@ function openSettings() {
   appWindow.close()
 }
 
+function getCSSFilterFromHexColor(hexColor?: string): string {
+
+  if (hexColor !== null) {
+
+    let color = hexColor!!;
+
+    if (hexColor === "accent") {
+      color = accentColor.value
+    }
+
+    let filter = hexToCSSFilter(color);
+
+    console.log(filter)
+
+    return filter.filter.replace(";", "")
+  }
+
+  return "none"
+}
 
 
 onMounted(async () => {
@@ -135,7 +154,9 @@ async function runAction() {
         actionType = "ExtensionAction"
       }
 
-      invoke("run_action", { action_json: actionJson, action_type: actionType })
+      if (action.DoNothingAction !== undefined) {
+        actionType = "DoNothingAction"
+      }
     }
 
     if (result.IconWithText !== undefined) {
@@ -161,7 +182,9 @@ async function runAction() {
         actionType = "ExtensionAction"
       }
 
-      invoke("run_action", { action_json: actionJson, action_type: actionType })
+      if (action.DoNothingAction !== undefined) {
+        actionType = "DoNothingAction"
+      }
     }
 
     if (result.TitleAndDescription !== undefined) {
@@ -187,7 +210,9 @@ async function runAction() {
         actionType = "ExtensionAction"
       }
 
-      invoke("run_action", { action_json: actionJson, action_type: actionType })
+      if (action.DoNothingAction !== undefined) {
+        actionType = "DoNothingAction"
+      }
     }
 
     if (result.IconWithTitleAndDescription !== undefined) {
@@ -213,7 +238,14 @@ async function runAction() {
         actionType = "ExtensionAction"
       }
 
+      if (action.DoNothingAction !== undefined) {
+        actionType = "DoNothingAction"
+      }
+    }
+
+    if (actionType !== "DoNothingAction") {
       invoke("run_action", { action_json: actionJson, action_type: actionType })
+      appWindow.close()
     }
   }
 }
@@ -230,11 +262,10 @@ watch(searchText, async (_newText, _oldText) => {
     results.value = JSON.parse(await invoke("get_results", { search_text: searchText.value }));
     var newHeight = 70;
 
-
     if (results.value.length > resultsLimit.value) {
-      newHeight = newHeight + (resultsLimit.value * 50);
+      newHeight = newHeight + (resultsLimit.value * 70);
     } else {
-      newHeight = newHeight + results.value.length * 50;
+      newHeight = newHeight + results.value.length * 70;
     }
 
     appWindow.setSize(new PhysicalSize(800, newHeight));
@@ -243,6 +274,9 @@ watch(searchText, async (_newText, _oldText) => {
 
   selectedIndex.value = 0;
 })
+
+
+
 
 </script>
 
@@ -263,24 +297,39 @@ watch(searchText, async (_newText, _oldText) => {
       </div>
       <div v-if="results.length > 0" class="overflow-auto mt-2">
         <div v-for="(result, index) in results" ref="resultsRef">
-          <div :ref="`result-${index}`" class="h-[50px] p-2 flex"
+          <div :ref="`result-${index}`" class="h-[70px] p-2 flex overflow-hidden"
             :class="index === selectedIndex ? 'selectedResult' : ''">
-            <div v-if="result.Text !== undefined">
+
+            <div v-if="result.Text !== undefined" class="flex items-center">
               <div>{{ result.Text.text }}</div>
             </div>
 
-            <div v-if="result.IconWithText !== undefined" class="flex">
-              <img :src="convertFileSrc(result.IconWithText.icon)" class="h-[35px] w-[35px] object-contain">
+            <div v-if="result.IconWithText !== undefined" class="flex items-center">
+              <img :src="convertFileSrc(result.IconWithText.icon)" class="h-[35px] w-[35px] object-contain icon"
+                :style="{ filter: getCSSFilterFromHexColor(result.IconWithText!!.icon_color) }">
               <div class="text-lg ml-2 flex-grow">{{ result.IconWithText.text }}</div>
             </div>
 
-
-            <div v-if="result.TitleAndDescription !== undefined">
-
+            <div v-if="result.TitleAndDescription !== undefined" class="flex flex-col justify-center p-2">
+              <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{ result.TitleAndDescription!!.title }}
+              </div>
+              <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{ result.TitleAndDescription!!.description
+              }}</div>
             </div>
 
-            <div v-if="result.IconWithTitleAndDescription !== undefined">
-
+            <div v-if="result.IconWithTitleAndDescription !== undefined" class="flex items-center">
+              <img :src="convertFileSrc(result.IconWithTitleAndDescription.icon)"
+                class="h-[35px] w-[35px] object-contain icon"
+                :style="{ filter: getCSSFilterFromHexColor(result.IconWithTitleAndDescription!!.icon_color) }">
+              <div class="flex-grow flex flex-col ml-2">
+                <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{
+                  result.IconWithTitleAndDescription!!.title
+                }}
+                </div>
+                <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{
+                  result.IconWithTitleAndDescription!!.description
+                }}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -291,7 +340,11 @@ watch(searchText, async (_newText, _oldText) => {
 
 <style scoped>
 .text {
-  color: v-bind(accentColor)
+  color: v-bind(textColor)
+}
+
+.subtext {
+  color: v-bind(secondaryTextColor);
 }
 
 .maxHeight {

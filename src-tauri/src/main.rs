@@ -7,9 +7,9 @@ use simple_kl_rs::{
     extensions::{ExtensionManifest, Parameters},
     paths::{
         get_apps_index_path, get_extension_parameters_path, get_extension_path,
-        get_extension_results_path, get_extensions_path,
+        get_extension_results_path, get_extensions_path, get_resources_path,
     },
-    results::{IconWithTextResult, SimpleKLResult, TextResult},
+    results::{IconWithTextResult, SimpleKLResult},
     settings::Settings,
 };
 use structs::structs::AppIndex;
@@ -30,7 +30,7 @@ fn get_results(search_text: String) -> Result<String, String> {
     let split_search: Vec<&str> = search_text.split_whitespace().collect();
     let mut keyword = String::from("");
     let mut search_words = String::from("");
-    let search_options = Settings::search_options();
+    let search_engines = Settings::current_settings().search_engines;
 
     for (index, word) in split_search.iter().enumerate() {
         if index == 0 {
@@ -53,16 +53,33 @@ fn get_results(search_text: String) -> Result<String, String> {
         }
     }
 
-    for search_option in search_options {
-        if search_option.keyword == keyword {
-            let url = search_option.query.replace("%s", &search_words);
+    for search_engine in search_engines {
+        if search_engine.keyword == keyword {
+            let url = search_engine.query.replace("%s", &search_words);
+            let mut results: Vec<SimpleKLResult> = Vec::new();
+            
 
-            let result: Vec<SimpleKLResult> = vec![SimpleKLResult::Text(TextResult {
-                text: format!("Search in {} for {}", search_option.name, search_words),
-                action: ResultAction::OpenInBrowser(OpenInBrowser { url }),
-            })];
+            results.push(SimpleKLResult::IconWithText(
+                match search_engine.tint_icon {
+                    true => IconWithTextResult::new_with_color(
+                        search_engine
+                            .icon
+                            .unwrap_or(format!("{}/images/search.svg", get_resources_path())),
+                        "accent".to_string(),
+                        format!("Search for {}", search_words),
+                        ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                    ),
+                    false => IconWithTextResult::new(
+                        search_engine
+                            .icon
+                            .unwrap_or(format!("{}/images/search.svg", get_resources_path())),
+                        format!("Search for {}", search_words),
+                        ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                    ),
+                },
+            ));
 
-            return Ok(serde_json::to_string(&result).unwrap());
+            return Ok(serde_json::to_string(&results).unwrap());
         }
     }
 
@@ -82,11 +99,11 @@ fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
         {
             let action = OpenApp::new(app.desktop_path);
 
-            results.push(SimpleKLResult::IconWithText(IconWithTextResult {
-                icon: app.icon_path,
-                text: app.name,
-                action: ResultAction::OpenApp(action),
-            }));
+            results.push(SimpleKLResult::IconWithText(IconWithTextResult::new(
+                app.icon_path,
+                app.name,
+                ResultAction::OpenApp(action),
+            )));
         }
     }
 
@@ -134,6 +151,8 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
                             let results: Vec<SimpleKLResult> =
                                 serde_json::from_str(&extension_results_json).unwrap();
 
+                            //println!("{:?}", results);
+
                             return results;
                         } else {
                             println!(
@@ -170,6 +189,11 @@ fn close_search_window(window: tauri::Window) {
 #[tauri::command()]
 fn show_window(window: tauri::Window) {
     window.show().unwrap();
+}
+
+#[tauri::command()]
+fn close_window(window: tauri::Window) {
+    window.close().unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -237,6 +261,11 @@ fn update_extension_setting(
     return Settings::update_extension_setting(extension_id, setting_id, new_value);
 }
 
+#[tauri::command(rename_all = "snake_case")]
+fn update_extension_keyword(extension_id: String, keyword: String) -> Result<(), String> {
+    return Settings::update_extension_keyword(extension_id, keyword);
+}
+
 #[tauri::command()]
 fn get_extensions_json() -> String {
     let mut extensions: Vec<ExtensionManifest> = Vec::new();
@@ -275,10 +304,12 @@ fn main() {
             update_settings,
             close_search_window,
             show_window,
+            close_window,
             run_action,
             get_extensions_json,
             get_os,
-            update_extension_setting
+            update_extension_setting,
+            update_extension_keyword
         ])
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();
@@ -316,7 +347,7 @@ fn main() {
                             //Hides the window if the user clicks outside
                             if !focused {
                                 let window = app.get_window("main").unwrap();
-                                window.hide().unwrap();
+                                window.close().unwrap();
                             }
                         }
                         _ => {}

@@ -8,6 +8,8 @@ const emit = defineEmits([
     "update:tertiaryBackgroundColor",
     "update:accentColor",
     "update:onAccentColor",
+    "update:dangerColor",
+    "update:onDangerColor",
     "update:textColor",
     "update:secondaryTextColor",
     "saveTheme"
@@ -34,6 +36,14 @@ const props = defineProps({
         required: true,
         type: String
     },
+    dangerColor: {
+        required: true,
+        type: String
+    },
+    onDangerColor: {
+        required: true,
+        type: String
+    },
     textColor: {
         required: true,
         type: String
@@ -50,6 +60,8 @@ const currentSecondaryBackgroundColor = ref(props.secondaryBackgroundColor);
 const currentTertiaryBackgroundColor = ref(props.tertiaryBackgroundColor);
 const currentAccentColor = ref(props.accentColor);
 const currentOnAccentColor = ref(props.onAccentColor);
+const currentDangerColor = ref(props.dangerColor);
+const currentOnDangerColor = ref(props.onDangerColor);
 const currentTextColor = ref(props.textColor);
 const currentSecondaryTextColor = ref(props.secondaryTextColor);
 
@@ -60,6 +72,8 @@ function saveTheme() {
         emit("update:tertiaryBackgroundColor", currentTertiaryBackgroundColor);
         emit("update:accentColor", currentAccentColor);
         emit("update:onAccentColor", currentOnAccentColor);
+        emit("update:dangerColor", currentDangerColor);
+        emit("update:onDangerColor", currentOnDangerColor);
         emit("update:textColor", currentTextColor);
         emit("update:secondaryTextColor", currentSecondaryTextColor);
         emit("saveTheme");
@@ -71,7 +85,7 @@ function saveTheme() {
     <div>
         <div class="text-lg font-bold">Import/Export</div>
         <div class="text-lg font-bold">Settings</div>
-        <div class=" items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Background Color</div>
                 <input v-model="currentBackgroundColor"
@@ -79,7 +93,7 @@ function saveTheme() {
                 <div class="ml-2 h-5 w-10 previewCurrentBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Secondary Background Color</div>
                 <input v-model="currentSecondaryBackgroundColor"
@@ -87,7 +101,7 @@ function saveTheme() {
                 <div class="ml-2 h-5 w-10 previewCurrentSecondaryBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Tertiary Background Color</div>
                 <input v-model="currentTertiaryBackgroundColor"
@@ -95,7 +109,7 @@ function saveTheme() {
                 <div class="ml-2 h-5 w-10 previewCurrentTertiaryBackground previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Accent Color</div>
                 <input v-model="currentAccentColor"
@@ -103,7 +117,7 @@ function saveTheme() {
                 <div class="ml-2 h-5 w-10 previewCurrentAccent previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">On Accent Color</div>
                 <input v-model="currentOnAccentColor"
@@ -111,14 +125,30 @@ function saveTheme() {
                 <div class="ml-2 h-5 w-10 previewCurrentOnAccent previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
+            <div class="flex items-center">
+                <div class="flex-grow font-bold">Danger Color</div>
+                <input v-model="currentDangerColor"
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
+                <div class="ml-2 h-5 w-10 previewCurrentDanger previewColor"></div>
+            </div>
+        </div>
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
+            <div class="flex items-center">
+                <div class="flex-grow font-bold">On Danger Color</div>
+                <input v-model="currentOnDangerColor"
+                    class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
+                <div class="ml-2 h-5 w-10 previewCurrentOnDanger previewColor"></div>
+            </div>
+        </div>
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Text Color</div>
                 <input v-model="currentTextColor" class="tertiaryBackground p-1 rounded-lg outline-none w-20 flex text-center">
                 <div class="ml-2 h-5 w-10 previewCurrentText previewColor"></div>
             </div>
         </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg card">
+        <div class=" mt-1 items-center secondaryBackground p-4 rounded-lg">
             <div class="flex items-center">
                 <div class="flex-grow font-bold">Secondary Text Color</div>
                 <input v-model="currentSecondaryTextColor"
@@ -134,9 +164,6 @@ function saveTheme() {
 </template>
 
 <style scoped>
-.card {
-    border: 1px solid v-bind(tertiaryBackgroundColor);
-}
 
 .previewColor {
     border: 1px solid v-bind(textColor);
@@ -161,6 +188,14 @@ function saveTheme() {
 
 .previewCurrentOnAccent {
     background-color: v-bind(currentOnAccentColor);
+}
+
+.previewCurrentDanger {
+    background-color: v-bind(currentDangerColor);
+}
+
+.previewCurrentOnDanger {
+    background-color: v-bind(currentOnDangerColor);
 }
 
 .previewCurrentText {

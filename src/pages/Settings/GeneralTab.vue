@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getSettings, updateSetting } from './Settings';
-import { invoke } from '@tauri-apps/api';
-
+import Slider from '../../components/Slider.vue';
 
 defineProps({
+    backgroundColor: {
+        required: true,
+        type: String
+    },
     secondaryBackgroundColor: {
         required: true,
         type: String
@@ -22,7 +25,7 @@ defineProps({
 const firstKey = ref("");
 const secondKey = ref("");
 const thirdKey = ref("");
-const resultsLimit = ref<number>();
+const resultsLimit = ref<number>(-1);
 const showFirstKeyOptions = ref(false);
 const showSecondKeyOptions = ref(false);
 const showThirdKeyOptions = ref(false);
@@ -94,6 +97,12 @@ function toggleShowKey(key: 1 | 2 | 3) {
     }
 }
 
+function updateResultsLimit(value: number) {
+
+    resultsLimit.value = value;
+    updateSetting("general_limit", value);
+}
+
 </script>
 
 <template>
@@ -149,14 +158,10 @@ function toggleShowKey(key: 1 | 2 | 3) {
         </div>
 
         <div class="p-4 secondaryBackground border rounded-xl mt-2">
-            <div class=" font-semibold text-lg">Results Limit</div>
+            <div class=" font-semibold text-lg">Results Limit ({{ resultsLimit }})</div>
             <div class="">The amount of results to show</div>
-            <div class=" flex">
-                <input type="range" class="flex-grow" step="1" min="1" max="8" :value="resultsLimit"
-                    @input="resultsLimit = +($event.target as HTMLInputElement).value">
-                <div class="ml-2 w-10 flex justify-center pl-3 pr-3 pt-1 pb-1 tertiaryBackground rounded-md">
-                    <div>{{ resultsLimit }}</div>
-                </div>
+            <div class="flex mt-2">
+                <Slider :min="2" :max="8" :step="1" :value="resultsLimit" @update:value="updateResultsLimit($event)" />
             </div>
         </div>
     </div>
