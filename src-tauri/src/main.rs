@@ -2,15 +2,16 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+use git2::Repository;
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
-    extensions::{ExtensionManifest, Parameters},
+    extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters},
     paths::{
         get_apps_index_path, get_extension_parameters_path, get_extension_path,
         get_extension_results_path, get_extensions_path, get_resources_path,
     },
     results::{IconWithTextResult, SimpleKLResult},
-    settings::Settings,
+    settings::{Settings, Theme},
 };
 use structs::structs::AppIndex;
 
@@ -55,9 +56,8 @@ fn get_results(search_text: String) -> Result<String, String> {
 
     for search_engine in search_engines {
         if search_engine.keyword == keyword {
-            let url = search_engine.query.replace("%s", &search_words);
+            let url = search_engine.query.replace("%s", &search_text);
             let mut results: Vec<SimpleKLResult> = Vec::new();
-            
 
             results.push(SimpleKLResult::IconWithText(
                 match search_engine.tint_icon {
@@ -83,7 +83,45 @@ fn get_results(search_text: String) -> Result<String, String> {
         }
     }
 
-    return Ok(serde_json::to_string(&get_apps_results(&search_text)).unwrap());
+    //Returns app results or search if it's empty
+    let app_results = &get_apps_results(&search_text);
+    return match app_results.len() > 0 {
+        true => Ok(serde_json::to_string(&app_results).unwrap()),
+        false => {
+            for search_engine in Settings::current_settings().search_engines {
+                if search_engine.default {
+                    let url = search_engine.query.replace("%s", &search_text);
+                    let mut results: Vec<SimpleKLResult> = Vec::new();
+
+                    results.push(SimpleKLResult::IconWithText(
+                        match search_engine.tint_icon {
+                            true => IconWithTextResult::new_with_color(
+                                search_engine.icon.unwrap_or(format!(
+                                    "{}/images/search.svg",
+                                    get_resources_path()
+                                )),
+                                "accent".to_string(),
+                                format!("Search for {}", search_text),
+                                ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                            ),
+                            false => IconWithTextResult::new(
+                                search_engine.icon.unwrap_or(format!(
+                                    "{}/images/search.svg",
+                                    get_resources_path()
+                                )),
+                                format!("Search for {}", search_text),
+                                ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                            ),
+                        },
+                    ));
+
+                    return Ok(serde_json::to_string(&results).unwrap());
+                }
+            }
+
+            Ok("".into())
+        }
+    };
 }
 
 fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
@@ -278,9 +316,12 @@ fn get_extensions_json() -> String {
 
                 if let Ok(mut manifest_file) = File::open(manifest_file_path) {
                     let mut manifest_json = String::from("");
-                    manifest_file.read_to_string(&mut manifest_json).unwrap();
+                    manifest_file
+                        .read_to_string(&mut manifest_json)
+                        .expect("Error writing content to string");
                     let _ = manifest_file.flush();
-                    let manifest: ExtensionManifest = serde_json::from_str(&manifest_json).unwrap();
+                    let manifest: ExtensionManifest =
+                        serde_json::from_str(&manifest_json).expect("Error converting manifest");
 
                     extensions.push(manifest);
                 }
@@ -296,6 +337,142 @@ fn get_os() -> Result<String, ()> {
     return Ok(String::from(env::consts::OS));
 }
 
+#[tauri::command(rename_all = "snake_case")]
+fn add_search_engine(
+    keyword: String,
+    icon_path: String,
+    tint_icon: bool,
+    name: String,
+    query: String,
+) {
+    let mut settings = Settings::current_settings();
+    let icon: Option<String> = match icon_path.is_empty() {
+        true => None,
+        false => Some(icon_path),
+    };
+
+    settings
+        .search_engines
+        .push(simple_kl_rs::settings::SearchEngine {
+            keyword,
+            icon,
+            tint_icon,
+            name,
+            query,
+            default: false,
+        });
+
+    let settings_json = serde_json::to_string(&settings).expect("Error converting search engine");
+    Settings::update(settings_json).expect("Error updating settings");
+}
+
+#[tauri::command()]
+fn export_theme(path: String) {
+    let mut file = File::create(&path).expect("Error creating theme file");
+    let themes = Settings::current_settings().theme;
+    let themes_json = serde_json::to_string(&themes).expect("Error converting theme");
+
+    file.write_all(&themes_json.as_bytes())
+        .expect("Error saving theme");
+}
+
+#[tauri::command()]
+fn import_theme(path: String) {
+    let mut file = File::open(&path).expect("Error opening theme file");
+    let mut file_content = "".to_string();
+    let mut settings = Settings::current_settings();
+
+    file.read_to_string(&mut file_content)
+        .expect("Error reading theme file");
+
+    let theme: Theme = serde_json::from_str(&file_content).expect("Error converting to a theme");
+
+    settings.theme = theme;
+
+    Settings::update(serde_json::to_string(&settings).expect("Error converting settings"))
+        .expect("Error updating settings");
+}
+
+#[tauri::command()]
+fn debug_message(message: String) {
+    println!("{}", message);
+}
+
+#[tauri::command()]
+async fn import_extension(url: String) {
+    let url_split: Vec<&str> = url.split("/").collect();
+    let repo_name = url_split[url_split.len() - 1];
+    let path = format!("{}/{}", get_extensions_path(), repo_name);
+
+    Repository::clone(&url, path).expect("Error cloning repo");
+
+    simple_kl_rs::extensions::init_extensions();
+}
+
+#[tauri::command()]
+async fn delete_extension(id: String) {
+    if let Ok(folders) = fs::read_dir(&get_extensions_path()) {
+        for folder in folders {
+            if let Ok(folder) = folder {
+                let folder_path = folder.path().into_os_string().into_string().unwrap();
+                let manifest_file_path = &format!("{}/manifest.json", folder_path);
+
+                if let Ok(mut manifest_file) = File::open(manifest_file_path) {
+                    let mut manifest_json = String::from("");
+                    manifest_file.read_to_string(&mut manifest_json).unwrap();
+
+                    let manifest: ExtensionManifest = serde_json::from_str(&manifest_json).unwrap();
+
+                    if manifest.id == id {
+                        fs::remove_dir_all(&folder_path).expect("Error deleting extension folder");
+                    }
+
+                    simple_kl_rs::extensions::init_extensions();
+
+                    manifest_file.flush().unwrap();
+                }
+            }
+        }
+    }
+}
+
+#[tauri::command(rename_all = "snake_case")]
+fn get_extension_default_keyword(extension_id: String) -> Result<String, ()> {
+    let extensions = get_extensions();
+
+    return match extensions.iter().find(|e| e.id == extension_id) {
+        Some(extension) => Ok(extension.keyword.clone()),
+        None => Err(()),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+fn get_extension_default_setting(setting_id: String, extension_id: String) -> Result<String, ()> {
+    let extensions = get_extensions();
+
+    for extension in extensions {
+        if extension.id == extension_id {
+            for setting in extension.settings.any{
+                if setting.id == setting_id{
+                    return Ok(setting.default_value)
+                }
+            }
+            for setting in extension.settings.linux{
+                if setting.id == setting_id{
+                    return Ok(setting.default_value)
+                }
+            }
+            for setting in extension.settings.windows{
+                if setting.id == setting_id{
+                    return Ok(setting.default_value)
+                }
+            }
+        }
+    }
+
+    return Err(());
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -309,7 +486,15 @@ fn main() {
             get_extensions_json,
             get_os,
             update_extension_setting,
-            update_extension_keyword
+            update_extension_keyword,
+            add_search_engine,
+            export_theme,
+            import_theme,
+            debug_message,
+            import_extension,
+            delete_extension,
+            get_extension_default_keyword,
+            get_extension_default_setting
         ])
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();

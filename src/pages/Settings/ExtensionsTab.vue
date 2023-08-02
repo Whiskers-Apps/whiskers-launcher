@@ -1,13 +1,60 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { Settings, getSettings, ExtensionSettings as SettingsExtensionsSettings } from './Settings';
+import { Settings, getSettings, ExtensionSettings as SettingsExtensionsSettings, getTheme } from './Settings';
 import { event, invoke } from '@tauri-apps/api';
 import { ExtensionManifest, ExtensionSettings } from '../../data';
 import ChevronDownSVG from "../../assets/icons/chevron-down.svg"
+import TrashSVG from "../../assets/icons/trash.svg"
+import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
+import { listen } from '@tauri-apps/api/event';
+import { WebviewWindow } from '@tauri-apps/api/window';
+import RestoreButton from '../../components/RestoreButton.vue';
 
 const settings = ref<Settings>();
 const tabExtensions = ref<TabExtensionManifest[]>();
 const os = ref("");
+
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const accentColor = ref("");
+const dangerColor = ref("");
+const onDangerColor = ref("");
+const textColor = ref("");
+const secondaryTextColor = ref("");
+
+const updateThemeEmit = ref();
+
+const menu = ref();
+const updateExtensionsEmit = ref();
+
+
+onMounted(async () => {
+    settings.value = await getSettings();
+    os.value = await invoke("get_os");
+
+    loadTheme();
+
+    updateThemeEmit.value = listen("updateTheme", (_event) => {
+        loadTheme();
+    });
+
+    getExtensions();
+
+    updateExtensionsEmit.value = listen("updateExtensions", (_event) => {
+        getExtensions();
+    });
+})
+
+async function loadTheme() {
+    let theme = await getTheme();
+    secondaryBackgroundColor.value = theme.secondary_background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    accentColor.value = theme.accent;
+    dangerColor.value = theme.danger;
+    onDangerColor.value = theme.on_danger;
+    textColor.value = theme.text;
+    secondaryTextColor.value = theme.seconday_text;
+}
 
 export interface TabExtensionManifest {
     id: string,
@@ -21,32 +68,7 @@ export interface TabExtensionManifest {
     current_settings: SettingsExtensionsSettings[]
 }
 
-
-defineProps({
-    backgroundColor: {
-        required: true,
-        type: String
-    },
-    secondaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    tertiaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    accentColor: {
-        required: true,
-        type: String
-    },
-    textColor: {
-        required: true,
-        type: String
-    }
-})
-
 async function updateSetting(extensionID: string, settingID: string, newValue: string) {
-    console.log("banana")
     invoke("update_extension_setting", { extension_id: extensionID, setting_id: settingID, new_value: newValue })
     settings.value = await getSettings();
 }
@@ -131,6 +153,7 @@ function getSettingValue(extensionID: string, settingID: string): String {
 }
 
 function getExtensionKeyword(extensionID: string): string {
+
     if (settings.value?.extensions?.find(extension => extension.id === extensionID)?.keyword !== null) {
         return settings.value!!.extensions.find(extension => extension.id === extensionID)!!.keyword
     } else {
@@ -145,17 +168,12 @@ async function updateExtensionKeyword(extensionID: string, keyword: string) {
     settings.value = await getSettings();
 }
 
-onMounted(async () => {
-    settings.value = await getSettings();
-    os.value = await invoke("get_os");
-    getExtensions();
-})
-
 async function getExtensions() {
 
     settings.value = await getSettings();
     let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json"));
     let newTabExtensions: TabExtensionManifest[] = [];
+
 
     extensions.forEach(extension => {
 
@@ -177,54 +195,142 @@ async function getExtensions() {
     tabExtensions.value = newTabExtensions;
 }
 
+function toggleIconMenu() {
+
+    if (menu.value.style.display == "block") {
+        menu.value.style.display = "none";
+    } else {
+        menu.value.style.display = "block";
+    }
+}
+
+function closeMenu() {
+    menu.value.style.display = "none";
+}
+
+function openDeleteDialog(id: string) {
+    new WebviewWindow("deleteExtensionDialog", {
+        resizable: false,
+        transparent: true,
+        center: true,
+        height: 140,
+        width: 500,
+        title: "Delete Extension",
+        url: `delete-extension-dialog?id=${id}`
+    })
+}
+
+function importExtension() {
+    closeMenu();
+
+    new WebviewWindow("importExtensionDialog", {
+        url: "import-extension-dialog",
+        width: 800,
+        height: 225,
+        center: true,
+        resizable: false,
+        transparent: true,
+        title: "Import Extension"
+    })
+}
+
+async function restoreKeyword(extensionID: string) {
+    let defaultValue: string = await invoke("get_extension_default_keyword", {
+        extension_id: extensionID
+    });
+
+    (document.getElementById(`keyword-${extensionID}`) as HTMLInputElement).value = defaultValue;
+
+    updateExtensionKeyword(extensionID, defaultValue);
+}
+
+async function restoreSetting(extensionID: string, settingID: string, type: "input" | "select") {
+    let defaultValue: string = await invoke("get_extension_default_setting", {
+        extension_id: extensionID,
+        setting_id: settingID
+    });
+
+    (document.getElementById(`${type}-${extensionID}-${settingID}`) as HTMLInputElement).value = defaultValue;
+
+    updateSetting(extensionID, settingID, defaultValue);
+}
 
 </script>
 
 <template>
-    <div>
+    <div class="p-4">
+        <div class="flex">
 
-        <div class="text-xl">Installed Extensions</div>
-        
-        <div v-for="extension in tabExtensions" class="p-4 secondaryBackground  rounded-2xl mb-2">
-            <div class="font-bold text-lg">{{ extension.name }}</div>
+            <div class="text-3xl ml-3 mb-4">Extensions</div>
+            <div class="flex flex-grow justify-end">
+                <button class="h-[50px] w-[50px] flex items-center justify-center menuButton" @click="toggleIconMenu()">
+                    <ThreeDotsSVG class="h-5 w-5 menuButtonIcon" />
+                </button>
+                <div class="menu-content" ref="menu">
+                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                        @click="importExtension()">Import
+                        Extension</button>
+                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80" @click="">Community
+                        Extensions</button>
+                </div>
+            </div>
+        </div>
+
+        <div v-for="extension in tabExtensions" class="p-4 secondaryBackground rounded-3xl mb-2">
+
+            <div class="flex">
+                <div class="font-bold text-lg ml-3 flex-grow">{{ extension.name }}</div>
+                <div>
+                    <button class="deleteButton" @click="openDeleteDialog(extension.id)">
+                        <TrashSVG class="w-5 h-5 deleteIcon" />
+                    </button>
+                </div>
+            </div>
 
             <div>
-                <div>Keyword</div>
-                <div class="flex">
-                    <input class="flex-grow tertiaryBackground rounded-lg p-2 input outline-none" maxlength="10"
+                <div class="ml-3 mt-2">Keyword</div>
+                <div class="flex items-center">
+                    <input class="input" :id="`keyword-${extension.id}`" placeholder="Extension Keyword" maxlength="10"
                         :value="getExtensionKeyword(extension.id)"
                         @change="event => updateExtensionKeyword(extension.id, (event.target as HTMLInputElement).value)">
+
+                    <RestoreButton class="ml-2" @click="restoreKeyword(extension.id)" />
                 </div>
             </div>
 
             <div v-if="os === 'linux'">
-                <div v-for="setting in extension.settings.linux">
+                <div class="mt-2" v-for="setting in extension.settings.linux">
                     <div v-if="canShowSetting(extension.id, setting.id)">
-                        <div>{{ setting.name }}</div>
+                        <div class="ml-3">{{ setting.name }}</div>
 
                         <div v-if="setting.input === 'select'" class="flex">
-                            <select class="dropdown flex-grow" :value="getSettingValue(extension.id, setting.id)"
-                                @change="event => updateSetting(extension.id, setting.id, (event.target as HTMLSelectElement).value)">
-                                <option v-for="option in setting.options" :value="option.value" :key="option.value">
-                                    <div>{{ option.name }}</div>
-                                </option>
-                            </select>
-                            <div class="flex items-center justify-center tertiaryBackground chevron p-2">
-                                <ChevronDownSVG class="h-3 w-3 fill"/>
+                            <div class="flex w-full selectBox">
+                                <select class="dropdown flex-grow" :id="`select-${extension.id}-${setting.id}`"
+                                    :value="getSettingValue(extension.id, setting.id)"
+                                    @change="event => updateSetting(extension.id, setting.id, (event.target as HTMLSelectElement).value)">
+                                    <option v-for="option in setting.options" :value="option.value" :key="option.value">
+                                        <div>{{ option.name }}</div>
+                                    </option>
+                                </select>
+                                <div class="flex items-center justify-center chevron">
+                                    <ChevronDownSVG class="h-3 w-3 fill" />
+                                </div>
                             </div>
+
+                            <RestoreButton class="ml-2" @click="restoreSetting(extension.id, setting.id, 'select')" />
                         </div>
 
                         <div v-if="setting.input === 'text'" class="flex">
-                            <input class="flex-grow tertiaryBackground rounded-lg p-2 outline-none input"
+                            <input class="input" :id="`input-${extension.id}-${setting.id}`"
                                 :value="getSettingValue(extension.id, setting.id)"
                                 @change="event => updateSetting(extension.id, setting.id, (event.target as HTMLInputElement).value)">
+
+                            <RestoreButton class="ml-2" @click="restoreSetting(extension.id, setting.id, 'input')" />
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="text-xl">Online Extensions</div>
 
         <div></div>
     </div>
@@ -240,32 +346,69 @@ async function getExtensions() {
 }
 
 .input:focus {
-    border: 1px solid v-bind(accentColor);
+    outline: 2px solid v-bind(accentColor);
 }
 
 .input {
-    border: 1px solid v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+    padding: 8px;
+    padding-left: 16px;
+    padding-right: 16px;
+    background-color: v-bind(tertiaryBackgroundColor);
+    width: 100%;
 }
 
-.fill{
+.input::placeholder {
+    color: v-bind(secondaryTextColor);
+}
+
+.fill {
     fill: v-bind(textColor);
 }
 
-.chevron{
+.deleteButton {
+    background-color: v-bind(dangerColor);
+    padding: 8px;
+    border-radius: 48px;
+}
 
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
+.deleteButton:hover {
+    opacity: 0.8;
+}
+
+.deleteButton:focus {
+    opacity: 0.8;
+    border-radius: 14px;
+    
+}
+
+.deleteIcon {
+    stroke: v-bind(onDangerColor);
+    stroke-width: 2px;
+}
+
+
+.selectBox {
+    background-color: v-bind(tertiaryBackgroundColor);
+    border: 1px solid v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
+
+
+.chevron {
+    padding: 8px;
+    padding-right: 16px;
+    border-top-right-radius: 48px;
+    border-bottom-right-radius: 48px;
 }
 
 .dropdown {
     all: unset;
     display: flex;
     width: 100%;
-    background-color: v-bind(tertiaryBackgroundColor);
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
     padding: 8px;
-    border: 1px solid v-bind(tertiaryBackgroundColor);
+    padding-left: 16px;
+    padding-right: 16px;
     cursor: pointer;
 }
 
@@ -283,8 +426,33 @@ async function getExtensions() {
     stroke-width: 2
 }
 
+.menuButton {
+    background-color: v-bind(secondaryBackgroundColor);
+    border-radius: 48px;
+}
 
+.menuButton:hover {
+    outline: 2px solid v-bind(accentColor);
+}
 
+.menuButton:focus {
+    outline: 2px solid v-bind(accentColor);
+}
 
+.menuButtonIcon {
+    fill: v-bind(accentColor);
+}
 
+.menu-content {
+    margin-top: 60px;
+    margin-right: 20px;
+    display: none;
+    position: absolute;
+    background-color: v-bind(tertiaryBackgroundColor);
+    padding: 10px;
+    z-index: 9999;
+    right: 0;
+    border-radius: 14px;
+    outline: 2px solid v-bind(accentColor);
+}
 </style>

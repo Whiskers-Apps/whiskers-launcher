@@ -1,30 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { getRoundnessInPixels, getSettings, updateSetting } from './Settings';
+import { onMounted, ref } from 'vue';
+import { getRoundnessInPixels, getSettings, getTheme, updateSettings } from './Settings';
 
 import SearchSVG from "../../assets/icons/search.svg"
 import SettingsSVG from "../../assets/icons/settings.svg"
 import Slider from '../../components/Slider.vue';
 import Switch from '../../components/Switch.vue';
-
-defineProps({
-    backgroundColor: {
-        required: true,
-        type: String
-    },
-    secondaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    tertiaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    accentColor: {
-        required: true,
-        type: String
-    }
-})
+import { listen } from '@tauri-apps/api/event';
 
 
 const showSearchIcon = ref(false);
@@ -33,6 +15,12 @@ const roundness = ref();
 const roundnessInput = ref();
 const borderWidth = ref();
 const borderWidthInput = ref()
+
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const accentColor = ref("");
+
+const updateThemeEmit = ref();
 
 onMounted(async () => {
     let settings = await getSettings()
@@ -43,26 +31,52 @@ onMounted(async () => {
     roundnessInput.value = settings.search_box.roundness;
     borderWidth.value = `${settings.search_box.border_width}px`;
     borderWidthInput.value = settings.search_box.border_width;
+
+    loadTheme();
+
+    updateThemeEmit.value = listen("updateTheme", (_event) => {
+        loadTheme();
+    })
 })
 
-watch(roundnessInput, async (_, __) => {
+async function loadTheme() {
+    let theme = await getTheme();
 
+    secondaryBackgroundColor.value = theme.secondary_background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    accentColor.value = theme.accent;
+}
+
+function updateRoundness() {
     roundness.value = getRoundnessInPixels(roundnessInput.value);
-})
+    update()
+}
 
-watch(borderWidthInput, async (_, __) => {
+function updateBorderWidth() {
+    borderWidth.value = `${borderWidthInput.value}px`
+    update()
+}
 
-    borderWidth.value = borderWidthInput.value + "px"
-})
+async function update() {
 
+    let settings = await getSettings();
 
+    settings.search_box.border_width = borderWidthInput.value;
+    settings.search_box.roundness = roundnessInput.value;
+    settings.search_box.show_search_icon = showSearchIcon.value;
+    settings.search_box.show_settings_icon = showSettingsIcon.value;
+
+    updateSettings(settings);
+}
 
 </script>
 
 <template>
-    <div>
+    <div class="p-4">
 
-        <div class="text-lg font-bold">Preview</div>
+        <div class="text-3xl ml-3">Search Box</div>
+
+        <div class="text-lg font-bold mt-4 ml-3">Preview</div>
 
         <div class=" background flex items-center rounded pt-2 pb-2 pl-4 pr-4 preview ">
             <div v-if="showSearchIcon" class="mr-2">
@@ -76,52 +90,45 @@ watch(borderWidthInput, async (_, __) => {
             </div>
         </div>
 
-        <div class="text-lg font-bold mt-2">Settings</div>
+        <div class="text-lg font-bold mt-4 ml-3">Settings</div>
 
-        <div class="secondaryBackground p-4 rounded-xl flex">
+        <div class="secondaryBackground p-4 rounded-3xl flex mb-1">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Search Icon</div>
                 <div class="text-sm">If enabled it will show a search icon on the left</div>
             </div>
             <div class="flex items-center">
-                <Switch :checked="showSearchIcon"
-                    @update:checked="showSearchIcon = $event; updateSetting('search_box_show_search_icon', showSearchIcon)" />
+                <Switch :checked="showSearchIcon" @update:checked="showSearchIcon = $event; update()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-xl flex mt-2">
+        <div class="secondaryBackground p-4 rounded-3xl flex mb-1">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Settings Icon</div>
                 <div class="text-sm">If enabled it will show a settings icon on the right</div>
             </div>
             <div class="flex items-center">
-                <Switch :checked="showSettingsIcon"
-                    @update:checked="showSettingsIcon = $event; updateSetting('search_box_show_settings_icon', showSettingsIcon)" />
+                <Switch :checked="showSettingsIcon" @update:checked="showSettingsIcon = $event; update()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-xl mt-2">
+        <div class="secondaryBackground p-4 rounded-3xl mb-1">
 
             <div class=" font-semibold">Roundness</div>
             <div class="text-sm">It changes the roundness of the search box. From no round to fully round</div>
             <div class=" mt-2">
                 <Slider :min="0" :max="9" :step="1" :value="roundnessInput"
-                    @update:value="roundnessInput = $event; updateSetting('search_box_roundness', +roundnessInput)" />
+                    @update:value="roundnessInput = $event; updateRoundness()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-xl mt-2">
+        <div class="secondaryBackground p-4 rounded-3xl mb-1">
 
             <div class=" font-semibold">Border Width</div>
             <div class="text-sm">It changes the border width of the search box. From 0px to 6px</div>
             <div class="flex mt-2">
-                <Slider
-                    :min="0"
-                    :max="6"
-                    :step="1"
-                    :value="borderWidthInput"
-                    @update:value="borderWidthInput = $event; updateSetting('search_box_border_width', +borderWidthInput)"
-                />
+                <Slider :min="0" :max="6" :step="1" :value="borderWidthInput"
+                    @update:value="borderWidthInput = $event; updateBorderWidth()" />
             </div>
         </div>
     </div>
@@ -141,24 +148,6 @@ watch(borderWidthInput, async (_, __) => {
     border: v-bind(borderWidth) solid v-bind(accentColor);
     height: 70px;
 }
-
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 60px;
-    height: 30px;
-    border: 4px solid v-bind(accentColor);
-    border-radius: 9999px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-
 
 .secondaryBackgroundColor {
     background-color: v-bind(secondaryBackgroundColor);

@@ -1,57 +1,51 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SettingsCategory, getSettings } from "./Settings"
-import { invoke } from '@tauri-apps/api';
+import { SettingsCategory, getTheme } from "./Settings"
 import GeneralTab from './GeneralTab.vue';
 import ThemesTab from './ThemesTab.vue';
 import SearchBoxTab from './SearchBoxTab.vue'
 import SearchEnginesTab from './SearchEnginesTab.vue';
 import ExtensionsTab from './ExtensionsTab.vue';
+import { listen } from '@tauri-apps/api/event';
+import SearchSVG from "../../assets/icons/search.svg"
 import HomeSVG from "../../assets/icons/home.svg"
-import SearchCircleSVG from "../../assets/icons/search-circle.svg"
 import BrushSVG from "../../assets/icons/brush.svg"
-import PuzzleSVG from "../../assets/icons/puzzle.svg"
+import PluginSVG from "../../assets/icons/plugin.svg"
 
 const currentCategory = ref(SettingsCategory.GENERAL)
-const backgroundColor = ref()
-const secondaryBackgroundColor = ref()
-const tertiaryBackgroundColor = ref()
-const accentColor = ref()
-const onAccentColor = ref()
-const dangerColor = ref()
-const onDangerColor = ref()
-const textColor = ref()
+
+const backgroundColor = ref("")
+const secondaryBackgroundColor = ref("")
+const tertiaryBackgroundColor = ref("")
+const accentColor = ref("")
+const onAccentColor = ref("")
+const dangerColor = ref("")
+const onDangerColor = ref("")
+const textColor = ref("")
 const secondaryTextColor = ref("")
 
-onMounted(async () => {
-    let settings = await getSettings();
+const updateThemeEmit = ref();
 
-    backgroundColor.value = settings.theming.background;
-    secondaryBackgroundColor.value = settings.theming.secondary_background;
-    tertiaryBackgroundColor.value = settings.theming.tertiary_background;
-    accentColor.value = settings.theming.accent;
-    onAccentColor.value = settings.theming.on_accent;
-    dangerColor.value = settings.theming.danger;
-    onDangerColor.value = settings.theming.on_danger;
-    textColor.value = settings.theming.text;
-    secondaryTextColor.value = settings.theming.seconday_text;
+onMounted(async () => {
+    loadTheme();
+
+    updateThemeEmit.value = listen("updateTheme", (_event) => {
+        loadTheme();
+    })
 })
 
-async function saveTheme() {
+async function loadTheme() {
+    let theme = await getTheme();
 
-    var settings = await getSettings();
-
-    settings.theming.background = backgroundColor.value;
-    settings.theming.secondary_background = secondaryBackgroundColor.value;
-    settings.theming.tertiary_background = tertiaryBackgroundColor.value;
-    settings.theming.accent = accentColor.value;
-    settings.theming.on_accent = onAccentColor.value;
-    settings.theming.danger = dangerColor.value;
-    settings.theming.on_danger = onDangerColor.value;
-    settings.theming.text = textColor.value;
-    settings.theming.seconday_text = secondaryTextColor.value;
-
-    invoke("update_settings", { settings_json: JSON.stringify(settings) });
+    backgroundColor.value = theme.background;
+    secondaryBackgroundColor.value = theme.secondary_background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    accentColor.value = theme.accent;
+    onAccentColor.value = theme.on_accent;
+    dangerColor.value = theme.danger;
+    onDangerColor.value = theme.on_danger;
+    textColor.value = theme.text;
+    secondaryTextColor.value = theme.seconday_text;
 }
 
 
@@ -63,41 +57,39 @@ async function saveTheme() {
             <div class="tab flex items-center"
                 v-bind:class="currentCategory === SettingsCategory.GENERAL ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.GENERAL">
-                <HomeSVG class="mr-3 h-7 w-7 fillAccent" />
+                <HomeSVG class="mr-3 h-7 w-7 strokeAccent" />
                 General
             </div>
             <div class="tab mt-1 flex items-center"
                 v-bind:class="currentCategory === SettingsCategory.SEARCH_BOX ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.SEARCH_BOX">
-                <SearchCircleSVG class="mr-3 h-7 w-7 strokeAccent" />
+                <SearchSVG class="mr-3 h-7 w-7 strokeAccent" />
                 Search Box
             </div>
 
             <div class="tab mt-1 flex items-center"
                 v-bind:class="currentCategory === SettingsCategory.SEARCH_ENGINES ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.SEARCH_ENGINES">
-                <SearchCircleSVG class="mr-3 h-7 w-7 strokeAccent" />
+                <SearchSVG class="mr-3 h-7 w-7 strokeAccent" />
                 Search Engines
             </div>
 
             <div class="tab mt-1 flex items-center"
-                v-bind:class="currentCategory === SettingsCategory.THEMING ? 'activeTab' : ''"
-                @click="currentCategory = SettingsCategory.THEMING">
-                <BrushSVG class="mr-3 h-7 w-7 strokeAccent" />
+                v-bind:class="currentCategory === SettingsCategory.THEME ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.THEME">
+                <BrushSVG class="mr-3 h-7 w-7 fillAccent" />
                 Theming
             </div>
-
-            
 
             <div class="tab mt-1 flex items-center"
                 v-bind:class="currentCategory === SettingsCategory.EXTENSIONS ? 'activeTab' : ''"
                 @click="currentCategory = SettingsCategory.EXTENSIONS">
-                <PuzzleSVG class="mr-3 h-7 w-7 fillAccent" />
+                <PluginSVG class="mr-3 h-7 w-7 fillAccent" />
                 Extensions
             </div>
         </div>
 
-        <div class="flex-grow p-2 overflow-auto">
+        <div class="flex-grow h-screen max-h-screen overflow-x-scroll">
             <div v-if="currentCategory === SettingsCategory.GENERAL">
                 <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :accent-color="accentColor" :text-color="textColor"
@@ -109,18 +101,8 @@ async function saveTheme() {
                     :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" />
             </div>
 
-            <div v-if="currentCategory === SettingsCategory.THEMING">
-                <ThemesTab :background-color="backgroundColor" @update:background-color="backgroundColor = $event.value"
-                    :secondary-background-color="secondaryBackgroundColor"
-                    @update:secondary-background-color="secondaryBackgroundColor = $event.value"
-                    :tertiary-background-color="tertiaryBackgroundColor"
-                    @update:tertiary-background-color="tertiaryBackgroundColor = $event.value" :accent-color="accentColor"
-                    @update:accent-color="accentColor = $event.value" :danger-color="dangerColor"
-                    @update:danger-color="dangerColor = $event.value" :on-danger-color="onDangerColor"
-                    @update:on-danger-color="onDangerColor = $event.value" :text-color="textColor"
-                    @update:text-color="textColor = $event.value" :on-accent-color="onAccentColor"
-                    @update:on-accent-color="onAccentColor = $event.value" :secondary-text-color="secondaryTextColor"
-                    @update:secondary-text-color="secondaryTextColor = $event.value" @save-theme="saveTheme()" />
+            <div v-if="currentCategory === SettingsCategory.THEME">
+                <ThemesTab />
             </div>
             <div v-if="currentCategory === SettingsCategory.SEARCH_ENGINES">
                 <SearchEnginesTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SearchEngine, getSettings } from './Settings';
+import { SearchEngine, getSettings, updateSettings } from './Settings';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { hexToCSSFilter } from "hex-to-css-filter"
 import EditSVG from "../../assets/icons/edit.svg"
 import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
 import { listen } from '@tauri-apps/api/event';
 import { WebviewWindow } from "@tauri-apps/api/window"
-import { event } from '@tauri-apps/api';
-
+import CheckSVG from "../../assets/icons/check-circle.svg"
+import { emit } from '@tauri-apps/api/event';
 
 const searchEngines = ref<SearchEngine[]>();
 const updateSettingsEvent = ref();
@@ -64,12 +64,14 @@ function getIconFilter(tintIcon: boolean): string {
 
 function openEditDialog(index: number) {
 
+    closeMenus();
+
     new WebviewWindow("edit-search-engine", {
         url: `edit-search-engine/${index}`,
         title: "Edit Search Engine",
         resizable: false,
         width: 700,
-        height: 500,
+        height: 670,
         center: true,
         transparent: true
     })
@@ -85,6 +87,21 @@ function openDeleteDialog(index: number) {
         resizable: false,
         width: 800,
         height: 200,
+        center: true,
+        transparent: true
+    })
+}
+
+function openAddDialog() {
+
+    closeMenus();
+
+    new WebviewWindow("add-search-engine", {
+        url: "add-search-engine",
+        title: "Add Search Engine",
+        resizable: false,
+        width: 700,
+        height: 670,
         center: true,
         transparent: true
     })
@@ -111,6 +128,23 @@ function closeMenus(exception?: number) {
     });
 }
 
+async function makeDefault(index: number){
+    let settings = await getSettings();
+    let newSearchEngines: SearchEngine[] = [];
+
+    settings.search_engines.forEach((searchEngine, se_index) =>{
+        
+        let newEngine = searchEngine;
+        newEngine.default = se_index === index ? true : false;
+        newSearchEngines.push(newEngine);
+    })
+
+    settings.search_engines = newSearchEngines;
+    updateSettings(settings);
+    emit("updateSettings");
+    closeMenus();
+}
+
 document.addEventListener('keydown', (event) => {
     if (event.key === "Escape") {
         closeMenus();
@@ -120,11 +154,11 @@ document.addEventListener('keydown', (event) => {
 </script>
 
 <template>
-    <div class="overflow-x-clip">
+    <div class="p-4">
         <div class="flex items-start">
             <div class="text-3xl flex-grow ml-3">Search Engines</div>
             <button @mouseover="addButtonHovering = true" @mouseout="addButtonHovering = false"
-                class="flex items-center addButton p-2 hover:rounded-2xl">
+                class="flex items-center addButton p-2 " @click="openAddDialog()">
                 Add
             </button>
         </div>
@@ -141,6 +175,10 @@ document.addEventListener('keydown', (event) => {
 
             <div class="ml-4 p-1 rounded-lg whitespace-nowrap text-ellipsis text-lg">{{ searchEngine.name }}</div>
 
+            <div v-if="searchEngine.default" class="ml-2">
+                <CheckSVG class="h-[30px] w-[30px] accentStroke"/>
+            </div>
+
             <div class="flex-grow"></div>
 
             <div class="accentText font-bold ml-4  tertiaryBackground pt-1 pb-1 pr-2 pl-2  rounded-md">{{
@@ -154,12 +192,12 @@ document.addEventListener('keydown', (event) => {
                 <button class="icon p-2 ml-4 rounded-lg" @click="toggleMenu(index)">
                     <ThreeDotsSVG class="h-5 w-4 fillAccent" />
                 </button>
-                <div class="menu-content rounded-xl" :id="`menu-${index}`">
+                <div class="menu-content p-2 rounded-xl" :id="`menu-${index}`">
                     <div class="menuButton flex items-center">
-                        <button class="text-start w-full p-2">Make Default</button>
+                        <button class="text-start w-full min-w-[140px] p-2 hover:opacity-80 focus:opacity-80" @click="makeDefault(index)">Make Default</button>
                     </div>
                     <div class="menuButton flex items-center">
-                        <button class="text-start w-full p-2" @click="openDeleteDialog(index)">Delete</button>
+                        <button class="text-start w-full p-2 hover:opacity-80 focus:opacity-80" @click="openDeleteDialog(index)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -184,17 +222,6 @@ document.addEventListener('keydown', (event) => {
     fill: v-bind(accentColor);
 }
 
-.menuButton {
-    width: 250px;
-    border: 2px solid transparent;
-}
-
-.menuButton:hover {
-    background-color: v-bind(backgroundColor);
-    border: 2px solid v-bind(accentColor);
-    border-radius: 8px;
-}
-
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
 }
@@ -203,6 +230,10 @@ document.addEventListener('keydown', (event) => {
     background-color: v-bind(tertiaryBackgroundColor);
 }
 
+.accentStroke{
+    fill: none;
+    stroke: v-bind(accentColor);
+}
 .border {
     border: 2px solid v-bind(accentColor);
 }
@@ -231,7 +262,7 @@ document.addEventListener('keydown', (event) => {
 }
 
 .addButton:focus {
-    border-radius: 16px;
+    border-radius: 20px;
 }
 
 .menu {
@@ -243,8 +274,6 @@ document.addEventListener('keydown', (event) => {
     display: none;
     position: absolute;
     background-color: v-bind(tertiaryBackgroundColor);
-    padding: 10px;
-    min-width: 250px;
     z-index: 9999;
     right: 0;
     border: 2px solid v-bind(accentColor);

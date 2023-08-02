@@ -1,8 +1,7 @@
 <script setup lang="ts">
 
 import { onMounted, ref } from "vue";
-import { Settings, getSettings, SearchEngine, updateSettings, getTheme } from "../Settings/Settings"
-import { useRoute } from "vue-router";
+import { getTheme } from "../Settings/Settings"
 import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { open } from "@tauri-apps/api/dialog"
 import { emit } from "@tauri-apps/api/event"
@@ -11,20 +10,19 @@ import { invoke } from "@tauri-apps/api";
 import Switch from "../../components/Switch.vue"
 import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
 
-const searchEngine = ref<SearchEngine>();
-const index = +useRoute().params.index;
 const backgroundColor = ref("");
 const accentColor = ref("");
-const onAccentColor = ref("")
+const onAccentColor = ref("");
+const dangerColor = ref("");
+const onDangerColor = ref("");
 const textColor = ref("");
 const secondaryBackgroundColor = ref("");
 const tertiaryBackgroundColor = ref("");
 const iconFilter = ref("");
 const iconMenu = ref();
 
-
 const iconPath = ref("");
-const realIconPath = ref()
+const realIconPath = ref("")
 const tintIcon = ref(false);
 const keyword = ref("");
 const name = ref("");
@@ -63,41 +61,35 @@ function toggleTintIcon(checked: boolean) {
 
 async function save() {
 
-    let settings = await getSettings();
+    invoke("add_search_engine", {
+        keyword: keyword.value,
+        icon_path: realIconPath.value,
+        tint_icon: tintIcon.value,
+        name: name.value,
+        query: query.value
+    })
 
-    settings.search_engines[index].icon = realIconPath.value;
-    settings.search_engines[index].tint_icon = tintIcon.value;
-    settings.search_engines[index].keyword = keyword.value;
-    settings.search_engines[index].name = name.value;
-    settings.search_engines[index].query = query.value;
-
-    updateSettings(settings);
     emit("updateSettings");
     invoke("close_window");
 }
 
 onMounted(async () => {
 
-    let settings: Settings = await getSettings();
     let theme = await getTheme();
+
     backgroundColor.value = theme.background;
     accentColor.value = theme.accent;
     onAccentColor.value = theme.on_accent;
+    dangerColor.value = theme.danger;
+    onDangerColor.value = theme.on_danger;
     textColor.value = theme.text;
     secondaryBackgroundColor.value = theme.secondary_background;
     tertiaryBackgroundColor.value = theme.tertiary_background;
-
-
-    searchEngine.value = settings.search_engines[index]
-    tintIcon.value = searchEngine.value.tint_icon;
-    realIconPath.value = searchEngine.value.icon;
-    iconPath.value = convertFileSrc(searchEngine.value.icon ?? '' + "?" + Math.floor(Math.random() * 1000));
-    keyword.value = searchEngine.value.keyword;
-    name.value = searchEngine.value.name;
-    query.value = searchEngine.value.query;
-
-    applyIconFilter();
 })
+
+function isSaveButtonDisabled(): boolean {
+    return keyword.value.trim() === "" || name.value.trim() === "" || query.value.trim() === ""
+}
 
 function clearIcon() {
     realIconPath.value = "";
@@ -115,21 +107,15 @@ function toggleIconMenu() {
     }
 }
 
-function isSaveButtonDisabled(): boolean {
-    return keyword.value.trim() === "" || name.value.trim() === "" || query.value.trim() === ""
-}
-
 document.addEventListener('keydown', (event) => {
     if (event.key === "Escape") {
         iconMenu.value.style.display = "none"
     }
 })
-
 </script>
 
 <template>
     <div class="background  h-[670px] p-4 text ">
-
         <div class="flex rounded-2xl items-start">
             <button class="icon p-2 rounded-2xl" @click="selectIcon()">
                 <div v-if="iconPath !== ''">
@@ -151,8 +137,7 @@ document.addEventListener('keydown', (event) => {
                         <Switch :background-color="backgroundColor" :tertiary-background-color="tertiaryBackgroundColor"
                             :accent-color="accentColor" :checked="tintIcon" @update:checked="toggleTintIcon($event)" />
                     </div>
-                    <button
-                        class=" tertiaryBackground hover:opacity-80 focus:opacity-80 p-2 rounded-2xl flex items-start w-full "
+                    <button class=" tertiaryBackground hover:opacity-80 focus:opacity-80 p-2 rounded-2xl flex items-start w-full "
                         @click="clearIcon()">
                         Clear
                     </button>
@@ -207,7 +192,7 @@ document.addEventListener('keydown', (event) => {
 }
 
 
-.input:focus {
+.input:focus{
     outline: 2px solid v-bind(accentColor);
 }
 
@@ -215,10 +200,6 @@ document.addEventListener('keydown', (event) => {
     background-color: v-bind(tertiaryBackgroundColor);
     color: v-bind(textColor);
     outline: v-bind(secondaryBackgroundColor);
-}
-
-.clearButton:hover {
-    opacity: 0.8;
 }
 
 .icon {
@@ -252,10 +233,9 @@ document.addEventListener('keydown', (event) => {
     fill: v-bind(accentColor);
 }
 
-.divider {
+.divider{
     background-color: v-bind(accentColor);
 }
-
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
 }
@@ -277,4 +257,5 @@ document.addEventListener('keydown', (event) => {
     right: 0;
     border-radius: 14px;
     outline: 2px solid v-bind(accentColor);
-}</style>
+}
+</style>

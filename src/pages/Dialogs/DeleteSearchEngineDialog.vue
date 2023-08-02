@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SearchEngine, getSettings, updateSettings } from '../Settings/Settings';
+import { SearchEngine, getSettings, getTheme, updateSettings } from '../Settings/Settings';
 import { useRoute } from 'vue-router';
 import { invoke } from '@tauri-apps/api';
 
@@ -18,12 +18,13 @@ const searchEngine = ref<SearchEngine>();
 
 onMounted(async () => {
     let settings = await getSettings();
-    backgroundColor.value = settings.theming.background;
-    textColor.value = settings.theming.text;
-    accentColor.value = settings.theming.accent;
-    onAccentColor.value = settings.theming.on_accent;
-    dangerColor.value = settings.theming.danger;
-    onDangerColor.value = settings.theming.on_danger;
+    let theme = await getTheme();
+    backgroundColor.value = theme.background;
+    textColor.value = theme.text;
+    accentColor.value = theme.accent;
+    onAccentColor.value = theme.on_accent;
+    dangerColor.value = theme.danger;
+    onDangerColor.value = theme.on_danger;
 
     searchEngine.value = settings.search_engines[index];
 })
@@ -37,7 +38,7 @@ async function deleteSearchEngine(){
 }
 </script>
 <template>
-    <div class="h-[300px] background text p-4">
+    <div class="h-[200px] background text p-4">
         <div class="text-2xl">Delete Search Engine</div>
         <div>Are you sure you want to delete <b>{{ searchEngine?.name }}</b>?</div>
         <div class="flex mt-4">

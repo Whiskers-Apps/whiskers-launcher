@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getSettings } from '../pages/Settings/Settings';
+import { getTheme } from '../pages/Settings/Settings';
+import { listen } from '@tauri-apps/api/event';
+
+const updateThemeEmit = ref();
 
 
-const props = defineProps({
+defineProps({
     min: {
         required: true,
         type: Number
@@ -30,12 +33,20 @@ const emit = defineEmits([
     "update:value"
 ])
 
-onMounted(async ()=>{
-    let settings = await getSettings();
-    backgroundColor.value = settings.theming.background;
-    tertiaryBackgroundColor.value = settings.theming.tertiary_background;
-    accentColor.value = settings.theming.accent;
+onMounted(() => {
+    loadTheme();
+
+    updateThemeEmit.value = listen("updateTheme", (_event)=>{
+        loadTheme();
+    })
 })
+
+async function loadTheme() {
+    let theme = await getTheme();
+    backgroundColor.value = theme.background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    accentColor.value = theme.accent;
+}
 
 </script>
 
@@ -78,8 +89,6 @@ input[type="range"] {
 ::-ms-fill-lower {
     background: v-bind(accentColor);
 }
-
-
 
 ::-ms-ticks-after {
     display: none;

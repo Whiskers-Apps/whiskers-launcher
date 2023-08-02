@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { getSettings, updateSetting } from './Settings';
+import { getSettings, updateSettings } from './Settings';
 import Slider from '../../components/Slider.vue';
 
 defineProps({
@@ -47,34 +47,24 @@ async function updateKey(key: number, value: string) {
 
     if (key == 1) {
         firstKey.value = value;
-        updateSetting("general_first_key", value);
         showFirstKeyOptions.value = false;
     }
     if (key == 2) {
         secondKey.value = value;
-        updateSetting("general_second_key", value);
         showSecondKeyOptions.value = false;
     }
     if (key == 3) {
         thirdKey.value = value;
-        updateSetting("general_third_key", value);
         showThirdKeyOptions.value = false;
     }
+
+    let settings = await getSettings();
+    settings.general.first_key = firstKey.value;
+    settings.general.second_key = secondKey.value;
+    settings.general.third_key = thirdKey.value;
+
+    updateSettings(settings);
 }
-
-async function showKeyOptions(key: 1 | 2 | 3) {
-
-    showFirstKeyOptions.value = false;
-    showSecondKeyOptions.value = false;
-    showThirdKeyOptions.value = false;
-
-    switch (key) {
-        case 1: { showFirstKeyOptions.value = true; break }
-        case 2: { showSecondKeyOptions.value = true; break }
-        case 3: { showThirdKeyOptions.value = true; break }
-    }
-}
-
 
 function toggleShowKey(key: 1 | 2 | 3) {
 
@@ -97,36 +87,43 @@ function toggleShowKey(key: 1 | 2 | 3) {
     }
 }
 
-function updateResultsLimit(value: number) {
+async function updateResultsLimit(value: number) {
 
     resultsLimit.value = value;
-    updateSetting("general_limit", value);
+
+    let settings = await getSettings();
+    settings.general.limit = value;
+
+    updateSettings(settings);
 }
 
 </script>
 
 <template>
-    <div>
-        <div class=" secondaryBackground p-4 border rounded-xl">
+    <div class="p-4">
+
+        <div class="ml-3 text-3xl">General</div>
+
+        <div class=" secondaryBackground p-4 border rounded-3xl mt-4">
             <div class=" font-semibold text-lg">Keybinding</div>
             <div class="">Key combination to launch the search box</div>
 
             <div class="grid grid-cols-11 gap-2 mt-2 ">
 
-                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                <button class="col-span-3 tertiaryBackground rounded-full p-1 flex items-center justify-center"
                     @click="toggleShowKey(1)">
                     {{ firstKey }}
-                </div>
+                </button>
                 <div class="col-span-1 flex items-center justify-center ">+</div>
-                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                <button class="col-span-3 tertiaryBackground rounded-full p-1 flex items-center justify-center"
                     @click="toggleShowKey(2)">
                     {{ secondKey }}
-                </div>
+                </button>
                 <div class="col-span-1 flex items-center justify-center ">+</div>
-                <div class="col-span-3 tertiaryBackground rounded-md p-1 flex items-center justify-center"
+                <button class="col-span-3 tertiaryBackground rounded-full p-1 flex items-center justify-center"
                     @click="toggleShowKey(3)">
                     {{ thirdKey }}
-                </div>
+                </button>
             </div>
 
             <div v-if="showFirstKeyOptions" class="grid grid-cols-8 gap-2 mt-2">
@@ -157,7 +154,7 @@ function updateResultsLimit(value: number) {
             </div>
         </div>
 
-        <div class="p-4 secondaryBackground border rounded-xl mt-2">
+        <div class="p-4 secondaryBackground border rounded-3xl mt-1">
             <div class=" font-semibold text-lg">Results Limit ({{ resultsLimit }})</div>
             <div class="">The amount of results to show</div>
             <div class="flex mt-2">

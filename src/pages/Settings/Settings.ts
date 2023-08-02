@@ -5,7 +5,7 @@ import { emit } from "@tauri-apps/api/event"
 export const SettingsCategory = {
   GENERAL: "general",
   SEARCH_BOX: "search_box",
-  THEMING: "theming",
+  THEME: "theme",
   SEARCH_ENGINES: "search_engines",
   EXTENSIONS: "extensions"
 };
@@ -13,7 +13,7 @@ export const SettingsCategory = {
 export interface Settings {
   general: GeneralSettings,
   search_box: SearchBoxSettings,
-  theming: ThemingSettings,
+  theme: Theme,
   search_engines: SearchEngine[],
   extensions: ExtensionSettings[]
 }
@@ -49,7 +49,13 @@ export interface SearchBoxSettings {
   border_width: number;
 }
 
-export interface ThemingSettings {
+export interface ThemeSettings {
+  current: Theme,
+  themes: Theme[]
+}
+
+export interface Theme {
+  name: string,
   background: string;
   secondary_background: string;
   tertiary_background: string;
@@ -66,7 +72,8 @@ export interface SearchEngine {
   tint_icon: boolean,
   name: string,
   keyword: string,
-  query: string
+  query: string,
+  default: boolean
 }
 
 
@@ -77,35 +84,10 @@ export async function getSettings(): Promise<Settings> {
   return settings
 }
 
-export async function updateSetting(setting: string, newValue: any) {
-
-  var settings = await getSettings();
-
-  switch (setting) {
-    case "general_first_key": { settings.general.first_key = newValue; break }
-    case "general_second_key": { settings.general.second_key = newValue; break }
-    case "general_third_key": { settings.general.third_key = newValue; break }
-    case "general_limit": { settings.general.limit = newValue; break }
-    case "search_box_show_search_icon": { settings.search_box.show_search_icon = newValue; break }
-    case "search_box_show_settings_icon": { settings.search_box.show_settings_icon = newValue; break }
-    case "search_box_roundness": { settings.search_box.roundness = newValue; break }
-    case "search_box_border_width": { settings.search_box.border_width = newValue; break }
-    case "theming_background": { settings.theming.background = newValue; break }
-    case "theming_secondary_background": { settings.theming.secondary_background = newValue; break }
-    case "theming_tertiary_background": { settings.theming.tertiary_background = newValue; break }
-    case "theming_accent": { settings.theming.accent = newValue; break }
-    case "theming_on_accent": { settings.theming.on_accent = newValue; break }
-    case "theming_danger": { settings.theming.danger = newValue; break }
-    case "theming_on_danger": { settings.theming.on_danger = newValue; break }
-    case "theming_text": { settings.theming.text = newValue; break }
-    case "theming_secondary_text": { settings.theming.seconday_text = newValue; break }
-
-    default: { break }
-  }
-
-  invoke("update_settings", { settings_json: JSON.stringify(settings) });
+export async function getTheme(): Promise<Theme> {
+  let settings = await getSettings();
+  return settings.theme;
 }
-
 
 export async function updateSettings(settings: Settings) {
 

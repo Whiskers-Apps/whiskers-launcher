@@ -5,7 +5,7 @@ import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { onMounted, ref, watch } from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
-import { getSettings, getRoundnessInPixels } from "../../pages/Settings/Settings";
+import { getSettings, getRoundnessInPixels, getTheme } from "../../pages/Settings/Settings";
 import { listen } from "@tauri-apps/api/event"
 import { SimpleKlResult, TextResult } from "../../data"
 import { hexToCSSFilter } from "hex-to-css-filter"
@@ -21,7 +21,6 @@ const accentColor = ref("")
 const textColor = ref("")
 const secondaryTextColor = ref("")
 const searchRef = ref();
-const focus = ref();
 const results = ref<SimpleKlResult[]>([]);
 const resultsLimit = ref(0)
 const searchBoxHeight = ref("70px");
@@ -68,20 +67,17 @@ onMounted(async () => {
   borderWidth.value = `${settings.search_box.border_width}px`
   showSearchIcon.value = settings.search_box.show_search_icon;
   showSettingsIcon.value = settings.search_box.show_settings_icon;
-  backgroundColor.value = settings.theming.background;
-  secondaryBackgroundColor.value = settings.theming.secondary_background;
-  accentColor.value = settings.theming.accent;
-  textColor.value = settings.theming.text;
-  secondaryTextColor.value = settings.theming.seconday_text;
   resultsLimit.value = settings.general.limit;
 
-  searchRef.value.focus();
+  let theme = await getTheme();
 
-  focus.value = await listen("focus_box", (event) => {
-    appWindow.show();
-    appWindow.setFocus();
-    searchRef.value.focus();
-  })
+  backgroundColor.value = theme.background;
+  secondaryBackgroundColor.value = theme.secondary_background;
+  accentColor.value = theme.accent;
+  textColor.value = theme.text;
+  secondaryTextColor.value = theme.seconday_text;
+
+  searchRef.value.focus();
 })
 
 document.addEventListener('keydown', function (event) {
