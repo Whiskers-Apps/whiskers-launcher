@@ -3,28 +3,33 @@
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use git2::Repository;
+use serde_json::Error;
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
-    extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters},
+    extensions::{get_extensions, ExtensionManifest, Parameters},
     paths::{
-        get_apps_index_path, get_extension_parameters_path, get_extension_path,
-        get_extension_results_path, get_extensions_path, get_resources_path,
+        get_apps_index_path, get_community_themes_file_path, get_community_themes_path,
+        get_extension_parameters_path, get_extension_path, get_extension_results_path,
+        get_extensions_path, get_resources_path,
     },
     results::{IconWithTextResult, SimpleKLResult},
     settings::{Settings, Theme},
 };
 use structs::structs::AppIndex;
+use themes::CommunityTheme;
 
 use std::{
     env,
     fs::{self, File},
     io::{Read, Write},
+    path::Path,
     process::Command,
 };
 
 use tauri::{Manager, PhysicalPosition, PhysicalSize, RunEvent, WindowEvent};
 pub mod extensions;
 pub mod structs;
+pub mod themes;
 
 #[tauri::command(rename_all = "snake_case")]
 fn get_results(search_text: String) -> Result<String, String> {
@@ -452,25 +457,61 @@ fn get_extension_default_setting(setting_id: String, extension_id: String) -> Re
 
     for extension in extensions {
         if extension.id == extension_id {
-            for setting in extension.settings.any{
-                if setting.id == setting_id{
-                    return Ok(setting.default_value)
+            for setting in extension.settings.any {
+                if setting.id == setting_id {
+                    return Ok(setting.default_value);
                 }
             }
-            for setting in extension.settings.linux{
-                if setting.id == setting_id{
-                    return Ok(setting.default_value)
+            for setting in extension.settings.linux {
+                if setting.id == setting_id {
+                    return Ok(setting.default_value);
                 }
             }
-            for setting in extension.settings.windows{
-                if setting.id == setting_id{
-                    return Ok(setting.default_value)
+            for setting in extension.settings.windows {
+                if setting.id == setting_id {
+                    return Ok(setting.default_value);
                 }
             }
         }
     }
 
     return Err(());
+}
+
+/// Gets community themes. It will clean the folder to always update 
+#[tauri::command()]
+async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
+
+    let themes_path = get_community_themes_path();
+
+    if Path::new(&themes_path).exists(){
+        fs::remove_dir_all(&themes_path).expect("Error deleting themes directory");
+    }
+
+    fs::create_dir_all(&themes_path).expect("Error creating themes directory");
+    
+    Repository::clone(
+        "https://github.com/lighttigerXIV/simple-kl-themes-hub",
+        &themes_path,
+    )
+    .expect("Error cloning themes repo");
+
+
+    let mut themes_file =
+        File::open(get_community_themes_file_path()).expect("Error opening themes file");
+
+    let mut themes_file_content = "".to_string();
+
+    themes_file
+        .read_to_string(&mut themes_file_content)
+        .expect("Error reading themes file");
+
+    let themes = serde_json::from_str(&themes_file_content);
+
+    return match themes {
+        Ok(themes) => Ok(themes),
+        Err(_) => Err(()),
+    };
 }
 
 fn main() {
@@ -494,7 +535,8 @@ fn main() {
             import_extension,
             delete_extension,
             get_extension_default_keyword,
-            get_extension_default_setting
+            get_extension_default_setting,
+            get_community_themes
         ])
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();

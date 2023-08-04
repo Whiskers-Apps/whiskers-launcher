@@ -7,7 +7,8 @@ export const SettingsCategory = {
   SEARCH_BOX: "search_box",
   THEME: "theme",
   SEARCH_ENGINES: "search_engines",
-  EXTENSIONS: "extensions"
+  EXTENSIONS: "extensions",
+  ABOUT: "about"
 };
 
 export interface Settings {

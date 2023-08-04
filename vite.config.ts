@@ -1,10 +1,21 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import svgLoader from 'vite-svg-loader';
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(async () => ({
   plugins: [vue(), svgLoader()],
+  resolve:{
+    alias:{
+      "@": path.resolve(__dirname, "./src"),
+      "@icons": path.resolve(__dirname, "./src/assets/icons"),
+      "@images": path.resolve(__dirname, "./src/assets/images"),
+      "@components": path.resolve(__dirname, "./src/components"),
+      "@pages": path.resolve(__dirname, "./src/pages"),
+      "@dialogs": path.resolve(__dirname, "./src/pages/Dialogs"),
+    }
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   // prevent vite from obscuring rust errors

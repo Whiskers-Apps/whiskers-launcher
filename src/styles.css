@@ -13,3 +13,10 @@ input[type="range"] {
 input[type="range"]:focus {
   outline: none;
 }
+
+
+.oneLineText {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

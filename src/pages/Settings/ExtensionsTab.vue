@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Settings, getSettings, ExtensionSettings as SettingsExtensionsSettings, getTheme } from './Settings';
-import { event, invoke } from '@tauri-apps/api';
+import { invoke } from '@tauri-apps/api';
 import { ExtensionManifest, ExtensionSettings } from '../../data';
 import ChevronDownSVG from "../../assets/icons/chevron-down.svg"
 import TrashSVG from "../../assets/icons/trash.svg"

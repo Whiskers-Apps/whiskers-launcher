@@ -11,6 +11,8 @@ import SearchSVG from "../../assets/icons/search.svg"
 import HomeSVG from "../../assets/icons/home.svg"
 import BrushSVG from "../../assets/icons/brush.svg"
 import PluginSVG from "../../assets/icons/plugin.svg"
+import InfoSVG from "../../assets/icons/info.svg"
+import AboutTab from './AboutTab.vue';
 
 const currentCategory = ref(SettingsCategory.GENERAL)
 
@@ -87,6 +89,13 @@ async function loadTheme() {
                 <PluginSVG class="mr-3 h-7 w-7 fillAccent" />
                 Extensions
             </div>
+
+            <div class="tab mt-1 flex items-center"
+                v-bind:class="currentCategory === SettingsCategory.ABOUT ? 'activeTab' : ''"
+                @click="currentCategory = SettingsCategory.ABOUT">
+                <InfoSVG class="mr-3 h-7 w-7 fillAccent" />
+                About
+            </div>
         </div>
 
         <div class="flex-grow h-screen max-h-screen overflow-x-scroll">
@@ -113,6 +122,10 @@ async function loadTheme() {
                 <ExtensionsTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
                     :text-color="textColor" />
+            </div>
+
+            <div v-if="currentCategory === SettingsCategory.ABOUT">
+                <AboutTab/>
             </div>
         </div>
     </div>

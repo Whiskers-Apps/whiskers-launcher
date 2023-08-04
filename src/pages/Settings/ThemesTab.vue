@@ -6,6 +6,7 @@ import { invoke } from '@tauri-apps/api';
 import { getSettings, getTheme } from './Settings';
 import { emit } from '@tauri-apps/api/event';
 import PrimaryButton from '../../components/PrimaryButton.vue';
+import { WebviewWindow } from '@tauri-apps/api/window';
 
 const menu = ref();
 
@@ -161,6 +162,17 @@ function isSaveButtonDisabled() {
         || !isHexColor(currentSecondaryTextColor.value)
 }
 
+function openCommunityThemesDialog() {
+    new WebviewWindow("communityThemesDialog", {
+        width: 800,
+        height: 800,
+        transparent: true,
+        center: true,
+        url: "community-themes-dialog",
+        title: "Community Themes"
+    })
+}
+
 </script>
 
 <template>
@@ -176,8 +188,10 @@ function isSaveButtonDisabled() {
                         @click="exportTheme()">Export Theme</button>
                     <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
                         @click="importTheme()">Import Theme</button>
-                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80">Community
-                        Themes</button>
+                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                        @click="openCommunityThemesDialog()">
+                        Community Themes
+                    </button>
                 </div>
             </div>
         </div>
@@ -306,7 +320,7 @@ function isSaveButtonDisabled() {
     background-color: v-bind(currentBackgroundColor);
 }
 
-.previewText{
+.previewText {
     color: v-bind(currentTextColor);
 }
 
