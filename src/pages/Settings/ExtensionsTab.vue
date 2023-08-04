@@ -53,7 +53,7 @@ async function loadTheme() {
     dangerColor.value = theme.danger;
     onDangerColor.value = theme.on_danger;
     textColor.value = theme.text;
-    secondaryTextColor.value = theme.seconday_text;
+    secondaryTextColor.value = theme.secondary_text;
 }
 
 export interface TabExtensionManifest {
@@ -91,7 +91,8 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
                     })
                 }
             }
-        })
+        });
+
         extension.settings.linux.forEach(setting => {
             if (setting.id == settingID) {
                 if (setting.show_condition === null) {
@@ -105,7 +106,8 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
                     })
                 }
             }
-        })
+        });
+
         extension.settings.windows.forEach(setting => {
             if (setting.id == settingID) {
                 if (setting.show_condition === null) {
@@ -154,7 +156,7 @@ function getSettingValue(extensionID: string, settingID: string): String {
 
 function getExtensionKeyword(extensionID: string): string {
 
-    if (settings.value?.extensions?.find(extension => extension.id === extensionID)?.keyword !== null) {
+    if (settings.value?.extensions?.find(extension => extension.id === extensionID)?.keyword !== undefined) {
         return settings.value!!.extensions.find(extension => extension.id === extensionID)!!.keyword
     } else {
         return ""
@@ -164,6 +166,8 @@ function getExtensionKeyword(extensionID: string): string {
 
 async function updateExtensionKeyword(extensionID: string, keyword: string) {
 
+    if (keyword.trim() === "") { return }
+
     invoke("update_extension_keyword", { extension_id: extensionID, keyword: keyword });
     settings.value = await getSettings();
 }
@@ -171,7 +175,7 @@ async function updateExtensionKeyword(extensionID: string, keyword: string) {
 async function getExtensions() {
 
     settings.value = await getSettings();
-    let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json"));
+    let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json") ?? []);
     let newTabExtensions: TabExtensionManifest[] = [];
 
 
@@ -190,7 +194,7 @@ async function getExtensions() {
         }
 
         newTabExtensions.push(newTabExtension);
-    })
+    });
 
     tabExtensions.value = newTabExtensions;
 }
@@ -217,6 +221,19 @@ function openDeleteDialog(id: string) {
         width: 500,
         title: "Delete Extension",
         url: `delete-extension-dialog?id=${id}`
+    })
+}
+
+function openCommunityExtensionsDialog() {
+    closeMenu();
+
+    new WebviewWindow("communityExtensionsDialog", {
+        width: 800,
+        height: 800,
+        transparent: true,
+        center: true,
+        url: "community-extensions-dialog",
+        title: "Community Extensions"
     })
 }
 
@@ -270,8 +287,10 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
                     <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
                         @click="importExtension()">Import
                         Extension</button>
-                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80" @click="">Community
-                        Extensions</button>
+                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                        @click="openCommunityExtensionsDialog()">
+                        Community Extensions
+                    </button>
                 </div>
             </div>
         </div>
@@ -346,7 +365,7 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
 }
 
 .input:focus {
-    outline: 2px solid v-bind(accentColor);
+    outline-color: 1px solid v-bind(accentColor);
 }
 
 .input {
@@ -379,7 +398,7 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
 .deleteButton:focus {
     opacity: 0.8;
     border-radius: 14px;
-    
+
 }
 
 .deleteIcon {

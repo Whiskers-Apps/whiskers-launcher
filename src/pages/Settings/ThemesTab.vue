@@ -4,7 +4,7 @@ import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
 import { open, save } from '@tauri-apps/api/dialog';
 import { invoke } from '@tauri-apps/api';
 import { getSettings, getTheme } from './Settings';
-import { emit } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 import PrimaryButton from '../../components/PrimaryButton.vue';
 import { WebviewWindow } from '@tauri-apps/api/window';
 
@@ -37,9 +37,14 @@ const currentTextColor = ref("");
 const secondaryTextColor = ref("");
 const currentSecondaryTextColor = ref("");
 
+const updateThemeEmit = ref();
 
 onMounted(() => {
     loadTheme();
+
+    updateThemeEmit.value = listen("updateTheme", (_event) => {
+        loadTheme();
+    });
 })
 
 async function loadTheme() {
@@ -69,8 +74,8 @@ async function loadTheme() {
     textColor.value = theme.text;
     currentTextColor.value = theme.text;
 
-    secondaryTextColor.value = theme.seconday_text;
-    currentSecondaryTextColor.value = theme.seconday_text;
+    secondaryTextColor.value = theme.secondary_text;
+    currentSecondaryTextColor.value = theme.secondary_text;
 }
 
 async function saveTheme() {
@@ -85,7 +90,7 @@ async function saveTheme() {
     settings.theme.danger = currentDangerColor.value;
     settings.theme.on_danger = currentOnDangerColor.value;
     settings.theme.text = currentTextColor.value;
-    settings.theme.seconday_text = currentSecondaryTextColor.value;
+    settings.theme.secondary_text = currentSecondaryTextColor.value;
 
     invoke("update_settings", { settings_json: JSON.stringify(settings) });
     emit("updateTheme");
@@ -163,6 +168,9 @@ function isSaveButtonDisabled() {
 }
 
 function openCommunityThemesDialog() {
+
+    closeMenu();
+
     new WebviewWindow("communityThemesDialog", {
         width: 800,
         height: 800,

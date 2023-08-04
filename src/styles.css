@@ -2,21 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-input[type="range"] {
-  -webkit-appearance: none;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-  width: 15rem;
-}
-
-input[type="range"]:focus {
-  outline: none;
-}
-
 
 .oneLineText {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }

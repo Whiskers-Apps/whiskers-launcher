@@ -65,7 +65,7 @@ export interface Theme {
   danger: string;
   on_danger: string;
   text: string;
-  seconday_text: string;
+  secondary_text: string;
 }
 
 export interface SearchEngine {

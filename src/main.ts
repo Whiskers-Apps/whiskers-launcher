@@ -1,15 +1,16 @@
 import { createApp } from "vue";
 import "./styles.css";
+import { createRouter, createWebHistory } from "vue-router"
 import Root from "./Root.vue"
 import Search from "@pages/Search/Search.vue"
 import Settings from "@pages/Settings/Settings.vue"
 import EditSearchEngineDialog from "@dialogs/EditSearchEngineDialog.vue";
-import { createRouter, createWebHistory } from "vue-router"
 import DeleteSearchEngineDialog from "@dialogs/DeleteSearchEngineDialog.vue";
 import AddSearchEngineDialog from "@dialogs/AddSearchEngineDialog.vue";
 import ImportExtensionDialog from "@dialogs/ImportExtensionDialog.vue"
 import DeleteExtensionDialog from "@dialogs/DeleteExtensionDialog.vue"
 import CommunityThemesDialog from "@dialogs/CommunityThemesDialog.vue"
+import CommunityExtensionsDialog from "@dialogs/CommunityExtensionsDialog.vue"
 
 const routes = [
     { path: "/", name: "search", component: Search },
@@ -20,6 +21,7 @@ const routes = [
     { path: "/import-extension-dialog", name: "import-extension-dialog", component: ImportExtensionDialog },
     { path: "/delete-extension-dialog", name: "delete-extension-dialog", component: DeleteExtensionDialog },
     { path: "/community-themes-dialog", name: "community-themes-dialog", component: CommunityThemesDialog },
+    { path: "/community-extensions-dialog", name: "community-extensions-dialog", component: CommunityExtensionsDialog },
 ]
 
 const router = createRouter({

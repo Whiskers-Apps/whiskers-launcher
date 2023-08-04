@@ -3,8 +3,9 @@ import { onMounted, ref } from 'vue';
 import { ExtensionSettings, getSettings, getTheme } from './Settings';
 import { listen } from '@tauri-apps/api/event';
 import { open as openLink } from "@tauri-apps/api/shell";
-import lighttigerxivPFP from "../../assets/images/lighttigerxiv.jpg";
-import GitHubSVG from "../../assets/icons/github.svg";
+import lighttigerxivPFP from "@images/lighttigerxiv.jpeg";
+import GitHubSVG from "@icons/github.svg";
+import DiscordSVG from "@icons/discord.svg"
 
 const secondaryBackgroundColor = ref("");
 const tertiaryBackgroundColor = ref("");
@@ -59,10 +60,13 @@ async function loadTheme() {
         </div>
         <div class="mt-4 ml-3 text-xl">Developers</div>
         <div class="card flex items-center">
-            <img :src="lighttigerxivPFP" class="h-[40px] w-[40px] rounded-full">
+            <img :src="lighttigerxivPFP" class="h-[50px] w-[50px] rounded-full">
             <div class="ml-4 flex-grow">lighttigerXIV</div>
-            <button @click="openLink('https://github.com/lighttigerXIV')">
-                <GitHubSVG class="h-[40px] w-[40px] fillIcon" />
+            <button @click="openLink('https://discord.com/users/598945126089228327')">
+                <DiscordSVG class="h-[35px] w-[35px] fillIcon"/>
+            </button>
+            <button @click="openLink('https://github.com/lighttigerXIV')" class="ml-4">
+                <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
             </button>
         </div>
     </div>

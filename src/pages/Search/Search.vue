@@ -6,8 +6,7 @@ import { onMounted, ref, watch } from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
 import { getSettings, getRoundnessInPixels, getTheme } from "../../pages/Settings/Settings";
-import { listen } from "@tauri-apps/api/event"
-import { SimpleKlResult, TextResult } from "../../data"
+import { SimpleKlResult } from "../../data"
 import { hexToCSSFilter } from "hex-to-css-filter"
 
 const showSearchIcon = ref();
@@ -75,7 +74,7 @@ onMounted(async () => {
   secondaryBackgroundColor.value = theme.secondary_background;
   accentColor.value = theme.accent;
   textColor.value = theme.text;
-  secondaryTextColor.value = theme.seconday_text;
+  secondaryTextColor.value = theme.secondary_text;
 
   searchRef.value.focus();
 })

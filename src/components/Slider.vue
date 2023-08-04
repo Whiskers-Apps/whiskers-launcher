@@ -58,6 +58,19 @@ async function loadTheme() {
 </template>
 
 <style scoped>
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 15rem;
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
 input[type="range"] {
     margin: auto;
     -webkit-appearance: none;

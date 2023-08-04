@@ -47,7 +47,7 @@ async function loadTheme() {
     dangerColor.value = theme.danger;
     onDangerColor.value = theme.on_danger;
     textColor.value = theme.text;
-    secondaryTextColor.value = theme.seconday_text;
+    secondaryTextColor.value = theme.secondary_text;
 }
 
 

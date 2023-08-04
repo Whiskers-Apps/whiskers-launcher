@@ -1,16 +1,17 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use extensions::CommunityExtension;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use git2::Repository;
-use serde_json::Error;
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
-    extensions::{get_extensions, ExtensionManifest, Parameters},
+    extensions::{get_extensions, ExtensionManifest, Parameters, init_extensions},
     paths::{
-        get_apps_index_path, get_community_themes_file_path, get_community_themes_path,
-        get_extension_parameters_path, get_extension_path, get_extension_results_path,
-        get_extensions_path, get_resources_path,
+        get_apps_index_path, get_community_extensions_file_path, get_community_extensions_path,
+        get_community_themes_file_path, get_community_themes_path, get_extension_parameters_path,
+        get_extension_path, get_extension_results_path, get_extensions_path, get_resources_path,
+        get_temp_themes_path,
     },
     results::{IconWithTextResult, SimpleKLResult},
     settings::{Settings, Theme},
@@ -26,7 +27,7 @@ use std::{
     process::Command,
 };
 
-use tauri::{Manager, PhysicalPosition, PhysicalSize, RunEvent, WindowEvent};
+use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, WindowEvent};
 pub mod extensions;
 pub mod structs;
 pub mod themes;
@@ -61,7 +62,7 @@ fn get_results(search_text: String) -> Result<String, String> {
 
     for search_engine in search_engines {
         if search_engine.keyword == keyword {
-            let url = search_engine.query.replace("%s", &search_text);
+            let url = search_engine.query.replace("%s", &search_words);
             let mut results: Vec<SimpleKLResult> = Vec::new();
 
             results.push(SimpleKLResult::IconWithText(
@@ -95,7 +96,7 @@ fn get_results(search_text: String) -> Result<String, String> {
         false => {
             for search_engine in Settings::current_settings().search_engines {
                 if search_engine.default {
-                    let url = search_engine.query.replace("%s", &search_text);
+                    let url = search_engine.query.replace("%s", &search_words);
                     let mut results: Vec<SimpleKLResult> = Vec::new();
 
                     results.push(SimpleKLResult::IconWithText(
@@ -106,7 +107,7 @@ fn get_results(search_text: String) -> Result<String, String> {
                                     get_resources_path()
                                 )),
                                 "accent".to_string(),
-                                format!("Search for {}", search_text),
+                                format!("Search for {}", search_words),
                                 ResultAction::OpenInBrowser(OpenInBrowser { url }),
                             ),
                             false => IconWithTextResult::new(
@@ -114,7 +115,7 @@ fn get_results(search_text: String) -> Result<String, String> {
                                     "{}/images/search.svg",
                                     get_resources_path()
                                 )),
-                                format!("Search for {}", search_text),
+                                format!("Search for {}", search_words),
                                 ResultAction::OpenInBrowser(OpenInBrowser { url }),
                             ),
                         },
@@ -432,7 +433,7 @@ async fn delete_extension(id: String) {
                         fs::remove_dir_all(&folder_path).expect("Error deleting extension folder");
                     }
 
-                    simple_kl_rs::extensions::init_extensions();
+                    init_extensions();
 
                     manifest_file.flush().unwrap();
                 }
@@ -478,24 +479,22 @@ fn get_extension_default_setting(setting_id: String, extension_id: String) -> Re
     return Err(());
 }
 
-/// Gets community themes. It will clean the folder to always update 
+/// Gets community themes. It will clean the folder to always update
 #[tauri::command()]
 async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
-
     let themes_path = get_community_themes_path();
 
-    if Path::new(&themes_path).exists(){
+    if Path::new(&themes_path).exists() {
         fs::remove_dir_all(&themes_path).expect("Error deleting themes directory");
     }
 
     fs::create_dir_all(&themes_path).expect("Error creating themes directory");
-    
+
     Repository::clone(
         "https://github.com/lighttigerXIV/simple-kl-themes-hub",
         &themes_path,
     )
     .expect("Error cloning themes repo");
-
 
     let mut themes_file =
         File::open(get_community_themes_file_path()).expect("Error opening themes file");
@@ -512,6 +511,88 @@ async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
         Ok(themes) => Ok(themes),
         Err(_) => Err(()),
     };
+}
+
+#[tauri::command()]
+async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
+    if Path::new(&get_temp_themes_path()).exists() {
+        fs::remove_dir_all(&get_temp_themes_path()).expect("Error deleting temp themes directory");
+    }
+
+    fs::create_dir(&get_temp_themes_path()).expect("Error creating themes directory");
+
+    Repository::clone(&repo, &get_temp_themes_path()).expect("Error cloning theme repo");
+
+    let theme_file_path = format!("{}/{}", get_temp_themes_path(), file);
+    let mut theme_file_content = "".to_string();
+
+    let mut theme_file = File::open(&theme_file_path).expect("Error opening theme file");
+    theme_file
+        .read_to_string(&mut theme_file_content)
+        .expect("Error reading theme content");
+
+    let theme: Theme =
+        serde_json::from_str(&theme_file_content).expect("Error getting theme from file");
+
+    let mut settings = Settings::current_settings();
+    settings.theme.background = theme.background;
+    settings.theme.secondary_background = theme.secondary_background;
+    settings.theme.tertiary_background = theme.tertiary_background;
+    settings.theme.accent = theme.accent;
+    settings.theme.on_accent = theme.on_accent;
+    settings.theme.danger = theme.danger;
+    settings.theme.on_danger = theme.on_danger;
+    settings.theme.text = theme.text;
+    settings.theme.secondary_text = theme.secondary_text;
+
+    let settings_json = serde_json::to_string(&settings).expect("Error converting theme to json");
+    Settings::update(settings_json).expect("Error updating settings");
+
+    app.emit_all("updateTheme", ()).expect("Error running emit");
+}
+
+#[tauri::command()]
+async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
+    let extensions_path = get_community_extensions_path();
+
+    if Path::new(&extensions_path).exists() {
+        fs::remove_dir_all(&extensions_path).expect("Error deleting extensions directory");
+    }
+
+    fs::create_dir_all(&extensions_path).expect("Error creating extensions directory");
+
+    Repository::clone(
+        "https://github.com/lighttigerXIV/simple-kl-extensions-hub",
+        &extensions_path,
+    )
+    .expect("Error cloning extensions repo");
+
+    let mut extensions_file =
+        File::open(get_community_extensions_file_path()).expect("Error opening extensions file");
+
+    let mut extensions_file_content = "".to_string();
+
+    extensions_file
+        .read_to_string(&mut extensions_file_content)
+        .expect("Error reading extensions file");
+
+    let extensions = serde_json::from_str(&extensions_file_content);
+
+    return match extensions {
+        Ok(extensions) => Ok(extensions),
+        Err(_) => Err(()),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+async fn install_community_extension(id: String, repo: String, app: AppHandle) {
+    let path = format!("{}/{}", get_extensions_path(), id);
+
+    Repository::clone(&repo, &path).expect("Error cloning repo");
+
+    init_extensions();
+
+    app.emit_all("updateExtensions", ()).expect("Error emiting");
 }
 
 fn main() {
@@ -536,7 +617,10 @@ fn main() {
             delete_extension,
             get_extension_default_keyword,
             get_extension_default_setting,
-            get_community_themes
+            get_community_themes,
+            apply_community_theme,
+            get_community_extensions,
+            install_community_extension
         ])
         .setup(|app| {
             let main_window = app.get_window("main").unwrap();
@@ -568,6 +652,7 @@ fn main() {
         .expect("")
         .run(|app, e| match e {
             RunEvent::WindowEvent { label, event, .. } => {
+
                 if label == "main" {
                     match event {
                         WindowEvent::Focused(focused) => {
