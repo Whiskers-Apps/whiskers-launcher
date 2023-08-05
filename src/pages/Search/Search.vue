@@ -88,6 +88,9 @@ document.addEventListener('keydown', function (event) {
     if (selectedIndex.value < results.value.length - 1) {
       selectedIndex.value = selectedIndex.value + 1;
       (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+    }else if(selectedIndex.value == results.value.length -1 ){
+       selectedIndex.value = 0;
+      (resultsRef.value[0] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -97,6 +100,9 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value > 0) {
       selectedIndex.value = selectedIndex.value - 1;
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+    } else if (selectedIndex.value == 0) {
+      selectedIndex.value = results.value.length - 1;
       (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
