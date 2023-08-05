@@ -655,6 +655,16 @@ fn main() {
             Ok(())
         })
         .plugin(tauri_plugin_positioner::init())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd|{
+
+            #[derive(Clone, serde::Serialize)]
+            struct PluginPayload {
+                args: Vec<String>,
+                cwd: String,
+            }
+
+            app.emit_all("single-instance", PluginPayload{args: argv, cwd}).unwrap();
+        }))
         .build(tauri::generate_context!())
         .expect("")
         .run(|app, e| match e {

@@ -25,6 +25,7 @@ fuzzy-matcher = "0.3.7"
 open = "5.0.0"
 rand = "0.8.5"
 git2 = "0.17.2"
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem
