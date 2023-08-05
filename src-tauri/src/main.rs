@@ -6,7 +6,7 @@ use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use git2::Repository;
 use simple_kl_rs::{
     actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
-    extensions::{get_extensions, ExtensionManifest, Parameters, init_extensions},
+    extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters},
     paths::{
         get_apps_index_path, get_community_extensions_file_path, get_community_extensions_path,
         get_community_themes_file_path, get_community_themes_path, get_extension_parameters_path,
@@ -96,7 +96,7 @@ fn get_results(search_text: String) -> Result<String, String> {
         false => {
             for search_engine in Settings::current_settings().search_engines {
                 if search_engine.default {
-                    let url = search_engine.query.replace("%s", &search_words);
+                    let url = search_engine.query.replace("%s", &search_text);
                     let mut results: Vec<SimpleKLResult> = Vec::new();
 
                     results.push(SimpleKLResult::IconWithText(
@@ -107,7 +107,7 @@ fn get_results(search_text: String) -> Result<String, String> {
                                     get_resources_path()
                                 )),
                                 "accent".to_string(),
-                                format!("Search for {}", search_words),
+                                format!("Search for {}", search_text),
                                 ResultAction::OpenInBrowser(OpenInBrowser { url }),
                             ),
                             false => IconWithTextResult::new(
@@ -115,7 +115,7 @@ fn get_results(search_text: String) -> Result<String, String> {
                                     "{}/images/search.svg",
                                     get_resources_path()
                                 )),
-                                format!("Search for {}", search_words),
+                                format!("Search for {}", search_text),
                                 ResultAction::OpenInBrowser(OpenInBrowser { url }),
                             ),
                         },
@@ -250,17 +250,24 @@ async fn run_action(
         "OpenApp" => {
             window.hide().unwrap();
 
-            let action: OpenApp = serde_json::from_str(&action_json).unwrap();
-            let command = Command::new("gio")
-                .arg("launch")
-                .arg(action.desktop_path)
-                .output()
-                .expect("Error opening app");
+            let action: OpenApp =
+                serde_json::from_str(&action_json).expect("Error getting action from JSON");
+            
+            let desktop_file_name = Path::new(&action.desktop_path)
+                .file_name()
+                .expect("Error getting file name");
 
-            return match command.status.success() {
-                true => Ok(()),
-                false => Err("".into()),
-            };
+            let desktop_file_dir = Path::new(&action.desktop_path)
+                .parent()
+                .expect("Error reading parent directory");
+
+            Command::new("gtk-launch")
+                .arg(desktop_file_name)
+                .current_dir(desktop_file_dir)
+                .spawn()
+                .expect("Error launching app");
+
+            return Ok(());
         }
         "OpenInBrowser" => {
             let action: OpenInBrowser = serde_json::from_str(&action_json).unwrap();
@@ -652,7 +659,6 @@ fn main() {
         .expect("")
         .run(|app, e| match e {
             RunEvent::WindowEvent { label, event, .. } => {
-
                 if label == "main" {
                     match event {
                         WindowEvent::Focused(focused) => {
