@@ -252,20 +252,24 @@ async fn run_action(
 
             let action: OpenApp =
                 serde_json::from_str(&action_json).expect("Error getting action from JSON");
-            
-            let desktop_file_name = Path::new(&action.desktop_path)
-                .file_name()
-                .expect("Error getting file name");
 
             let desktop_file_dir = Path::new(&action.desktop_path)
                 .parent()
-                .expect("Error reading parent directory");
+                .expect("Error reading parent directory")
+                .to_owned();
 
-            Command::new("gtk-launch")
-                .arg(desktop_file_name)
-                .current_dir(desktop_file_dir)
-                .spawn()
-                .expect("Error launching app");
+            let desktop_file_name = Path::new(&action.desktop_path)
+                .file_name()
+                .expect("")
+                .to_owned();
+
+            tokio::spawn(async move {
+                Command::new("gtk-launch")
+                    .arg(desktop_file_name)
+                    .current_dir(desktop_file_dir)
+                    .spawn()
+                    .expect("");
+            });
 
             return Ok(());
         }
@@ -486,7 +490,6 @@ fn get_extension_default_setting(setting_id: String, extension_id: String) -> Re
     return Err(());
 }
 
-/// Gets community themes. It will clean the folder to always update
 #[tauri::command()]
 async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
     let themes_path = get_community_themes_path();
@@ -602,7 +605,8 @@ async fn install_community_extension(id: String, repo: String, app: AppHandle) {
     app.emit_all("updateExtensions", ()).expect("Error emiting");
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             get_results,
@@ -630,6 +634,24 @@ fn main() {
             install_community_extension
         ])
         .setup(|app| {
+            let arguments: Vec<String> = env::args().collect();
+            let open_settings = arguments.iter().any(|e| e == "--settings");
+
+            if open_settings {
+                tauri::WindowBuilder::new(
+                    app,
+                    "settings",
+                    tauri::WindowUrl::App("settings".into()),
+                )
+                .build()
+                .expect("Error creating settings window");
+
+                let main_window = app.get_window("main").unwrap();
+                main_window.close().expect("Error closing search window");
+
+                return Ok(());
+            }
+
             let main_window = app.get_window("main").unwrap();
             let screen = main_window.current_monitor().unwrap().unwrap();
             let screen_position = screen.position();
@@ -655,16 +677,17 @@ fn main() {
             Ok(())
         })
         .plugin(tauri_plugin_positioner::init())
-        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd|{
-
+        /*
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             #[derive(Clone, serde::Serialize)]
             struct PluginPayload {
                 args: Vec<String>,
                 cwd: String,
             }
-
-            app.emit_all("single-instance", PluginPayload{args: argv, cwd}).unwrap();
+            app.emit_all("single-instance", PluginPayload { args: argv, cwd })
+                .unwrap();
         }))
+        */
         .build(tauri::generate_context!())
         .expect("")
         .run(|app, e| match e {
