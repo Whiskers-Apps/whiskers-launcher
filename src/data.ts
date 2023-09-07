@@ -1,64 +1,84 @@
 import { invoke } from "@tauri-apps/api"
 
 export interface SimpleKlResult {
-    Text?: TextResult,
-    IconWithText?: IconWithTextResult,
-    TitleAndDescription?: TitleAndDescriptionResult,
-    IconWithTitleAndDescription?: IconWithTitleAndDescriptionResult
-}
-
-export interface TextResult {
-    text: string,
-    action: ResultAction
-}
-
-export interface IconWithTextResult {
-    icon: string,
+    icon?: string,
     icon_color?: string,
-    text: string,
-    action: ResultAction
+    title?: string,
+    text?: string,
+    description?: string,
+    action?: OpenAppAction | OpenInBrowserAction | CopyToClipboardAction | ExtensionAction | DialogAction | DoNothingAction
 }
 
-export interface TitleAndDescriptionResult {
-    title: string,
-    description: string,
-    action: ResultAction
-}
-
-export interface IconWithTitleAndDescriptionResult {
-    icon: string,
-    icon_color: string,
-    title: string,
-    description: string,
-    action: ResultAction
-}
 
 export interface ResultAction {
     OpenApp?: OpenAppAction,
     OpenInBrowser?: OpenInBrowserAction,
     CopyToClipboard?: CopyToClipboardAction,
     ExtensionAction?: ExtensionAction,
+    DialogAction?: DialogAction,
     DoNothingAction?: DoNothingAction
 }
 
 export interface OpenAppAction {
+    type: string,
     desktop_path: string,
 }
 
 export interface OpenInBrowserAction {
+    type: string,
     url: string,
 }
 
 export interface CopyToClipboardAction {
+    type: string,
     text: string,
 }
 
 export interface ExtensionAction {
+    type: string,
     action: string,
     args?: string[]
 }
 
-export interface DoNothingAction { }
+export interface DialogAction {
+    extension_id: string,
+    title: string,
+    type: string,
+    action: string,
+    button_text: string,
+    fields: DialogField[]
+}
+
+export interface DialogField {
+    type: string,
+    id: string,
+    value: string | boolean,
+    default_value: string,
+    title?: string,
+    description?: string,
+    placeholder?: string,
+    options?: SelectOption[]
+}
+
+export interface DialogResult{
+    extension_id: string,
+    action: string,
+    results: DialogFieldResult[]
+}
+
+export interface DialogFieldResult{
+    field_id: string,
+    value: string
+}
+
+export interface SelectOption {
+    id: string,
+    value: string
+}
+
+export interface DoNothingAction {
+    type: string,
+}
 
 export interface ExtensionManifest {
     id: string,
@@ -71,9 +91,9 @@ export interface ExtensionManifest {
 }
 
 export interface ExtensionSettings {
-    any: ExtensionSetting[],
-    linux: ExtensionSetting[],
-    windows: ExtensionSetting[],
+    any?: ExtensionSetting[],
+    linux?: ExtensionSetting[],
+    windows?: ExtensionSetting[],
 }
 
 export interface ExtensionSetting {

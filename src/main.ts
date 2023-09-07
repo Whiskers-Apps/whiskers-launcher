@@ -11,6 +11,7 @@ import ImportExtensionDialog from "@dialogs/ImportExtensionDialog.vue"
 import DeleteExtensionDialog from "@dialogs/DeleteExtensionDialog.vue"
 import CommunityThemesDialog from "@dialogs/CommunityThemesDialog.vue"
 import CommunityExtensionsDialog from "@dialogs/CommunityExtensionsDialog.vue"
+import ExtensionDialog from "@dialogs/ExtensionDialog.vue"
 
 const routes = [
     { path: "/", name: "search", component: Search },
@@ -22,6 +23,7 @@ const routes = [
     { path: "/delete-extension-dialog", name: "delete-extension-dialog", component: DeleteExtensionDialog },
     { path: "/community-themes-dialog", name: "community-themes-dialog", component: CommunityThemesDialog },
     { path: "/community-extensions-dialog", name: "community-extensions-dialog", component: CommunityExtensionsDialog },
+    { path: "/extension-dialog", name: "extension-dialog", component: ExtensionDialog }
 ]
 
 const router = createRouter({

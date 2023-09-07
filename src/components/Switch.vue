@@ -9,6 +9,10 @@ defineProps({
   checked: {
     required: true,
     type: Boolean
+  },
+  id:{
+    type: String,
+    default: null
   }
 })
 
@@ -40,7 +44,7 @@ async function loadTheme() {
 </script>
 <template>
   <label class="switch ml-2">
-    <input type="checkbox" :checked="checked"
+    <input :id="id" type="checkbox" :checked="checked"
       @input="emit('update:checked', ($event.target as HTMLInputElement).checked)">
     <span class="slider round"></span>
   </label>

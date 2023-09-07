@@ -42,7 +42,7 @@ async function loadTheme() {
         <div class="card flex mt-2">
             <b>Version:</b>
             <div class="flex-grow"></div>
-            <div class="ml-4 oneLineText">Alpha-0.0.1</div>
+            <div class="ml-4 oneLineText">0.0.1-alpha</div>
         </div>
 
         <div class="card flex mt-1">

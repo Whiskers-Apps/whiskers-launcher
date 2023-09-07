@@ -2,7 +2,7 @@ import { invoke } from "@tauri-apps/api"
 import { emit } from "@tauri-apps/api/event"
 
 
-export const SettingsCategory = {
+export const SettingsTabs = {
   GENERAL: "general",
   SEARCH_BOX: "search_box",
   THEME: "theme",
@@ -22,13 +22,13 @@ export interface Settings {
 export interface ExtensionSettings {
   id: string,
   keyword: string,
-  settings: ExtensionSetting
+  settings?: ExtensionSetting
 }
 
 export interface ExtensionSetting {
-  any: ExtensionOptionSetting[],
-  linux: ExtensionOptionSetting[],
-  windows: ExtensionOptionSetting[]
+  any?: ExtensionOptionSetting[],
+  linux?: ExtensionOptionSetting[],
+  windows?: ExtensionOptionSetting[]
 }
 
 export interface ExtensionOptionSetting {
@@ -82,11 +82,13 @@ export interface SearchEngine {
 export async function getSettings(): Promise<Settings> {
 
   let settings: Settings = JSON.parse(await invoke("get_current_settings"));
+
   return settings
 }
 
 export async function getTheme(): Promise<Theme> {
   let settings = await getSettings();
+
   return settings.theme;
 }
 

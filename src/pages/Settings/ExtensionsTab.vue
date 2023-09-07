@@ -64,7 +64,7 @@ export interface TabExtensionManifest {
     os: string,
     keyword: string,
     current_keyword: string,
-    settings: ExtensionSettings,
+    settings?: ExtensionSettings,
     current_settings: SettingsExtensionsSettings[]
 }
 
@@ -78,7 +78,7 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
     let showSetting = false
 
     tabExtensions.value?.forEach(extension => {
-        extension.settings.any.forEach(setting => {
+        extension.settings?.any?.forEach(setting => {
             if (setting.id == settingID) {
                 if (setting.show_condition === null) {
                     showSetting = true
@@ -93,7 +93,7 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
             }
         });
 
-        extension.settings.linux.forEach(setting => {
+        extension.settings?.linux?.forEach(setting => {
             if (setting.id == settingID) {
                 if (setting.show_condition === null) {
                     showSetting = true
@@ -108,7 +108,7 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
             }
         });
 
-        extension.settings.windows.forEach(setting => {
+        extension.settings?.windows?.forEach(setting => {
             if (setting.id == settingID) {
                 if (setting.show_condition === null) {
                     showSetting = true
@@ -133,17 +133,17 @@ function getSettingValue(extensionID: string, settingID: string): String {
 
     settings.value?.extensions.forEach((extension) => {
         if (extension.id == extensionID) {
-            extension.settings.any.forEach((setting) => {
+            extension.settings?.any?.forEach((setting) => {
                 if (setting.id == settingID) {
                     settingValue = setting.current_value;
                 }
             })
-            extension.settings.linux.forEach((setting) => {
+            extension.settings?.linux?.forEach((setting) => {
                 if (setting.id == settingID) {
                     settingValue = setting.current_value;
                 }
             })
-            extension.settings.windows.forEach((setting) => {
+            extension.settings?.windows?.forEach((setting) => {
                 if (setting.id == settingID) {
                     settingValue = setting.current_value;
                 }
@@ -178,6 +178,7 @@ async function getExtensions() {
     let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json") ?? []);
     let newTabExtensions: TabExtensionManifest[] = [];
 
+    
 
     extensions.forEach(extension => {
 
@@ -318,7 +319,7 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
             </div>
 
             <div v-if="os === 'linux'">
-                <div class="mt-2" v-for="setting in extension.settings.linux">
+                <div class="mt-2" v-for="setting in extension.settings?.linux">
                     <div v-if="canShowSetting(extension.id, setting.id)">
                         <div class="ml-3">{{ setting.name }}</div>
 

@@ -5,9 +5,10 @@ import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { onMounted, ref, watch } from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
-import { getSettings, getRoundnessInPixels, getTheme } from "../../pages/Settings/Settings";
-import { SimpleKlResult } from "../../data"
+import { getSettings, getRoundnessInPixels, getTheme } from "@pages/Settings/Settings";
+import { SimpleKlResult, OpenAppAction } from "@/data"
 import { hexToCSSFilter } from "hex-to-css-filter"
+import { isCopyToClipboardAction, isDoNothingAction, isExtensionAction, isOpenAppAction, isOpenInBrowserAction, isIconWithTitleAndDescriptionResult, isTitleAndDescriptionResult, isIconWithTextResult, isTextResult } from "@pages/Search/SearchVM"
 
 const showSearchIcon = ref();
 const showSettingsIcon = ref();
@@ -49,8 +50,6 @@ function getCSSFilterFromHexColor(hexColor?: string): string {
 
     let filter = hexToCSSFilter(color);
 
-    console.log(filter)
-
     return filter.filter.replace(";", "")
   }
 
@@ -59,6 +58,8 @@ function getCSSFilterFromHexColor(hexColor?: string): string {
 
 
 onMounted(async () => {
+
+  searchRef.value.focus();
 
   let settings = await getSettings();
 
@@ -76,7 +77,6 @@ onMounted(async () => {
   textColor.value = theme.text;
   secondaryTextColor.value = theme.secondary_text;
 
-  searchRef.value.focus();
 })
 
 document.addEventListener('keydown', function (event) {
@@ -88,8 +88,8 @@ document.addEventListener('keydown', function (event) {
     if (selectedIndex.value < results.value.length - 1) {
       selectedIndex.value = selectedIndex.value + 1;
       (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
-    }else if(selectedIndex.value == results.value.length -1 ){
-       selectedIndex.value = 0;
+    } else if (selectedIndex.value == results.value.length - 1) {
+      selectedIndex.value = 0;
       (resultsRef.value[0] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
@@ -125,129 +125,20 @@ document.addEventListener('keydown', function (event) {
 });
 
 async function runAction() {
+
   if (results.value.length > 0) {
 
-    var actionJson = "";
-    var actionType = "";
     var result = results.value[selectedIndex.value];
+    var type = result.action?.type;
 
-
-    if (result.Text !== undefined) {
-      let action = result.Text.action;
-
-      if (action.OpenApp !== undefined) {
-        actionJson = JSON.stringify(action.OpenApp);
-        actionType = "OpenApp"
-      }
-
-      if (action.OpenInBrowser !== undefined) {
-        actionJson = JSON.stringify(action.OpenInBrowser);
-        actionType = "OpenInBrowser"
-      }
-
-      if (action.CopyToClipboard !== undefined) {
-        actionJson = JSON.stringify(action.CopyToClipboard);
-        actionType = "CopyToClipboard"
-      }
-
-      if (action.ExtensionAction !== undefined) {
-        actionJson = JSON.stringify(action.ExtensionAction);
-        actionType = "ExtensionAction"
-      }
-
-      if (action.DoNothingAction !== undefined) {
-        actionType = "DoNothingAction"
-      }
+    if (type != null) {
+      invoke("run_action", {
+        action_type: type,
+        action_json: JSON.stringify(result.action)
+      });
     }
 
-    if (result.IconWithText !== undefined) {
-      let action = result.IconWithText.action;
-
-      if (action.OpenApp !== undefined) {
-        actionJson = JSON.stringify(action.OpenApp);
-        actionType = "OpenApp"
-      }
-
-      if (action.OpenInBrowser !== undefined) {
-        actionJson = JSON.stringify(action.OpenInBrowser);
-        actionType = "OpenInBrowser"
-      }
-
-      if (action.CopyToClipboard !== undefined) {
-        actionJson = JSON.stringify(action.CopyToClipboard);
-        actionType = "CopyToClipboard"
-      }
-
-      if (action.ExtensionAction !== undefined) {
-        actionJson = JSON.stringify(action.ExtensionAction);
-        actionType = "ExtensionAction"
-      }
-
-      if (action.DoNothingAction !== undefined) {
-        actionType = "DoNothingAction"
-      }
-    }
-
-    if (result.TitleAndDescription !== undefined) {
-      let action = result.TitleAndDescription.action;
-
-      if (action.OpenApp !== undefined) {
-        actionJson = JSON.stringify(action.OpenApp);
-        actionType = "OpenApp"
-      }
-
-      if (action.OpenInBrowser !== undefined) {
-        actionJson = JSON.stringify(action.OpenInBrowser);
-        actionType = "OpenInBrowser"
-      }
-
-      if (action.CopyToClipboard !== undefined) {
-        actionJson = JSON.stringify(action.CopyToClipboard);
-        actionType = "CopyToClipboard"
-      }
-
-      if (action.ExtensionAction !== undefined) {
-        actionJson = JSON.stringify(action.ExtensionAction);
-        actionType = "ExtensionAction"
-      }
-
-      if (action.DoNothingAction !== undefined) {
-        actionType = "DoNothingAction"
-      }
-    }
-
-    if (result.IconWithTitleAndDescription !== undefined) {
-      let action = result.IconWithTitleAndDescription.action;
-
-      if (action.OpenApp !== undefined) {
-        actionJson = JSON.stringify(action.OpenApp);
-        actionType = "OpenApp"
-      }
-
-      if (action.OpenInBrowser !== undefined) {
-        actionJson = JSON.stringify(action.OpenInBrowser);
-        actionType = "OpenInBrowser"
-      }
-
-      if (action.CopyToClipboard !== undefined) {
-        actionJson = JSON.stringify(action.CopyToClipboard);
-        actionType = "CopyToClipboard"
-      }
-
-      if (action.ExtensionAction !== undefined) {
-        actionJson = JSON.stringify(action.ExtensionAction);
-        actionType = "ExtensionAction"
-      }
-
-      if (action.DoNothingAction !== undefined) {
-        actionType = "DoNothingAction"
-      }
-    }
-
-    if (actionType !== "DoNothingAction") {
-      invoke("run_action", { action_json: actionJson, action_type: actionType })
-      appWindow.close()
-    }
+    //appWindow.close();
   }
 }
 
@@ -261,6 +152,7 @@ watch(searchText, async (_newText, _oldText) => {
   } else {
 
     results.value = JSON.parse(await invoke("get_results", { search_text: searchText.value }));
+
     var newHeight = 70;
 
     if (results.value.length > resultsLimit.value) {
@@ -275,9 +167,6 @@ watch(searchText, async (_newText, _oldText) => {
 
   selectedIndex.value = 0;
 })
-
-
-
 
 </script>
 
@@ -301,35 +190,33 @@ watch(searchText, async (_newText, _oldText) => {
           <div :ref="`result-${index}`" class="h-[70px] p-2 flex overflow-hidden"
             :class="index === selectedIndex ? 'selectedResult' : ''">
 
-            <div v-if="result.Text !== undefined" class="flex items-center">
-              <div>{{ result.Text.text }}</div>
+            <div v-if="isTextResult(result)" class="flex items-center">
+              <div>{{ result.text }}</div>
             </div>
 
-            <div v-if="result.IconWithText !== undefined" class="flex items-center">
-              <img :src="convertFileSrc(result.IconWithText.icon)" class="h-[35px] w-[35px] object-contain icon"
-                :style="{ filter: getCSSFilterFromHexColor(result.IconWithText!!.icon_color) }">
-              <div class="text-lg ml-2 flex-grow">{{ result.IconWithText.text }}</div>
+            <div v-if="isIconWithTextResult(result)" class="flex items-center">
+              <img :src="convertFileSrc(result.icon!!)" class="h-[35px] w-[35px] object-contain icon"
+                :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+              <div class="text-lg ml-2 flex-grow">{{ result.text }}</div>
             </div>
 
-            <div v-if="result.TitleAndDescription !== undefined" class="flex flex-col justify-center p-2">
-              <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{ result.TitleAndDescription!!.title }}
+            <div v-if="isTitleAndDescriptionResult(result)" class="flex flex-col justify-center p-2">
+              <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{ result.title }}
               </div>
-              <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{ result.TitleAndDescription!!.description
+              <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{ result.description
               }}</div>
             </div>
 
-            <div v-if="result.IconWithTitleAndDescription !== undefined" class="flex items-center">
-              <img :src="convertFileSrc(result.IconWithTitleAndDescription.icon)"
-                class="h-[35px] w-[35px] object-contain icon"
-                :style="{ filter: getCSSFilterFromHexColor(result.IconWithTitleAndDescription!!.icon_color) }">
+            <div v-if="isIconWithTitleAndDescriptionResult(result)" class="flex items-center">
+              <img :src="convertFileSrc(result.icon!!)" class="h-[35px] w-[35px] object-contain icon"
+                :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="flex-grow flex flex-col ml-2">
-                <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{
-                  result.IconWithTitleAndDescription!!.title
-                }}
+                <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">
+                  {{ result.title }}
                 </div>
-                <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{
-                  result.IconWithTitleAndDescription!!.description
-                }}</div>
+                <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">
+                  {{ result.description }}
+                </div>
               </div>
             </div>
           </div>
