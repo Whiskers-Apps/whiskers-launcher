@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { getTheme } from '../Settings/Settings';
 import { listen } from '@tauri-apps/api/event';
-import { DialogField, DialogResult, DialogFieldResult, DialogAction } from '@/data';
+import { DialogResult, DialogFieldResult, DialogAction, CheckOption, SelectOption } from '@/data';
 import { invoke } from '@tauri-apps/api';
 import ChevronDown from "@icons/chevron-down.svg"
 import PrimaryButton from '@/components/PrimaryButton.vue';
@@ -26,6 +26,8 @@ onMounted(async () => {
     });
 
     dialogAction.value = await invoke("get_dialog_action");
+
+    console.log(dialogAction.value)
 });
 
 
@@ -73,6 +75,30 @@ function finish() {
                 value: String((document.getElementById(field.id) as HTMLInputElement).checked)
             })
         }
+
+        if (field.type === "CheckGroup") {
+
+            interface OptionValue {
+                id: string,
+                checked: boolean
+            }
+
+            var value: OptionValue[] = [];
+
+            field.options?.forEach((option) => {
+                let checked = (document.getElementById(`${field.id}-${option.id}`) as HTMLInputElement).checked
+                value.push({
+                    id: option.id,
+                    checked: checked
+                })
+            });
+
+
+            results.push({
+                field_id: field.id,
+                value: JSON.stringify(value)
+            });
+        }
     })
 
     let dialogResult: DialogResult = {
@@ -89,24 +115,39 @@ function finish() {
     <div class="p-4 main h-screen overflow-auto flex flex-col">
         <div class="flex-grow">
             <div v-for="field in dialogAction?.fields" class="field">
-                <div v-if="field.type === 'Toggle'" class="flex">
-                    <div class="flex-grow">
-                        <div class="font-bold ml-2">{{ field.title }}</div>
-                        <div class="ml-2">{{ field.description }}</div>
+                <div v-if="field.type === 'Toggle'">
+                    <div class="flex">
+                        <div class="flex-grow">
+                            <div class="font-bold">{{ field.title }}</div>
+                            <div>{{ field.description }}</div>
+                        </div>
+                        <div>
+                            <Switch :id="field.id" :checked="Boolean(field.value)" />
+                        </div>
                     </div>
-                    <div class=" items-center">
-                        <Switch :id="field.id" :checked="Boolean(field.value)" />
+                </div>
+                <div v-else-if="field.type === 'CheckGroup'" :id="field.id">
+                    <div class="font-bold mb-4 text-lg">{{ field.title }}</div>
+                    <div v-for="option in (field.options as CheckOption[])" class="flex mb-2">
+                        <div class="flex-grow">
+                            <div class="font-bold">{{ option.title }}</div>
+                            <div>{{ option.description }}</div>
+                        </div>
+                        <div>
+                            <Switch :id="`${field.id}-${option.id}`" :checked="Boolean(option.checked)" />
+                        </div>
                     </div>
                 </div>
                 <div v-else>
                     <div class="font-bold ml-2">{{ field.title }}</div>
                     <div class="ml-2">{{ field.description }}</div>
 
-                    <input v-if="field.type === 'Input'" :id="field.id" class="input" :placeholder="field.placeholder">
+                    <input v-if="field.type === 'Input'" :value="field.value" :id="field.id" class="input" :placeholder="field.placeholder">
 
                     <div v-if="field.type === 'Select'" class="select flex items-center">
                         <select class="select-input" :id="field.id" :value="getSelectValue(field.id)">
-                            <option v-for="option in field.options" :value="option.id">{{ option.value }}</option>
+                            <option v-for="option in (field.options as SelectOption[])" :value="option.id">{{ option.value
+                            }}</option>
                         </select>
 
                         <ChevronDown class="h-3 w-3 select-chevron" />
@@ -118,6 +159,7 @@ function finish() {
         <PrimaryButton :text="dialogAction?.button_text ?? ''" :expand="true" @click="finish()" />
     </div>
 </template>
+
 <style scoped>
 .main {
     background-color: v-bind(backgroundColor);

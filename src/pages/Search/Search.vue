@@ -138,7 +138,7 @@ async function runAction() {
       });
     }
 
-    //appWindow.close();
+    appWindow.close();
   }
 }
 

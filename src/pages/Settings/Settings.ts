@@ -2,14 +2,14 @@ import { invoke } from "@tauri-apps/api"
 import { emit } from "@tauri-apps/api/event"
 
 
-export const SettingsTabs = {
-  GENERAL: "general",
-  SEARCH_BOX: "search_box",
-  THEME: "theme",
-  SEARCH_ENGINES: "search_engines",
-  EXTENSIONS: "extensions",
-  ABOUT: "about"
-};
+export enum SettingsTab{
+  General,
+  SearchBox,
+  Theme,
+  SearchEngines,
+  Extensions,
+  About
+}
 
 export interface Settings {
   general: GeneralSettings,
@@ -76,7 +76,6 @@ export interface SearchEngine {
   query: string,
   default: boolean
 }
-
 
 
 export async function getSettings(): Promise<Settings> {

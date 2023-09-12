@@ -43,7 +43,7 @@ fn get_results(search_text: String) -> Result<String, String> {
     let split_search: Vec<&str> = search_text.split_whitespace().collect();
     let mut keyword = String::from("");
     let mut search_words = String::from("");
-    let search_engines = Settings::current_settings().unwrap().search_engines;
+    let search_engines = Settings::get_settings().search_engines;
 
     for (index, word) in split_search.iter().enumerate() {
         if index == 0 {
@@ -55,7 +55,7 @@ fn get_results(search_text: String) -> Result<String, String> {
 
     search_words = String::from(search_words.trim_end());
 
-    let settings = Settings::current_settings().unwrap();
+    let settings = Settings::get_settings();
     let extensions = settings.extensions;
 
     for extension in extensions {
@@ -83,7 +83,6 @@ fn get_results(search_text: String) -> Result<String, String> {
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
                                 .to_owned(),
-                            "accent",
                             format!("Search for {}", search_words).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -105,7 +104,7 @@ fn get_results(search_text: String) -> Result<String, String> {
     return match app_results.len() > 0 {
         true => Ok(serde_json::to_string(&app_results).unwrap()),
         false => {
-            for search_engine in Settings::current_settings().unwrap().search_engines {
+            for search_engine in Settings::get_settings().search_engines {
                 if search_engine.default {
                     let url = search_engine.query.replace("%s", &search_text);
                     let mut results: Vec<SimpleKLResult> = Vec::new();
@@ -117,7 +116,6 @@ fn get_results(search_text: String) -> Result<String, String> {
                                     search_svg_path.into_os_string().into_string().unwrap(),
                                 ))
                                     .to_path_buf(),
-                                "accent",
                                 format!("Search for {}", search_text).as_str(),
                                 ResultAction::OpenInBrowser(OpenInBrowser { url }),
                             ),
@@ -227,13 +225,17 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
 #[tauri::command]
 fn get_current_settings() -> String {
     Settings::init();
-    return serde_json::to_string(&Settings::current_settings()).unwrap();
+    return serde_json::to_string(&Settings::get_settings()).unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_settings(settings_json: String) -> Result<(), String> {
     Settings::init();
-    return Settings::update(settings_json);
+
+    let settings: Settings = serde_json::from_str(&settings_json).unwrap();
+    let settings_yaml = serde_yaml::to_string(&settings).unwrap();
+
+    return Settings::update(settings_yaml);
 }
 
 #[tauri::command()]
@@ -294,10 +296,9 @@ async fn run_action(
             Ok(())
         }
         "CopyToClipbard" => {
-
             window.close().unwrap();
             Ok(())
-        },
+        }
         "ExtensionAction" => {
             let action: ExtensionAction = serde_json::from_str(&action_json).unwrap();
 
@@ -413,7 +414,7 @@ fn add_search_engine(
     name: String,
     query: String,
 ) {
-    let mut settings = Settings::current_settings().unwrap();
+    let mut settings = Settings::get_settings();
     let icon: Option<String> = match icon_path.is_empty() {
         true => None,
         false => Some(icon_path),
@@ -437,7 +438,7 @@ fn add_search_engine(
 #[tauri::command()]
 fn export_theme(path: String) {
     let mut file = File::create(&path).expect("Error creating theme file");
-    let themes = Settings::current_settings().unwrap().theme;
+    let themes = Settings::get_settings().theme;
     let themes_json = serde_yaml::to_string(&themes).expect("Error converting theme");
 
     file.write_all(&themes_json.as_bytes())
@@ -448,7 +449,7 @@ fn export_theme(path: String) {
 fn import_theme(path: String) {
     let mut file = File::open(&path).expect("Error opening theme file");
     let mut file_content = "".to_string();
-    let mut settings = Settings::current_settings().unwrap();
+    let mut settings = Settings::get_settings();
 
     file.read_to_string(&mut file_content)
         .expect("Error reading theme file");
@@ -609,7 +610,7 @@ async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
     let theme: Theme = serde_yaml::from_str(&theme_file_content)
         .expect("Error getting theme from file");
 
-    let mut settings = Settings::current_settings().unwrap();
+    let mut settings = Settings::get_settings();
     settings.theme.background = theme.background;
     settings.theme.secondary_background = theme.secondary_background;
     settings.theme.tertiary_background = theme.tertiary_background;
@@ -708,7 +709,6 @@ fn write_dialog_result(
     window.close().expect("Error closing window");
 }
 
-
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -737,7 +737,7 @@ async fn main() {
             get_community_extensions,
             install_community_extension,
             get_dialog_action,
-            write_dialog_result
+            write_dialog_result,
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
@@ -797,7 +797,8 @@ async fn main() {
                 if label == "main" {
                     match event {
                         WindowEvent::Focused(focused) => {
-                            //Hides the window if the user clicks outside
+
+                            //Hides the window when user clicks outside
                             if !focused {
                                 let window = app.get_window("main").unwrap();
                                 window.close().unwrap();

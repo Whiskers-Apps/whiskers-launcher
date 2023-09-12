@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { getTheme } from './Settings';
-import { SettingsTabs } from './Settings';
-import SearchSVG from "../../assets/icons/search.svg"
-import HomeSVG from "../../assets/icons/home.svg"
-import BrushSVG from "../../assets/icons/brush.svg"
-import PluginSVG from "../../assets/icons/plugin.svg"
-import InfoSVG from "../../assets/icons/info.svg"
-import { listen } from '@tauri-apps/api/event';
 
+import { onMounted, PropType, ref } from 'vue';
+import { listen } from '@tauri-apps/api/event';
+import SearchSVG from "@icons/search.svg"
+import HomeSVG from "@icons/home.svg"
+import BrushSVG from "@icons/brush.svg"
+import PluginSVG from "@icons/plugin.svg"
+import InfoSVG from "@icons/info.svg"
+
+import { getTheme, SettingsTab } from '@pages/Settings/Settings';
 
 const accentColor = ref("");
 const tertiaryBackgroundColor = ref("")
@@ -19,7 +19,7 @@ const emit = defineEmits(["click"])
 defineProps({
     currentTab: {
         required: true,
-        type: String
+        type: Object as PropType<SettingsTab>
     }
 });
 
@@ -43,8 +43,8 @@ async function loadTheme() {
 
 <template>
     <div class=" max-w-fit h-screen secondaryBackground p-2 overflow-auto">
-        <div class="tab flex flex-col items-center" v-bind:class="currentTab === SettingsTabs.GENERAL ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.GENERAL)">
+        <div class="tab flex flex-col items-center" v-bind:class="currentTab === SettingsTab.General ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.General)">
             <div class="flex justify-center w-full">
                 <HomeSVG class="h-7 w-7 strokeAccent" />
             </div>
@@ -55,8 +55,8 @@ async function loadTheme() {
 
         </div>
         <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTabs.SEARCH_BOX ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.SEARCH_BOX)">
+            v-bind:class="currentTab === SettingsTab.SearchBox ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.SearchBox)">
             <div class="w-full flex justify-center">
                 <SearchSVG class="h-7 w-7 strokeAccent" />
             </div>
@@ -66,8 +66,8 @@ async function loadTheme() {
         </div>
 
         <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTabs.SEARCH_ENGINES ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.SEARCH_ENGINES)">
+            v-bind:class="currentTab === SettingsTab.SearchEngines ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.SearchEngines)">
             <div class="w-full flex justify-center">
                 <SearchSVG class="h-7 w-7 strokeAccent" />
             </div>
@@ -76,8 +76,8 @@ async function loadTheme() {
             </div>
         </div>
 
-        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTabs.THEME ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.THEME)">
+        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTab.Theme ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.Theme)">
             <div class="w-full flex justify-center">
                 <BrushSVG class="h-7 w-7 fillAccent" />
             </div>
@@ -87,8 +87,8 @@ async function loadTheme() {
         </div>
 
         <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTabs.EXTENSIONS ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.EXTENSIONS)">
+            v-bind:class="currentTab === SettingsTab.Extensions ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.Extensions)">
             <div class="w-full flex justify-center">
                 <PluginSVG class="h-7 w-7 fillAccent" />
             </div>
@@ -97,8 +97,8 @@ async function loadTheme() {
             </div>
         </div>
 
-        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTabs.ABOUT ? 'activeTab' : ''"
-            @click="emit('click', SettingsTabs.ABOUT)">
+        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTab.About ? 'activeTab' : ''"
+            @click="emit('click', SettingsTab.About)">
             <div class="w-full flex justify-center">
                 <InfoSVG class="h-7 w-7 fillAccent" />
             </div>

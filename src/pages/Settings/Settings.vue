@@ -1,27 +1,26 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SettingsTabs, getTheme } from "./Settings"
+import { SettingsTab, getTheme } from "./Settings"
 import GeneralTab from './GeneralTab.vue';
 import ThemesTab from './ThemesTab.vue';
 import SearchBoxTab from './SearchBoxTab.vue'
 import SearchEnginesTab from './SearchEnginesTab.vue';
 import ExtensionsTab from './ExtensionsTab.vue';
 import { listen } from '@tauri-apps/api/event';
-
 import AboutTab from './AboutTab.vue';
-import Navbar from "./Navbar.vue"
+import Navbar from "./Navbar.vue";
 
-const currentTab = ref(SettingsTabs.GENERAL)
+const currentTab = ref(SettingsTab.General);
 
-const backgroundColor = ref("")
-const secondaryBackgroundColor = ref("")
-const tertiaryBackgroundColor = ref("")
-const accentColor = ref("")
-const onAccentColor = ref("")
-const dangerColor = ref("")
-const onDangerColor = ref("")
-const textColor = ref("")
-const secondaryTextColor = ref("")
+const backgroundColor = ref("");
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const accentColor = ref("");
+const onAccentColor = ref("");
+const dangerColor = ref("");
+const onDangerColor = ref("");
+const textColor = ref("");
+const secondaryTextColor = ref("");
 
 const updateThemeEmit = ref();
 
@@ -56,32 +55,32 @@ async function loadTheme() {
         
 
         <div class="flex-grow h-screen max-h-screen overflow-x-scroll">
-            <div v-if="currentTab === SettingsTabs.GENERAL">
+            <div v-if="currentTab === SettingsTab.General">
                 <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :accent-color="accentColor" :text-color="textColor"
                     :tertiary-background-color="tertiaryBackgroundColor" />
             </div>
 
-            <div v-if="currentTab === SettingsTabs.SEARCH_BOX">
+            <div v-if="currentTab === SettingsTab.SearchBox">
                 <SearchBoxTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" />
             </div>
 
-            <div v-if="currentTab === SettingsTabs.THEME">
+            <div v-if="currentTab === SettingsTab.Theme">
                 <ThemesTab />
             </div>
-            <div v-if="currentTab === SettingsTabs.SEARCH_ENGINES">
+            <div v-if="currentTab === SettingsTab.SearchEngines">
                 <SearchEnginesTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" :text-color="textColor"
                     :on-accent-color="onAccentColor" />
             </div>
-            <div v-if="currentTab === SettingsTabs.EXTENSIONS">
+            <div v-if="currentTab === SettingsTab.Extensions">
                 <ExtensionsTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
                     :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
                     :text-color="textColor" />
             </div>
 
-            <div v-if="currentTab === SettingsTabs.ABOUT">
+            <div v-if="currentTab === SettingsTab.About">
                 <AboutTab/>
             </div>
         </div>

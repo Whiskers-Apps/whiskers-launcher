@@ -1,5 +1,7 @@
 import { invoke } from "@tauri-apps/api"
 
+
+
 export interface SimpleKlResult {
     icon?: string,
     icon_color?: string,
@@ -57,7 +59,7 @@ export interface DialogField {
     title?: string,
     description?: string,
     placeholder?: string,
-    options?: SelectOption[]
+    options?: SelectOption[] | CheckOption[]
 }
 
 export interface DialogResult{
@@ -76,12 +78,20 @@ export interface SelectOption {
     value: string
 }
 
+export interface CheckOption{
+    id: string,
+    title: string,
+    description: string,
+    checked: boolean
+}
+
 export interface DoNothingAction {
     type: string,
 }
 
 export interface ExtensionManifest {
     id: string,
+    version: string,
     name: string,
     description: string,
     icon: string,

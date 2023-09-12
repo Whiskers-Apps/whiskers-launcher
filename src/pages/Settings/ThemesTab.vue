@@ -111,11 +111,11 @@ async function exportTheme() {
     closeMenu();
 
     let path = await save({
-        defaultPath: "CustomTheme.json",
+        defaultPath: "CustomTheme.yml",
         filters: [
             {
-                name: "Json",
-                extensions: ["json"]
+                name: "Yaml",
+                extensions: ["yml"]
             }
         ]
     })

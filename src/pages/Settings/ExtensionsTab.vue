@@ -58,6 +58,7 @@ async function loadTheme() {
 
 export interface TabExtensionManifest {
     id: string,
+    version: string,
     name: string,
     description?: string,
     icon: string,
@@ -178,12 +179,13 @@ async function getExtensions() {
     let extensions: ExtensionManifest[] = JSON.parse(await invoke("get_extensions_json") ?? []);
     let newTabExtensions: TabExtensionManifest[] = [];
 
-    
+
 
     extensions.forEach(extension => {
 
         let newTabExtension: TabExtensionManifest = {
             id: extension.id,
+            version: extension.version,
             name: extension.name,
             description: extension.description,
             icon: extension.icon,
@@ -299,8 +301,12 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
         <div v-for="extension in tabExtensions" class="p-4 secondaryBackground rounded-3xl mb-2">
 
             <div class="flex">
-                <div class="font-bold text-lg ml-3 flex-grow">{{ extension.name }}</div>
-                <div>
+                <div class="font-bold text-lg ml-3">{{ extension.name }}</div>
+                <div class="flex-grow"></div>
+                <div class="p-2 pr-4 pl-4 rounded-full tertiaryBackground ml-4">
+                    {{ extension.version }}
+                </div>
+                <div class="ml-4">
                     <button class="deleteButton" @click="openDeleteDialog(extension.id)">
                         <TrashSVG class="w-5 h-5 deleteIcon" />
                     </button>
