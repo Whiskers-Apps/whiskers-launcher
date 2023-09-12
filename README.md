@@ -3,7 +3,8 @@
 ⚠ It will take some months :P
 
 # To-Do
-- [ ] App Basics
-- [ ] Extensions Support
+- [x] App Basics
+- [x] Extensions Support
+- [ ] Windows Support
 - [ ] Website
 - [ ] Documentation
