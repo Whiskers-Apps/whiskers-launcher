@@ -17,25 +17,27 @@ const borderWidth = ref();
 const searchText = ref("")
 const backgroundColor = ref("")
 const secondaryBackgroundColor = ref("")
+const tertiaryBackgroundColor = ref("")
 const accentColor = ref("")
 const textColor = ref("")
 const secondaryTextColor = ref("")
 const searchRef = ref();
 const results = ref<SimpleKlResult[]>([]);
 const resultsLimit = ref(0)
-const searchBoxHeight = ref("70px");
+const resultsBoxHeight = ref("70px");
 const selectedIndex = ref(0);
 const resultsRef = ref([]);
 
 
 function openSettings() {
-  new WebviewWindow('settings', {
-    url: 'settings',
-    title: "Settings",
-    width: 1100
-  })
 
-  appWindow.close()
+  appWindow.hide();
+
+  new WebviewWindow("settings", {
+    url: "settings",
+    title: "Settings"
+  });
+
 }
 
 function getCSSFilterFromHexColor(hexColor?: string): string {
@@ -116,7 +118,7 @@ document.addEventListener('keydown', function (event) {
   }
 
   if (event.key === "Escape") {
-    appWindow.close()
+    appWindow.close();
   }
 
   if (event.key === "Enter") {
@@ -137,8 +139,6 @@ async function runAction() {
         action_json: JSON.stringify(result.action)
       });
     }
-
-    appWindow.close();
   }
 }
 
@@ -147,22 +147,21 @@ watch(searchText, async (_newText, _oldText) => {
   if (searchText.value.trim() === "") {
 
     results.value = [];
-    appWindow.setSize(new PhysicalSize(800, 70));
-    searchBoxHeight.value = `70px`
+    resultsBoxHeight.value = `0px`
   } else {
 
-    results.value = JSON.parse(await invoke("get_results", { search_text: searchText.value }));
-
-    var newHeight = 70;
+    results.value = await invoke("get_results", { search_text: searchText.value });
+    
+    var newHeight = 55;
 
     if (results.value.length > resultsLimit.value) {
-      newHeight = newHeight + (resultsLimit.value * 70);
+      newHeight = newHeight + (resultsLimit.value * 55);
     } else {
-      newHeight = newHeight + results.value.length * 70;
+      newHeight = newHeight + results.value.length * 55;
     }
 
-    appWindow.setSize(new PhysicalSize(800, newHeight));
-    searchBoxHeight.value = `${newHeight}px`
+    resultsBoxHeight.value = `${newHeight}px`
+    
   }
 
   selectedIndex.value = 0;
@@ -171,9 +170,9 @@ watch(searchText, async (_newText, _oldText) => {
 </script>
 
 <template>
-  <div class="items-center justify-center h-screen w-screen max-h-screen text maxHeight">
-    <div class="searchBox pt-2 pb-2 pl-4 pr-4 flex flex-col justify-center">
-      <div class="flex  items-center">
+  <div class="items-center flex flex-col h-screen w-screen max-h-screen text maxHeight">
+    <div class="mainBox">
+      <div class="flex items-center searchBox">
         <div v-if="showSearchIcon" class="mr-2">
           <SearchSVG class="w-5 h-5 stroke" />
         </div>
@@ -185,9 +184,9 @@ watch(searchText, async (_newText, _oldText) => {
           <SettingsSVG class="w-5 h-5 stroke" />
         </button>
       </div>
-      <div v-if="results.length > 0" class="overflow-auto mt-2">
+      <div v-if="results.length > 0" class="resultsBox">
         <div v-for="(result, index) in results" ref="resultsRef">
-          <div :ref="`result-${index}`" class="h-[70px] p-2 flex overflow-hidden"
+          <div :ref="`result-${index}`" class="h-[55px] p-2 flex overflow-hidden"
             :class="index === selectedIndex ? 'selectedResult' : ''">
 
             <div v-if="isTextResult(result)" class="flex items-center">
@@ -195,7 +194,7 @@ watch(searchText, async (_newText, _oldText) => {
             </div>
 
             <div v-if="isIconWithTextResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class="h-[35px] w-[35px] object-contain icon"
+              <img :src="convertFileSrc(result.icon!!)" class="h-[30px] w-[30px] object-contain icon"
                 :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="text-lg ml-2 flex-grow">{{ result.text }}</div>
             </div>
@@ -208,7 +207,7 @@ watch(searchText, async (_newText, _oldText) => {
             </div>
 
             <div v-if="isIconWithTitleAndDescriptionResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class="h-[35px] w-[35px] object-contain icon"
+              <img :src="convertFileSrc(result.icon!!)" class="h-[30px] w-[30px] object-contain icon"
                 :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="flex-grow flex flex-col ml-2">
                 <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">
@@ -227,6 +226,19 @@ watch(searchText, async (_newText, _oldText) => {
 </template>
 
 <style scoped>
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: v-bind(tertiaryBackgroundColor);
+}
+
+::-webkit-scrollbar-thumb {
+  background: v-bind(accentColor);
+  border-radius: 48px;
+}
+
 .text {
   color: v-bind(textColor)
 }
@@ -237,7 +249,7 @@ watch(searchText, async (_newText, _oldText) => {
 
 .maxHeight {
 
-  max-height: v-bind(searchBoxHeight);
+  max-height: v-bind(resultsBoxHeight);
 }
 
 .selectedResult {
@@ -245,13 +257,23 @@ watch(searchText, async (_newText, _oldText) => {
   border-radius: v-bind(roundnessLevel);
 }
 
-.searchBox {
+.mainBox {
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
-  font-size: 1.1rem;
   border-radius: v-bind(roundnessLevel);
-  min-height: 65px;
-  max-height: v-bind(searchBoxHeight);
+  width: 700px;
+}
+
+.searchBox {
+  padding: 12px;
+  width: 700px;
+}
+
+.resultsBox {
+  max-height: v-bind(resultsBoxHeight);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px;
 }
 
 .placeholder::placeholder {

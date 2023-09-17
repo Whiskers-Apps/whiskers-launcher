@@ -6,6 +6,7 @@ import { listen } from '@tauri-apps/api/event';
 import { open as openLink } from "@tauri-apps/api/shell"
 import BranchSVG from "@icons/branch.svg"
 import CheckSVG from "@icons/check.svg"
+import BrushSVG from "@icons/brush.svg"
 
 interface CommunityTheme {
     repo: string,
@@ -48,7 +49,7 @@ async function loadTheme() {
 }
 
 function filter() {
-    console.log("entrou");
+    console.log(`entrou ${searchInput.value}`)
     currentThemes.value = themes.value.filter((theme) => theme.name.toLowerCase().trim().includes(searchInput.value.toLowerCase().trim()));
 }
 
@@ -61,50 +62,71 @@ async function applyTheme(repo: string, file: string) {
 <template>
     <div class="main flex flex-col">
         <div class="flex items-center">
-            <div class="text-3xl">Community Themes</div>
-            <div class="flex-grow flex justify-end ml-4">
-                <input class="input" v-model="searchInput" @input="filter()" placeholder="Search Themes">
-            </div>
+            <div class="text-3xl oneLineText">Community Themes</div>
+            <BrushSVG class="h-7 w-7 ml-4 fillIcon" />
+            <div class="flex-grow"></div>
+            <input class="input" placeholder="Search for themes" v-model="searchInput" @input="filter()">
         </div>
-        <div class="grid 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 grid-cols-1 gap-4 mt-4 overflow-scroll">
-            <div class="themeCard grid grid-cols-3 col-span-1" 
-                v-for="(theme, index) in currentThemes" :key="index">
-                <div class="col-span-1">
-                    <img :src="theme.preview" class="h-[200px] object-contain">
-                </div>
-                <div class="h-full flex col-span-2 items-center">
-                    <div class="col-span-2 oneLineText ml-4 text-lg flex-grow text-start">{{ theme.name }}</div>
-                    <button class="cardButton ml-4" :disabled="disableButtons" @click="openLink(theme.repo)">
-                        <BranchSVG class="h-6 w-6 fillIcon" />
-                    </button>
-                    <button class="cardButton ml-4" :disabled="disableButtons" @click="applyTheme(theme.repo, theme.file)">
-                        <CheckSVG class="h-6 w-6 applyIcon" />
-                    </button>
+        <div class="mt-4 flex-grow overflow-auto grid grid-flow-row 2xl:grid-cols-2 xl:grid-cols-2 md:grid-cols-2 grid-cols-1 gap-4">
+            <div v-for="(theme, index) in currentThemes" :key="index" class="grid grid-cols-2 themeCard max-h-[200px]">
+                <img :src="theme.preview" class=" object-contain h-[200px]">
+                <div class="flex flex-col ml-4 ">
+                    <div class="min-w-0 oneLineText text-lg w-full">{{ theme.name }}</div>
+                    <div class="flex-grow flex flex-col items-center justify-center">
+                        <button class="cardButton w-full" :disabled="disableButtons" @click="openLink(theme.repo)">
+                            <div class="flex justify-center items-center">
+                                <BranchSVG class="h-5 w-5 mr-2 fillIcon"/>
+                                Source
+                            </div>
+                        </button>
+
+                        <button class="cardButton w-full mt-4" :disabled="disableButtons" @click="applyTheme(theme.repo, theme.file)">
+                            <div class="flex justify-center items-center">
+                                <CheckSVG class="h-5 w-5 mr-2 applyIcon"/>
+                                Apply
+                            </div>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
 <style scoped>
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    border-radius: 48px;
+}
+
+::-webkit-scrollbar-track {
+    background: v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: v-bind(accentColor);
+    border-radius: 48px;
+}
+
 .main {
     height: 100vh;
     width: 100vw;
     max-height: 100vh;
     max-width: 100vw;
-    background-color: v-bind(backgroundColor);
     color: v-bind(textColor);
+    background-color: v-bind(backgroundColor);
     padding: 16px;
 }
 
 .input {
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
     padding: 8px;
     padding-left: 16px;
     padding-right: 16px;
     background-color: v-bind(tertiaryBackgroundColor);
     border-radius: 48px;
-    outline: 1px solid v-bind(textColor);
 }
 
 .input::placeholder {
@@ -124,7 +146,7 @@ input:focus {
 
 .cardButton {
     background-color: v-bind(tertiaryBackgroundColor);
-    padding: 16px;
+    padding: 8px;
     border-radius: 48px;
 }
 
@@ -132,15 +154,16 @@ input:focus {
     background-color: v-bind(tertiaryBackgroundColor);
 }
 
-.cardButton:hover:enabled{
-    outline: 2px solid v-bind(accentColor);
+.cardButton:hover:enabled {
+    filter: brightness(0.95);
 }
 
 .fillIcon {
     fill: v-bind(textColor);
 }
 
-.applyIcon{
+
+.applyIcon {
     stroke: v-bind(textColor);
     stroke-width: 3px;
 }

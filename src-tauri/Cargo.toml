@@ -19,14 +19,23 @@ serde_json = "1.0.99"
 serde_yaml = "0.9.25"
 tauri-plugin-positioner = "1.0.4"
 dirs = "5.0.1"
-simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
-freedesktop-desktop-entry = "0.5.0"
+#simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
+simple_kl_rs = {path = "C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl-rs"}
 tokio = { version = "1.29.0", features= ["full"] }
 fuzzy-matcher = "0.3.7"
 open = "5.0.0"
 rand = "0.8.5"
 git2 = "0.18.0"
 enigo = "0.1.3"
+encoding = "0.2.33"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+freedesktop-desktop-entry = "0.5.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+lnk = "0.5.1"
+powershell_script = "1.1.0"
+winapi = "0.3.9"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

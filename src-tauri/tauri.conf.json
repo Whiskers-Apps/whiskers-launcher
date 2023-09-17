@@ -62,7 +62,6 @@
         "title": "Simple Keyboard Launcher",
         "decorations": false,
         "width": 800,
-        "height": 70,
         "transparent": true
       }
     ],

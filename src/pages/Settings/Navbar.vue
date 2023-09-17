@@ -7,12 +7,16 @@ import HomeSVG from "@icons/home.svg"
 import BrushSVG from "@icons/brush.svg"
 import PluginSVG from "@icons/plugin.svg"
 import InfoSVG from "@icons/info.svg"
+import MenuSVG from "@icons/menu.svg"
 
 import { getTheme, SettingsTab } from '@pages/Settings/Settings';
 
 const accentColor = ref("");
+const textColor = ref("");
+const secondaryTextColor = ref("");
 const tertiaryBackgroundColor = ref("")
 const updateThemeEmit = ref();
+const showNavBar = ref(true);
 
 const emit = defineEmits(["click"])
 
@@ -37,103 +41,119 @@ async function loadTheme() {
 
     accentColor.value = theme.accent;
     tertiaryBackgroundColor.value = theme.tertiary_background;
-
+    textColor.value = theme.text;
+    secondaryTextColor.value = theme.secondary_text;
 }
 </script>
 
 <template>
-    <div class=" max-w-fit h-screen secondaryBackground p-2 overflow-auto">
-        <div class="tab flex flex-col items-center" v-bind:class="currentTab === SettingsTab.General ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.General)">
-            <div class="flex justify-center w-full">
-                <HomeSVG class="h-7 w-7 strokeAccent" />
+    <div class=" h-screen flex flex-col  p-4">
+
+        <button class="p-2 ml-2 navbarToggle w-fit" @click="showNavBar = !showNavBar">
+            <MenuSVG class="h-7 w-7 navbarToggleIcon" />
+        </button>
+
+        <div v-if="showNavBar" class="min-w-[250px] overflow-auto">
+            <div class="mt-4 tab flex items-center" v-bind:class="currentTab === SettingsTab.General ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.General)">
+                <div class="">
+                    <HomeSVG class="h-6 w-6 strokeAccent" />
+                </div>
+
+                <div class="ml-3">
+                    General
+                </div>
+
+            </div>
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.SearchBox ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.SearchBox)">
+                <div class="">
+                    <SearchSVG class="h-6 w-6 strokeAccent" />
+                </div>
+                <div class="ml-3">
+                    Search Box
+                </div>
             </div>
 
-            <div class="flex justify-center w-full text-sm">
-                General
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.SearchEngines ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.SearchEngines)">
+                <div class="">
+                    <SearchSVG class="h-6 w-6 strokeAccent" />
+                </div>
+                <div class="ml-3">
+                    Search Engines
+                </div>
             </div>
 
-        </div>
-        <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTab.SearchBox ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.SearchBox)">
-            <div class="w-full flex justify-center">
-                <SearchSVG class="h-7 w-7 strokeAccent" />
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.Theme ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.Theme)">
+                <div class="">
+                    <BrushSVG class="h-6 w-6 fillAccent" />
+                </div>
+                <div class="ml-3">
+                    Theming
+                </div>
             </div>
-            <div class="w-full flex justify-center text-sm">
-                Search Box
-            </div>
-        </div>
 
-        <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTab.SearchEngines ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.SearchEngines)">
-            <div class="w-full flex justify-center">
-                <SearchSVG class="h-7 w-7 strokeAccent" />
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.Extensions ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.Extensions)">
+                <div class="">
+                    <PluginSVG class="h-6 w-6 fillAccent" />
+                </div>
+                <div class="ml-3">
+                    Extensions
+                </div>
             </div>
-            <div class="w-full flex justify-center text-sm">
-                Search Engines
-            </div>
-        </div>
 
-        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTab.Theme ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.Theme)">
-            <div class="w-full flex justify-center">
-                <BrushSVG class="h-7 w-7 fillAccent" />
-            </div>
-            <div class="w-full flex justify-center text-sm">
-                Theming
-            </div>
-        </div>
-
-        <div class="tab mt-4 flex flex-col items-center"
-            v-bind:class="currentTab === SettingsTab.Extensions ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.Extensions)">
-            <div class="w-full flex justify-center">
-                <PluginSVG class="h-7 w-7 fillAccent" />
-            </div>
-            <div class="w-full flex justify-center text-sm">
-                Extensions
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.About ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.About)">
+                <div class="">
+                    <InfoSVG class="h-6 w-6 fillAccent" />
+                </div>
+                <div class="ml-3">
+                    About
+                </div>
             </div>
         </div>
 
-        <div class="tab mt-4 flex flex-col items-center" v-bind:class="currentTab === SettingsTab.About ? 'activeTab' : ''"
-            @click="emit('click', SettingsTab.About)">
-            <div class="w-full flex justify-center">
-                <InfoSVG class="h-7 w-7 fillAccent" />
-            </div>
-            <div class="w-full flex justify-center text-sm">
-                About
-            </div>
-        </div>
+
     </div>
 </template>
 
 <style scoped>
+.navbarToggle:hover {
+    background-color: v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
+
+.navbarToggleIcon {
+    stroke: v-bind(textColor);
+}
+
 .fillAccent {
-    fill: v-bind(accentColor);
+    fill: v-bind(textColor);
     stroke: none;
 }
 
 .strokeAccent {
     fill: none;
-    stroke: v-bind(accentColor);
+    stroke: v-bind(textColor);
     stroke-width: 2;
 }
 
 .tab {
-    padding: 8px;
+    padding: 16px;
     cursor: pointer;
-    border-radius: 14px;
+    border-radius: 48px;
+    color: v-bind(secondaryTextColor);
 }
 
-.tab:hover{
-    background-color: v-bind(tertiaryBackgroundColor);
-    
+.tab:hover {
+    color: v-bind(textColor);
 }
 
 .activeTab {
     background-color: v-bind(tertiaryBackgroundColor);
-    font-weight: 600;
+    font-weight: 500;
 }
 </style>

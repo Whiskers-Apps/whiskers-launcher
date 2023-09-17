@@ -50,44 +50,66 @@ async function loadTheme() {
 </script>
 
 <template>
-    <div class=" h-screen w-screen max-h-screen max-w-screen background flex text">
-        <Navbar :current-tab="currentTab" @click="currentTab = $event"/>
-        
+    <div class="background text h-screen max-h-screen">
+        <div class="flex">
+            <Navbar :current-tab="currentTab" @click="currentTab = $event" />
 
-        <div class="flex-grow h-screen max-h-screen overflow-x-scroll">
-            <div v-if="currentTab === SettingsTab.General">
-                <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                    :accent-color="accentColor" :text-color="textColor"
-                    :tertiary-background-color="tertiaryBackgroundColor" />
-            </div>
+            <div class="flex-grow ml-[40px] overflow-y-auto h-screen test">
+                <div v-if="currentTab === SettingsTab.General">
+                    <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                        :accent-color="accentColor" :text-color="textColor"
+                        :tertiary-background-color="tertiaryBackgroundColor" />
+                </div>
 
-            <div v-if="currentTab === SettingsTab.SearchBox">
-                <SearchBoxTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" />
-            </div>
+                <div v-if="currentTab === SettingsTab.SearchBox">
+                    <SearchBoxTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
+                        :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" />
+                </div>
 
-            <div v-if="currentTab === SettingsTab.Theme">
-                <ThemesTab />
-            </div>
-            <div v-if="currentTab === SettingsTab.SearchEngines">
-                <SearchEnginesTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" :text-color="textColor"
-                    :on-accent-color="onAccentColor" />
-            </div>
-            <div v-if="currentTab === SettingsTab.Extensions">
-                <ExtensionsTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                    :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
-                    :text-color="textColor" />
-            </div>
+                <div v-if="currentTab === SettingsTab.Theme">
+                    <ThemesTab />
+                </div>
+                <div v-if="currentTab === SettingsTab.SearchEngines">
+                    <SearchEnginesTab :background-color="backgroundColor"
+                        :secondary-background-color="secondaryBackgroundColor"
+                        :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
+                        :text-color="textColor" :on-accent-color="onAccentColor" />
+                </div>
+                <div v-if="currentTab === SettingsTab.Extensions">
+                    <ExtensionsTab :background-color="backgroundColor"
+                        :secondary-background-color="secondaryBackgroundColor"
+                        :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
+                        :text-color="textColor" />
+                </div>
 
-            <div v-if="currentTab === SettingsTab.About">
-                <AboutTab/>
+                <div v-if="currentTab === SettingsTab.About">
+                    <AboutTab />
+                </div>
             </div>
         </div>
+
     </div>
-</template>
+</template>\
+
+<style>
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: v-bind(accentColor);
+    border-radius: 48px;
+}
+</style>
 
 <style scoped>
+
+
 .text {
     color: v-bind(textColor);
 }

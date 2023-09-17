@@ -36,9 +36,9 @@ async function loadTheme() {
 
 </script>
 <template>
-    <div class="p-4">
-        <div class="text-3xl ml-3">About</div>
-        <div class="mt-4 ml-3 text-xl">App</div>
+    <div class="p-4 max-w-[700px]">
+        <div class="text-2xl ml-2">About</div>
+        <div class="mt-2 ml-2 text-xl">App</div>
         <div class="card flex mt-2">
             <b>Version:</b>
             <div class="flex-grow"></div>
@@ -51,11 +51,11 @@ async function loadTheme() {
             <div class="oneLineText">{{ extensions.length }}</div>
         </div>
 
-        <div class="card flex mt-1">
+        <div class="card flex items-center mt-1">
             <b>Source:</b>
             <div class="flex-grow"></div>
             <button @click="openLink('https://github.com/lighttigerXIV/simple-keyboard-launcher')">
-                <div class="oneLineText link">https://github.com/lighttigerXIV/simple-keyboard-launcher</div>
+                <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
             </button>
         </div>
         <div class="mt-4 ml-3 text-xl">Developers</div>
@@ -74,7 +74,7 @@ async function loadTheme() {
 <style>
 .card {
     background-color: v-bind(secondaryBackgroundColor);
-    padding: 16px;
+    padding: 24px;
     border-radius: 24px;
 }
 

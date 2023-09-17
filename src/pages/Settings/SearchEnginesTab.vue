@@ -154,29 +154,29 @@ document.addEventListener('keydown', (event) => {
 </script>
 
 <template>
-    <div class="p-4">
+    <div class="max-w-[700px] p-4">
         <div class="flex items-start">
-            <div class="text-3xl flex-grow ml-3">Search Engines</div>
+            <div class="text-2xl flex-grow ml-2">Search Engines</div>
             <button @mouseover="addButtonHovering = true" @mouseout="addButtonHovering = false"
-                class="flex items-center addButton p-2 " @click="openAddDialog()">
+                class="flex items-center addButton " @click="openAddDialog()">
                 Add
             </button>
         </div>
 
         <div class="mt-4"></div>
 
-        <div class="p-4 mb-1 rounded-3xl flex secondaryBackground items-center"
+        <div class="p-6 rounded-[28px] mb-1  flex secondaryBackground items-center"
             v-for="(searchEngine, index) in searchEngines">
 
             <div class="p-1 rounded-lg">
-                <img class="h-[30px] w-[30px]" :src="convertFileSrc(searchEngine.icon ?? '')"
+                <img class="h-[25px] w-[25px]" :src="convertFileSrc(searchEngine.icon ?? '')"
                     :style="{ filter: getIconFilter(searchEngine.tint_icon) }">
             </div>
 
             <div class="ml-4 p-1 rounded-lg whitespace-nowrap text-ellipsis text-lg">{{ searchEngine.name }}</div>
 
             <div v-if="searchEngine.default" class="ml-2">
-                <CheckSVG class="h-[30px] w-[30px] accentStroke"/>
+                <CheckSVG class="h-[25px] w-[25px] accentStroke"/>
             </div>
 
             <div class="flex-grow"></div>
@@ -250,9 +250,9 @@ document.addEventListener('keydown', (event) => {
 .addButton {
     border: 2px solid v-bind(accentColor);
     border-radius: 48px;
-    padding: 10px;
-    padding-left: 30px;
-    padding-right: 30px;
+    padding: 6px;
+    padding-left: 24px;
+    padding-right: 24px;
     outline: none;
 }
 

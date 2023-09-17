@@ -1,6 +1,10 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+//Windows Flags
+const FLAG_CREATE_NO_WINDOW: u32 = 0x08000000;
+const FLAG_DETACHED_PROCESS: u32 = 0x00000008;
+
 use enigo::MouseControllable;
 use extensions::CommunityExtension;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
@@ -21,25 +25,28 @@ use simple_kl_rs::{
 use structs::structs::AppIndex;
 use themes::CommunityTheme;
 
+use simple_kl_rs::actions::{DialogAction, DialogResult};
+use simple_kl_rs::paths::get_dialog_action_path;
 use std::{
     env,
     fs::{self, File},
     io::{Read, Write},
+    os::windows::process::CommandExt,
     path::Path,
     process::Command,
 };
-use simple_kl_rs::actions::{DialogAction, DialogResult};
-use simple_kl_rs::paths::get_dialog_action_path;
 
-use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, Window, WindowBuilder, WindowEvent, WindowUrl};
-
+use tauri::{
+    AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, Window, WindowBuilder,
+    WindowEvent, WindowUrl,
+};
 
 pub mod extensions;
 pub mod structs;
 pub mod themes;
 
 #[tauri::command(rename_all = "snake_case")]
-fn get_results(search_text: String) -> Result<String, String> {
+fn get_results(search_text: String) -> Vec<SimpleKLResult> {
     let split_search: Vec<&str> = search_text.split_whitespace().collect();
     let mut keyword = String::from("");
     let mut search_words = String::from("");
@@ -60,9 +67,7 @@ fn get_results(search_text: String) -> Result<String, String> {
 
     for extension in extensions {
         if extension.keyword == keyword {
-            return Ok(
-                serde_json::to_string(&get_extension_results(extension.id, search_words)).unwrap(),
-            );
+            return get_extension_results(extension.id, search_words);
         }
     }
 
@@ -73,67 +78,75 @@ fn get_results(search_text: String) -> Result<String, String> {
     for search_engine in search_engines {
         if search_engine.keyword == keyword {
             let url = search_engine.query.replace("%s", &search_words);
-            let mut results: Vec<SimpleKLResult> = Vec::new();
+            let mut result: Vec<SimpleKLResult> = Vec::new();
 
-            results.push(SimpleKLResult::IconWithText(
+            result.push(SimpleKLResult::IconWithText(
                 match search_engine.tint_icon {
                     true => {
                         IconWithTextResult::new_with_color(
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             format!("Search for {}", search_words).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
                     }
-                    false => IconWithTextResult::new(
-                        Path::new(&search_engine.icon.unwrap_or(search_svg_path.into_os_string().into_string().unwrap())).to_owned(),
-                        &format!("Search for {}", search_words),
-                        ResultAction::OpenInBrowser(OpenInBrowser { url }),
-                    ),
+                    false => {
+                        IconWithTextResult::new(
+                            Path::new(&search_engine.icon.unwrap_or(
+                                search_svg_path.into_os_string().into_string().unwrap(),
+                            ))
+                            .to_owned(),
+                            &format!("Search for {}", search_words),
+                            ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                        )
+                    }
                 },
             ));
 
-            return Ok(serde_json::to_string(&results).unwrap());
+            return result;
         }
     }
 
-    //Returns app results or search if it's empty
-    let app_results = &get_apps_results(&search_text);
-    return match app_results.len() > 0 {
-        true => Ok(serde_json::to_string(&app_results).unwrap()),
-        false => {
-            for search_engine in Settings::get_settings().search_engines {
-                if search_engine.default {
-                    let url = search_engine.query.replace("%s", &search_text);
-                    let mut results: Vec<SimpleKLResult> = Vec::new();
+    let app_results = get_apps_results(&search_text);
 
-                    results.push(SimpleKLResult::IconWithText(
-                        match search_engine.tint_icon {
-                            true => IconWithTextResult::new_with_color(
-                                Path::new(&search_engine.icon.unwrap_or(
-                                    search_svg_path.into_os_string().into_string().unwrap(),
-                                ))
-                                    .to_path_buf(),
-                                format!("Search for {}", search_text).as_str(),
-                                ResultAction::OpenInBrowser(OpenInBrowser { url }),
-                            ),
-                            false => IconWithTextResult::new(
-                                Path::new(&search_engine.icon.unwrap_or(search_svg_path.into_os_string().into_string().unwrap())).to_owned(),
-                                &format!("Search for {}", search_text),
-                                ResultAction::OpenInBrowser(OpenInBrowser { url }),
-                            ),
-                        },
-                    ));
+    if &app_results.len() > &0 {
+        return app_results;
+    } else {
+        //Returns a search result
+        for search_engine in Settings::get_settings().search_engines {
+            if search_engine.default {
+                let url = search_engine.query.replace("%s", &search_text);
+                let mut result: Vec<SimpleKLResult> = Vec::new();
 
-                    return Ok(serde_json::to_string(&results).unwrap());
-                }
+                result.push(SimpleKLResult::IconWithText(
+                    match search_engine.tint_icon {
+                        true => IconWithTextResult::new_with_color(
+                            Path::new(&search_engine.icon.unwrap_or(
+                                search_svg_path.into_os_string().into_string().unwrap(),
+                            ))
+                            .to_path_buf(),
+                            format!("Search for {}", search_text).as_str(),
+                            ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                        ),
+                        false => IconWithTextResult::new(
+                            Path::new(&search_engine.icon.unwrap_or(
+                                search_svg_path.into_os_string().into_string().unwrap(),
+                            ))
+                            .to_owned(),
+                            &format!("Search for {}", search_text),
+                            ResultAction::OpenInBrowser(OpenInBrowser { url }),
+                        ),
+                    },
+                ));
+
+                return result;
             }
-
-            Ok("".into())
         }
-    };
+
+        return vec![];
+    }
 }
 
 fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
@@ -170,9 +183,7 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
         .write_all(&parameters_yaml.as_bytes())
         .unwrap();
 
-    parameters_file
-        .flush()
-        .unwrap();
+    parameters_file.flush().unwrap();
 
     if let Ok(folders) = fs::read_dir(&get_extensions_path().unwrap()) {
         for folder in folders {
@@ -187,31 +198,64 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
                     let manifest: ExtensionManifest = serde_yaml::from_str(&manifest_yaml).unwrap();
 
                     if manifest.id == id {
-                        let extension_run = Command::new("sh")
-                            .arg("-c")
-                            .arg("./extension")
-                            .current_dir(folder_path)
-                            .output()
-                            .expect("Error running extension");
+                        if cfg!(target_os = "linux") {
+                            let extension_run = Command::new("sh")
+                                .arg("-c")
+                                .arg("./extension")
+                                .current_dir(&folder_path)
+                                .output()
+                                .expect("Error running extension");
 
-                        if extension_run.status.success() {
-                            let mut extension_results_yaml = String::from("");
-                            let mut extensions_results_file =
-                                File::open(&get_extension_results_path().unwrap()).unwrap();
+                            if extension_run.status.success() {
+                                let mut extension_results_yaml = String::from("");
+                                let mut extensions_results_file =
+                                    File::open(&get_extension_results_path().unwrap()).unwrap();
 
-                            extensions_results_file
-                                .read_to_string(&mut extension_results_yaml)
-                                .unwrap();
+                                extensions_results_file
+                                    .read_to_string(&mut extension_results_yaml)
+                                    .unwrap();
 
-                            let results: Vec<SimpleKLResult> =
-                                serde_yaml::from_str(&extension_results_yaml).unwrap();
+                                let results: Vec<SimpleKLResult> =
+                                    serde_yaml::from_str(&extension_results_yaml).unwrap();
 
-                            return results;
-                        } else {
-                            println!(
-                                "Error running extension: {}",
-                                String::from_utf8_lossy(&extension_run.stderr)
-                            )
+                                return results;
+                            } else {
+                                println!(
+                                    "Error running extension: {}",
+                                    String::from_utf8_lossy(&extension_run.stderr)
+                                )
+                            }
+                        }
+
+                        if cfg!(target_os = "windows") {
+                            let extension_run = Command::new("cmd")
+                                .arg("/C")
+                                .arg("start extension.exe")
+                                .current_dir(&folder_path)
+                                .creation_flags(FLAG_CREATE_NO_WINDOW)
+                                .creation_flags(FLAG_DETACHED_PROCESS)
+                                .output()
+                                .expect("Error running extension");
+
+                            if extension_run.status.success() {
+                                let mut extension_results_yaml = String::from("");
+                                let mut extensions_results_file =
+                                    File::open(&get_extension_results_path().unwrap()).unwrap();
+
+                                extensions_results_file
+                                    .read_to_string(&mut extension_results_yaml)
+                                    .unwrap();
+
+                                let results: Vec<SimpleKLResult> =
+                                    serde_yaml::from_str(&extension_results_yaml).unwrap();
+
+                                return results;
+                            } else {
+                                println!(
+                                    "Error running extension: {}",
+                                    String::from_utf8_lossy(&extension_run.stderr)
+                                )
+                            }
                         }
                     }
                 }
@@ -229,13 +273,12 @@ fn get_current_settings() -> String {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn update_settings(settings_json: String) -> Result<(), String> {
+fn update_settings(settings_json: String) {
     Settings::init();
 
     let settings: Settings = serde_json::from_str(&settings_json).unwrap();
-    let settings_yaml = serde_yaml::to_string(&settings).unwrap();
 
-    return Settings::update(settings_yaml);
+    Settings::update(&settings);
 }
 
 #[tauri::command()]
@@ -259,46 +302,54 @@ async fn run_action(
     action_json: String,
     window: Window,
     app_handle: AppHandle,
-) -> Result<(), String> {
-    return match action_type.as_str() {
+) {
+    match action_type.as_str() {
         "OpenApp" => {
             window.hide().unwrap();
 
-            let action: OpenApp = serde_json::from_str(&action_json)
-                .expect("Error getting action from JSON");
+            let action: OpenApp =
+                serde_json::from_str(&action_json).expect("Error getting action from JSON");
 
-            let desktop_file_dir = Path::new(&action.desktop_path)
-                .parent()
-                .expect("Error reading parent directory")
-                .to_owned();
+            #[cfg(target_os = "linux")]
+            if cfg!(target_os = "linux") {
+                let desktop_file_dir = Path::new(&action.desktop_path)
+                    .parent()
+                    .expect("Error reading parent directory")
+                    .to_owned();
 
-            let desktop_file_name = Path::new(&action.desktop_path)
-                .file_name()
-                .expect("")
-                .to_owned();
+                let desktop_file_name = Path::new(&action.desktop_path)
+                    .file_name()
+                    .expect("")
+                    .to_owned();
 
-            std::thread::spawn(|| {
-                Command::new("gtk-launch")
-                    .arg(desktop_file_name)
-                    .current_dir(desktop_file_dir)
-                    .spawn()
-                    .expect("");
-            });
+                std::thread::spawn(|| {
+                    Command::new("gtk-launch")
+                        .arg(desktop_file_name)
+                        .current_dir(desktop_file_dir)
+                        .spawn()
+                        .expect("");
+                });
+            }
 
-            window.close().unwrap();
-            Ok(())
+            #[cfg(target_os = "windows")]
+            if cfg!(target_os = "windows") {
+                let path = Path::new(&action.desktop_path).to_owned();
+
+                std::thread::spawn(move || {
+                    let script = format!(
+                        "invoke-item '{}'",
+                        path.into_os_string().into_string().unwrap()
+                    );
+
+                    powershell_script::run(&script).expect("Error opening app");
+                });
+            }
         }
         "OpenInBrowser" => {
             let action: OpenInBrowser = serde_json::from_str(&action_json).unwrap();
             open::that(action.url).expect("Error opening url");
-
-            window.close().unwrap();
-            Ok(())
         }
-        "CopyToClipbard" => {
-            window.close().unwrap();
-            Ok(())
-        }
+        "CopyToClipbard" => {}
         "ExtensionAction" => {
             let action: ExtensionAction = serde_json::from_str(&action_json).unwrap();
 
@@ -308,69 +359,80 @@ async fn run_action(
             let mut parameters_file = File::create(&get_extension_parameters_path().unwrap())
                 .expect("Error opening parameters file");
 
-            let parameters_yaml = serde_yaml::to_string(&parameters)
-                .expect("Error converting parameters yaml");
+            let parameters_yaml =
+                serde_yaml::to_string(&parameters).expect("Error converting parameters yaml");
 
-            parameters_file.write_all(&parameters_yaml.as_bytes()).unwrap();
+            parameters_file
+                .write_all(&parameters_yaml.as_bytes())
+                .unwrap();
 
             parameters_file.flush().unwrap();
 
-            Command::new("sh")
-                .arg("-c")
-                .arg("./extension")
-                .current_dir(get_extension_path(action.extension_id).unwrap())
-                .output()
-                .expect("Error running extension action");
+            if cfg!(target_os = "linux") {
+                Command::new("sh")
+                    .arg("-c")
+                    .arg("./extension")
+                    .current_dir(get_extension_path(&action.extension_id).unwrap())
+                    .output()
+                    .expect("Error running extension action");
+            }
 
-            window.close().unwrap();
-            Ok(())
+            if cfg!(target_os = "windows") {
+                Command::new("cmd")
+                    .arg("/C")
+                    .arg("start extension.exe")
+                    .current_dir(get_extension_path(&action.extension_id).unwrap())
+                    .creation_flags(FLAG_CREATE_NO_WINDOW)
+                    .creation_flags(FLAG_DETACHED_PROCESS)
+                    .output()
+                    .expect("Error running extension action");
+            }
         }
         "DialogAction" => {
-
             //Writes a file with all the fields for the dialog
-            let action: DialogAction = serde_json::from_str(&action_json)
-                .expect("Error getting action from JSON");
+            let action: DialogAction =
+                serde_json::from_str(&action_json).expect("Error getting action from JSON");
 
-            let action_yaml = serde_yaml::to_string(&action)
-                .expect("Error creating dialog action yaml");
+            let action_yaml =
+                serde_yaml::to_string(&action).expect("Error creating dialog action yaml");
 
             let mut dialog_action_file = File::create(get_dialog_action_path().unwrap())
                 .expect("Error creating dialog action file");
 
-            dialog_action_file.write_all(action_yaml.as_bytes())
+            dialog_action_file
+                .write_all(action_yaml.as_bytes())
                 .expect("Error writing dialog action file");
 
-            dialog_action_file.flush()
+            dialog_action_file
+                .flush()
                 .expect("Error closing dialog action file");
 
-
             //Opens the dialog window
-            WindowBuilder::new(&app_handle, "extension_dialog", WindowUrl::App("extension-dialog".parse().unwrap()))
-                .max_inner_size(300.0, 800.0)
-                .resizable(false)
-                .title(action.title)
-                .build()
-                .expect("Error spawning extension dialog");
-
-            window.close().unwrap();
-            Ok(())
+            WindowBuilder::new(
+                &app_handle,
+                "extension_dialog",
+                WindowUrl::App("extension-dialog".parse().unwrap()),
+            )
+            .max_inner_size(300.0, 800.0)
+            .resizable(false)
+            .title(action.title)
+            .build()
+            .expect("Error spawning extension dialog");
         }
-        _ => Err("Action not found".into()),
+        _ => {}
     };
+
+    window.close().unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn update_extension_setting(
-    extension_id: String,
-    setting_id: String,
-    new_value: String,
-) -> Result<(), String> {
-    return Settings::update_extension_setting(extension_id, setting_id, new_value);
+fn update_extension_setting(extension_id: String, setting_id: String, new_value: String) {
+    Settings::update_extension_setting(extension_id, setting_id, new_value);
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn update_extension_keyword(extension_id: String, keyword: String) -> Result<(), String> {
-    return Settings::update_extension_keyword(extension_id, keyword);
+fn update_extension_keyword(extension_id: String, keyword: String) {
+    Settings::update_extension_keyword(extension_id, keyword);
 }
 
 #[tauri::command()]
@@ -431,8 +493,7 @@ fn add_search_engine(
             default: false,
         });
 
-    let settings_json = serde_yaml::to_string(&settings).expect("Error converting search engine");
-    Settings::update(settings_json).expect("Error updating settings");
+    Settings::update(&settings);
 }
 
 #[tauri::command()]
@@ -447,19 +508,15 @@ fn export_theme(path: String) {
 
 #[tauri::command()]
 fn import_theme(path: String) {
-    let mut file = File::open(&path).expect("Error opening theme file");
-    let mut file_content = "".to_string();
+    let file_content = fs::read_to_string(&path).expect("Error getting theme content");
     let mut settings = Settings::get_settings();
 
-    file.read_to_string(&mut file_content)
-        .expect("Error reading theme file");
-
-    let theme: Theme = serde_yaml::from_str(&file_content).expect("Error converting to a theme");
+    let theme: Theme =
+        serde_yaml::from_str(&file_content).expect("Error converting file to a theme");
 
     settings.theme = theme;
 
-    Settings::update(serde_yaml::to_string(&settings).expect("Error converting settings"))
-        .expect("Error updating settings");
+    Settings::update(&settings);
 }
 
 #[tauri::command()]
@@ -567,7 +624,7 @@ async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-themes-hub",
         &themes_path,
     )
-        .expect("Error cloning themes repo");
+    .expect("Error cloning themes repo");
 
     let mut themes_file =
         File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
@@ -607,8 +664,8 @@ async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
         .read_to_string(&mut theme_file_content)
         .expect("Error reading theme content");
 
-    let theme: Theme = serde_yaml::from_str(&theme_file_content)
-        .expect("Error getting theme from file");
+    let theme: Theme =
+        serde_yaml::from_str(&theme_file_content).expect("Error getting theme from file");
 
     let mut settings = Settings::get_settings();
     settings.theme.background = theme.background;
@@ -621,8 +678,7 @@ async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
     settings.theme.text = theme.text;
     settings.theme.secondary_text = theme.secondary_text;
 
-    let settings_json = serde_yaml::to_string(&settings).expect("Error converting theme to json");
-    Settings::update(settings_json).expect("Error updating settings");
+    Settings::update(&settings);
 
     app.emit_all("updateTheme", ()).expect("Error running emit");
 }
@@ -641,7 +697,7 @@ async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-extensions-hub",
         &extensions_dir,
     )
-        .expect("Error cloning extensions repo");
+    .expect("Error cloning extensions repo");
 
     let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
         .expect("Error opening extensions file");
@@ -684,10 +740,7 @@ fn get_dialog_action() -> Result<DialogAction, ()> {
 }
 
 #[tauri::command]
-fn write_dialog_result(
-    result: DialogResult,
-    window: Window,
-) {
+fn write_dialog_result(result: DialogResult, window: Window) {
     let fields = serde_yaml::to_string(&result.results).unwrap();
 
     let parameters = Parameters::new_action(result.action, vec![fields]);
@@ -697,16 +750,42 @@ fn write_dialog_result(
     let mut parameters_file = File::create(get_extension_parameters_path().unwrap())
         .expect("Error creating parameters file");
 
-    parameters_file.write_all(&parameters_yaml.as_bytes()).unwrap();
+    parameters_file
+        .write_all(&parameters_yaml.as_bytes())
+        .unwrap();
 
-    Command::new("sh")
-        .arg("-c")
-        .arg("./extension")
-        .current_dir(get_extension_path(result.extension_id).unwrap())
-        .output()
-        .expect("Error running extension action");
+    if cfg!(target_os = "linux") {
+        Command::new("sh")
+            .arg("-c")
+            .arg("./extension")
+            .current_dir(get_extension_path(&result.extension_id).unwrap())
+            .output()
+            .expect("Error running extension action");
+    }
+
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .arg("/C")
+            .arg("start extension.exe")
+            .current_dir(get_extension_path(&result.extension_id).unwrap())
+            .creation_flags(FLAG_CREATE_NO_WINDOW)
+            .creation_flags(FLAG_DETACHED_PROCESS)
+            .output()
+            .expect("Error running extension action");
+    }
 
     window.close().expect("Error closing window");
+}
+
+#[tauri::command]
+fn open_settings(app: AppHandle) {
+    WindowBuilder::new(&app, "settings", WindowUrl::App("settings".into()))
+        .title("Settings")
+        .build()
+        .expect("Error creating settings window");
+
+    let main_window = &app.get_window("main").unwrap();
+    main_window.close().expect("Error closing search window");
 }
 
 #[tokio::main]
@@ -738,6 +817,7 @@ async fn main() {
             install_community_extension,
             get_dialog_action,
             write_dialog_result,
+            open_settings
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
@@ -745,11 +825,7 @@ async fn main() {
 
             //Opens settings if the argument is found
             if open_settings {
-                WindowBuilder::new(
-                    app,
-                    "settings",
-                    WindowUrl::App("settings".into()),
-                )
+                WindowBuilder::new(app, "settings", WindowUrl::App("settings".into()))
                     .title("Settings")
                     .build()
                     .expect("Error creating settings window");
@@ -764,7 +840,12 @@ async fn main() {
 
             let main_window = app.get_window("main").unwrap();
 
-            main_window.set_position(PhysicalPosition { x: cursor_x, y: cursor_y }).unwrap();
+            main_window
+                .set_position(PhysicalPosition {
+                    x: cursor_x,
+                    y: cursor_y,
+                })
+                .unwrap();
 
             let screen = main_window.current_monitor().unwrap().unwrap();
             let screen_position = screen.position();
@@ -797,7 +878,6 @@ async fn main() {
                 if label == "main" {
                     match event {
                         WindowEvent::Focused(focused) => {
-
                             //Hides the window when user clicks outside
                             if !focused {
                                 let window = app.get_window("main").unwrap();

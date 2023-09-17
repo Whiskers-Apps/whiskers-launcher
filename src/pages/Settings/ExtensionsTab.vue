@@ -281,9 +281,9 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
     <div class="p-4">
         <div class="flex">
 
-            <div class="text-3xl ml-3 mb-4">Extensions</div>
+            <div class="text-2xl ml-2 mb-4">Extensions</div>
             <div class="flex flex-grow justify-end">
-                <button class="h-[50px] w-[50px] flex items-center justify-center menuButton" @click="toggleIconMenu()">
+                <button class="h-[40px] w-[40px] flex items-center justify-center menuButton" @click="toggleIconMenu()">
                     <ThreeDotsSVG class="h-5 w-5 menuButtonIcon" />
                 </button>
                 <div class="menu-content" ref="menu">
@@ -298,7 +298,7 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
             </div>
         </div>
 
-        <div v-for="extension in tabExtensions" class="p-4 secondaryBackground rounded-3xl mb-2">
+        <div v-for="extension in tabExtensions" class="p-4 secondaryBackground rounded-3xl mb-2 max-w-[700px]">
 
             <div class="flex">
                 <div class="font-bold text-lg ml-3">{{ extension.name }}</div>

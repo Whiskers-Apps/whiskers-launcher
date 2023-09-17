@@ -132,8 +132,8 @@ async function importTheme() {
     let path = await open({
         filters: [
             {
-                name: "Json",
-                extensions: ["json"]
+                name: "Yaml",
+                extensions: ["yml"]
             }
         ]
     })
@@ -186,9 +186,9 @@ function openCommunityThemesDialog() {
 <template>
     <div class="p-4">
         <div class="flex items-start">
-            <div class="text-3xl flex-grow ml-3">Theming</div>
+            <div class="text-2xl flex-grow ml-2">Theming</div>
             <div class="flex flex-grow justify-end">
-                <button class="h-[50px] w-[50px] flex items-center justify-center menuButton" @click="toggleIconMenu()">
+                <button class="h-[40px] w-[40px] flex items-center justify-center menuButton" @click="toggleIconMenu()">
                     <ThreeDotsSVG class="h-5 w-5 menuButtonIcon" />
                 </button>
                 <div class="menu-content" ref="menu">
@@ -204,79 +204,85 @@ function openCommunityThemesDialog() {
             </div>
         </div>
 
-        <div class="ml-3 mt-4 text-xl">Preview</div>
-        <div class="previewBox p-4 rounded-3xl w-fit">
-            <div class="flex">
-                <button class=" previewButton p-2 pr-4 pl-4 rounded-full hover:opacity-80 w-full">Abc</button>
-                <button class=" ml-4 previewDangerButton p-2 pr-4 pl-4 rounded-full hover:opacity-80 w-full">Abc</button>
+        <div class="max-w-[700px] test">
+            <div class="ml-3 mt-2 text-xl">Preview</div>
+            <div class="previewBox mt-2 p-6 rounded-3xl w-fit">
+                <div class="flex">
+                    <button class=" previewButton p-2 pr-4 pl-4 rounded-full hover:opacity-80 w-full">Abc</button>
+                    <button
+                        class=" ml-4 previewDangerButton p-2 pr-4 pl-4 rounded-full hover:opacity-80 w-full">Abc</button>
+                </div>
+                <div class="p-4 previewCurrentSecondaryBackground rounded-3xl mt-4">
+                    <div class="ml-3 previewText">Abc</div>
+                    <input class="previewInput w-full" placeholder="Abc" />
+                </div>
             </div>
-            <div class="p-4 previewCurrentSecondaryBackground rounded-3xl mt-4">
-                <div class="ml-3 previewText">Abc</div>
-                <input class="previewInput w-full" placeholder="Abc" />
+            <div class="ml-2 mt-2 text-xl">Colors</div>
+            <div class=" items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Background</div>
+                    <input v-model="currentBackgroundColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class="ml-3 mt-4 text-xl">Colors</div>
-        <div class=" items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Background</div>
-                <input v-model="currentBackgroundColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Secondary Background</div>
+                    <input v-model="currentSecondaryBackgroundColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Secondary Background</div>
-                <input v-model="currentSecondaryBackgroundColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Tertiary Background</div>
+                    <input v-model="currentTertiaryBackgroundColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Tertiary Background</div>
-                <input v-model="currentTertiaryBackgroundColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Accent</div>
+                    <input v-model="currentAccentColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Accent</div>
-                <input v-model="currentAccentColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">On Accent</div>
+                    <input v-model="currentOnAccentColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">On Accent</div>
-                <input v-model="currentOnAccentColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Danger</div>
+                    <input v-model="currentDangerColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Danger</div>
-                <input v-model="currentDangerColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">On Danger</div>
+                    <input v-model="currentOnDangerColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">On Danger</div>
-                <input v-model="currentOnDangerColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Text</div>
+                    <input v-model="currentTextColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Text</div>
-                <input v-model="currentTextColor" type="color" class="colorInput">
+            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
+                <div class="flex items-center">
+                    <div class="flex-grow">Secondary Text</div>
+                    <input v-model="currentSecondaryTextColor" type="color" class="colorInput">
+                </div>
             </div>
-        </div>
-        <div class=" mt-1 items-center secondaryBackground p-4 rounded-3xl">
-            <div class="flex items-center">
-                <div class="flex-grow">Secondary Text</div>
-                <input v-model="currentSecondaryTextColor" type="color" class="colorInput">
+            <div class="flex mt-4">
+                <PrimaryButton text="Save" @click="saveTheme()" :disabled="isSaveButtonDisabled()" :expand="true" />
             </div>
-        </div>
-        <div class="flex mt-4">
-            <PrimaryButton text="Save" @click="saveTheme()" :disabled="isSaveButtonDisabled()" :expand="true" />
         </div>
     </div>
 </template>
 
 <style scoped>
+
+
+
 .previewBox {
     background-color: v-bind(currentBackgroundColor);
     outline: 2px solid v-bind(currentSecondaryBackgroundColor);

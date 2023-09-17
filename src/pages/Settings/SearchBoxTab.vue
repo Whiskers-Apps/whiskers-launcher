@@ -72,13 +72,13 @@ async function update() {
 </script>
 
 <template>
-    <div class="p-4">
+    <div class="max-w-[700px] p-4">
 
-        <div class="text-3xl ml-3">Search Box</div>
+        <div class="text-2xl ml-2">Search Box</div>
 
-        <div class="text-lg font-bold mt-4 ml-3">Preview</div>
+        <div class="text-lg mt-1 ml-2">Preview</div>
 
-        <div class=" background flex items-center rounded pt-2 pb-2 pl-4 pr-4 preview ">
+        <div class="background flex items-center rounded  preview ">
             <div v-if="showSearchIcon" class="mr-2">
                 <SearchSVG class="w-5 h-5 stroke" />
             </div>
@@ -90,42 +90,42 @@ async function update() {
             </div>
         </div>
 
-        <div class="text-lg font-bold mt-4 ml-3">Settings</div>
+        <div class="text-lg mt-2 ml-2">Settings</div>
 
-        <div class="secondaryBackground p-4 rounded-3xl flex mb-1">
+        <div class="secondaryBackground p-6 rounded-[28px] flex mb-1">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Search Icon</div>
-                <div class="text-sm">If enabled it will show a search icon on the left</div>
+                <div>If enabled it will show the search icon</div>
             </div>
             <div class="flex items-center">
                 <Switch :checked="showSearchIcon" @update:checked="showSearchIcon = $event; update()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-3xl flex mb-1">
+        <div class="secondaryBackground p-6 rounded-[28px] flex mb-1">
             <div class="flex-grow">
                 <div class=" font-semibold">Show Settings Icon</div>
-                <div class="text-sm">If enabled it will show a settings icon on the right</div>
+                <div>If enabled it will show the settings icon</div>
             </div>
             <div class="flex items-center">
                 <Switch :checked="showSettingsIcon" @update:checked="showSettingsIcon = $event; update()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-3xl mb-1">
+        <div class="secondaryBackground p-6 rounded-[28px] mb-1">
 
             <div class=" font-semibold">Roundness</div>
-            <div class="text-sm">It changes the roundness of the search box. From no round to fully round</div>
+            <div>It changes the roundness of the search box. From no round to fully round</div>
             <div class=" mt-2">
                 <Slider :min="0" :max="9" :step="1" :value="roundnessInput"
                     @update:value="roundnessInput = $event; updateRoundness()" />
             </div>
         </div>
 
-        <div class="secondaryBackground p-4 rounded-3xl mb-1">
+        <div class="secondaryBackground p-6 rounded-[28px] mb-1">
 
             <div class=" font-semibold">Border Width</div>
-            <div class="text-sm">It changes the border width of the search box. From 0px to 6px</div>
+            <div>It changes the border width of the search box. From 0px to 6px</div>
             <div class="flex mt-2">
                 <Slider :min="0" :max="6" :step="1" :value="borderWidthInput"
                     @update:value="borderWidthInput = $event; updateBorderWidth()" />
@@ -146,7 +146,8 @@ async function update() {
 .preview {
     border-radius: v-bind(roundness);
     border: v-bind(borderWidth) solid v-bind(accentColor);
-    height: 70px;
+    height: 55px;
+    padding: 12px;
 }
 
 .secondaryBackgroundColor {

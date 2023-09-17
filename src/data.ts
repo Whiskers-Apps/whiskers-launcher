@@ -38,6 +38,7 @@ export interface CopyToClipboardAction {
 
 export interface ExtensionAction {
     type: string,
+    extension_id: string,
     action: string,
     args?: string[]
 }
