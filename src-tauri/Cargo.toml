@@ -7,20 +7,20 @@ license = ""
 repository = ""
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [build-dependencies]
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
+simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
+#simple_kl_rs = {path = "C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl-rs"}
+
+
 tauri = { version = "1.4.1", features = [ "protocol-all", "fs-all", "global-shortcut-all", "system-tray", "macos-private-api", "window-all", "shell-open"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.99"
 serde_yaml = "0.9.25"
 tauri-plugin-positioner = "1.0.4"
 dirs = "5.0.1"
-#simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
-simple_kl_rs = {path = "C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl-rs"}
 tokio = { version = "1.29.0", features= ["full"] }
 fuzzy-matcher = "0.3.7"
 open = "5.0.0"

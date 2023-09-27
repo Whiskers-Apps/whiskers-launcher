@@ -65,13 +65,23 @@ async function loadTheme() {
                 </div>
 
             </div>
-            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.SearchBox ? 'activeTab' : ''"
-                @click="emit('click', SettingsTab.SearchBox)">
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.Search ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.Search)">
                 <div class="">
                     <SearchSVG class="h-6 w-6 strokeAccent" />
                 </div>
                 <div class="ml-3">
-                    Search Box
+                    Search
+                </div>
+            </div>
+
+            <div class="tab flex items-center" v-bind:class="currentTab === SettingsTab.Results ? 'activeTab' : ''"
+                @click="emit('click', SettingsTab.Results)">
+                <div class="">
+                    <SearchSVG class="h-6 w-6 strokeAccent" />
+                </div>
+                <div class="ml-3">
+                    Results
                 </div>
             </div>
 

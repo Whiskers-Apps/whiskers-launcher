@@ -192,11 +192,11 @@ function openCommunityThemesDialog() {
                     <ThreeDotsSVG class="h-5 w-5 menuButtonIcon" />
                 </button>
                 <div class="menu-content" ref="menu">
-                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                    <button class="w-full p-2 whitespace-nowrap flex justify-start hover:opacity-80 focus:opacity-80"
                         @click="exportTheme()">Export Theme</button>
-                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                    <button class="w-full p-2 whitespace-nowrap flex justify-start hover:opacity-80 focus:opacity-80"
                         @click="importTheme()">Import Theme</button>
-                    <button class="w-full p-2 flex justify-start hover:opacity-80 focus:opacity-80"
+                    <button class="w-full p-2 whitespace-nowrap flex justify-start hover:opacity-80 focus:opacity-80"
                         @click="openCommunityThemesDialog()">
                         Community Themes
                     </button>

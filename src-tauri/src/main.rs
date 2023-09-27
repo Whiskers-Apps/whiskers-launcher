@@ -1,27 +1,22 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-//Windows Flags
-const FLAG_CREATE_NO_WINDOW: u32 = 0x08000000;
-const FLAG_DETACHED_PROCESS: u32 = 0x00000008;
+#[cfg(target_os = "windows")]
+use {
+    os::windows::process::CommandExt,
+};
 
 use enigo::MouseControllable;
 use extensions::CommunityExtension;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use git2::Repository;
-use simple_kl_rs::{
-    actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
-    extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters},
-    paths::{
-        get_apps_index_path, get_community_extensions_directory,
-        get_community_extensions_file_path, get_community_themes_file_path,
-        get_community_themes_path, get_extension_parameters_path, get_extension_path,
-        get_extension_results_path, get_extensions_path, get_resources_directory,
-        get_temp_themes_path,
-    },
-    results::{IconWithTextResult, SimpleKLResult},
-    settings::{Settings, Theme},
-};
+use simple_kl_rs::{actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction}, extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters}, paths::{
+    get_apps_index_path, get_community_extensions_directory,
+    get_community_extensions_file_path, get_community_themes_file_path,
+    get_community_themes_path, get_extension_parameters_path, get_extension_path,
+    get_extension_results_path, get_extensions_path, get_resources_directory,
+    get_temp_themes_path,
+}, results::{IconWithTextResult, SimpleKLResult}, settings::{Settings}, settings};
 use structs::structs::AppIndex;
 use themes::CommunityTheme;
 
@@ -31,10 +26,10 @@ use std::{
     env,
     fs::{self, File},
     io::{Read, Write},
-    os::windows::process::CommandExt,
     path::Path,
     process::Command,
 };
+use simple_kl_rs::settings::{get_settings, init_settings, ThemeSettings};
 
 use tauri::{
     AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, Window, WindowBuilder,
@@ -45,12 +40,14 @@ pub mod extensions;
 pub mod structs;
 pub mod themes;
 
+pub mod pages;
+
 #[tauri::command(rename_all = "snake_case")]
 fn get_results(search_text: String) -> Vec<SimpleKLResult> {
     let split_search: Vec<&str> = search_text.split_whitespace().collect();
     let mut keyword = String::from("");
     let mut search_words = String::from("");
-    let search_engines = Settings::get_settings().search_engines;
+    let search_engines = get_settings().search_engines;
 
     for (index, word) in split_search.iter().enumerate() {
         if index == 0 {
@@ -62,7 +59,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
 
     search_words = String::from(search_words.trim_end());
 
-    let settings = Settings::get_settings();
+    let settings = get_settings();
     let extensions = settings.extensions;
 
     for extension in extensions {
@@ -87,7 +84,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                            .to_owned(),
+                                .to_owned(),
                             format!("Search for {}", search_words).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -97,7 +94,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                            .to_owned(),
+                                .to_owned(),
                             &format!("Search for {}", search_words),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -111,11 +108,11 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
 
     let app_results = get_apps_results(&search_text);
 
-    if &app_results.len() > &0 {
-        return app_results;
+    return if &app_results.len() > &0 {
+        app_results
     } else {
         //Returns a search result
-        for search_engine in Settings::get_settings().search_engines {
+        for search_engine in get_settings().search_engines {
             if search_engine.default {
                 let url = search_engine.query.replace("%s", &search_text);
                 let mut result: Vec<SimpleKLResult> = Vec::new();
@@ -126,7 +123,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                            .to_path_buf(),
+                                .to_path_buf(),
                             format!("Search for {}", search_text).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -134,7 +131,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                            .to_owned(),
+                                .to_owned(),
                             &format!("Search for {}", search_text),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -145,8 +142,8 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
             }
         }
 
-        return vec![];
-    }
+        vec![]
+    };
 }
 
 fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
@@ -227,6 +224,7 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
                             }
                         }
 
+                        #[cfg(target_os = "windows")]
                         if cfg!(target_os = "windows") {
                             let extension_run = Command::new("cmd")
                                 .arg("/C")
@@ -268,17 +266,17 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
 
 #[tauri::command]
 fn get_current_settings() -> String {
-    Settings::init();
-    return serde_json::to_string(&Settings::get_settings()).unwrap();
+    init_settings();
+    return serde_json::to_string(&get_settings()).unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_settings(settings_json: String) {
-    Settings::init();
+    init_settings();
 
     let settings: Settings = serde_json::from_str(&settings_json).unwrap();
 
-    Settings::update(&settings);
+    settings::update_settings(&settings);
 }
 
 #[tauri::command()]
@@ -377,6 +375,7 @@ async fn run_action(
                     .expect("Error running extension action");
             }
 
+            #[cfg(target_os = "windows")]
             if cfg!(target_os = "windows") {
                 Command::new("cmd")
                     .arg("/C")
@@ -413,11 +412,11 @@ async fn run_action(
                 "extension_dialog",
                 WindowUrl::App("extension-dialog".parse().unwrap()),
             )
-            .max_inner_size(300.0, 800.0)
-            .resizable(false)
-            .title(action.title)
-            .build()
-            .expect("Error spawning extension dialog");
+                .max_inner_size(300.0, 800.0)
+                .resizable(false)
+                .title(action.title)
+                .build()
+                .expect("Error spawning extension dialog");
         }
         _ => {}
     };
@@ -427,12 +426,13 @@ async fn run_action(
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_extension_setting(extension_id: String, setting_id: String, new_value: String) {
-    Settings::update_extension_setting(extension_id, setting_id, new_value);
+    simple_kl_rs::extensions::update_extension_setting(&extension_id, &setting_id, &new_value);
 }
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_extension_keyword(extension_id: String, keyword: String) {
-    Settings::update_extension_keyword(extension_id, keyword);
+
+    simple_kl_rs::extensions::update_extension_keyword(&extension_id, &keyword);
 }
 
 #[tauri::command()]
@@ -476,7 +476,7 @@ fn add_search_engine(
     name: String,
     query: String,
 ) {
-    let mut settings = Settings::get_settings();
+    let mut settings = get_settings();
     let icon: Option<String> = match icon_path.is_empty() {
         true => None,
         false => Some(icon_path),
@@ -484,22 +484,22 @@ fn add_search_engine(
 
     settings
         .search_engines
-        .push(simple_kl_rs::settings::SearchEngine {
+        .push(settings::SearchEngineSettings {
             keyword,
-            icon,
+            icon: if icon.is_some() { Some(icon.unwrap()) } else { None },
             tint_icon,
             name,
             query,
             default: false,
         });
 
-    Settings::update(&settings);
+    settings::update_settings(&settings);
 }
 
 #[tauri::command()]
 fn export_theme(path: String) {
     let mut file = File::create(&path).expect("Error creating theme file");
-    let themes = Settings::get_settings().theme;
+    let themes = get_settings().theme;
     let themes_json = serde_yaml::to_string(&themes).expect("Error converting theme");
 
     file.write_all(&themes_json.as_bytes())
@@ -508,15 +508,15 @@ fn export_theme(path: String) {
 
 #[tauri::command()]
 fn import_theme(path: String) {
-    let file_content = fs::read_to_string(&path).expect("Error getting theme content");
-    let mut settings = Settings::get_settings();
+    let file_content = fs::read_to_string(&path).expect("Error reading theme file");
+    let mut settings = get_settings();
 
-    let theme: Theme =
-        serde_yaml::from_str(&file_content).expect("Error converting file to a theme");
+    let theme: ThemeSettings = serde_yaml::from_str(&file_content)
+        .expect("Error converting file to a theme");
 
     settings.theme = theme;
 
-    Settings::update(&settings);
+    settings::update_settings(&settings);
 }
 
 #[tauri::command()]
@@ -580,27 +580,22 @@ fn get_extension_default_setting(setting_id: String, extension_id: String) -> Re
     for extension in extensions {
         if extension.id == extension_id {
             if let Some(settings) = extension.settings {
-                if let Some(any_settings) = settings.any {
-                    for setting in any_settings {
-                        if setting.id == setting_id {
-                            return Ok(setting.default_value);
-                        }
+                for setting in settings.any {
+                    if setting.id == setting_id {
+                        return Ok(setting.default_value);
                     }
                 }
 
-                if let Some(linux_settings) = settings.linux {
-                    for setting in linux_settings {
-                        if setting.id == setting_id {
-                            return Ok(setting.default_value);
-                        }
+
+                for setting in settings.linux {
+                    if setting.id == setting_id {
+                        return Ok(setting.default_value);
                     }
                 }
 
-                if let Some(windows_settings) = settings.windows {
-                    for setting in windows_settings {
-                        if setting.id == setting_id {
-                            return Ok(setting.default_value);
-                        }
+                for setting in settings.windows {
+                    if setting.id == setting_id {
+                        return Ok(setting.default_value);
                     }
                 }
             }
@@ -624,7 +619,7 @@ async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-themes-hub",
         &themes_path,
     )
-    .expect("Error cloning themes repo");
+        .expect("Error cloning themes repo");
 
     let mut themes_file =
         File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
@@ -664,10 +659,10 @@ async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
         .read_to_string(&mut theme_file_content)
         .expect("Error reading theme content");
 
-    let theme: Theme =
+    let theme: ThemeSettings =
         serde_yaml::from_str(&theme_file_content).expect("Error getting theme from file");
 
-    let mut settings = Settings::get_settings();
+    let mut settings = get_settings();
     settings.theme.background = theme.background;
     settings.theme.secondary_background = theme.secondary_background;
     settings.theme.tertiary_background = theme.tertiary_background;
@@ -678,7 +673,7 @@ async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
     settings.theme.text = theme.text;
     settings.theme.secondary_text = theme.secondary_text;
 
-    Settings::update(&settings);
+    settings::update_settings(&settings);
 
     app.emit_all("updateTheme", ()).expect("Error running emit");
 }
@@ -697,7 +692,7 @@ async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-extensions-hub",
         &extensions_dir,
     )
-    .expect("Error cloning extensions repo");
+        .expect("Error cloning extensions repo");
 
     let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
         .expect("Error opening extensions file");
@@ -763,6 +758,7 @@ fn write_dialog_result(result: DialogResult, window: Window) {
             .expect("Error running extension action");
     }
 
+    #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
         Command::new("cmd")
             .arg("/C")
@@ -881,7 +877,7 @@ async fn main() {
                             //Hides the window when user clicks outside
                             if !focused {
                                 let window = app.get_window("main").unwrap();
-                                window.close().unwrap();
+                                //window.close().unwrap();
                             }
                         }
                         _ => {}

@@ -4,7 +4,8 @@ import { emit } from "@tauri-apps/api/event"
 
 export enum SettingsTab{
   General,
-  SearchBox,
+  Search,
+  Results,
   Theme,
   SearchEngines,
   Extensions,
@@ -13,50 +14,41 @@ export enum SettingsTab{
 
 export interface Settings {
   general: GeneralSettings,
-  search_box: SearchBoxSettings,
-  theme: Theme,
-  search_engines: SearchEngine[],
+  search: SearchSettings,
+  results: ResultsSettings,
+  theme: ThemeSettings,
+  search_engines: SearchEngineSettings[],
   extensions: ExtensionSettings[]
 }
 
-export interface ExtensionSettings {
-  id: string,
-  keyword: string,
-  settings?: ExtensionSetting
-}
 
-export interface ExtensionSetting {
-  any?: ExtensionOptionSetting[],
-  linux?: ExtensionOptionSetting[],
-  windows?: ExtensionOptionSetting[]
-}
-
-export interface ExtensionOptionSetting {
-  id: string,
-  current_value: string
-}
 
 export interface GeneralSettings {
   first_key: string;
   second_key: string;
   third_key: string;
-  limit: number;
+  auto_start: boolean;
 }
 
-export interface SearchBoxSettings {
-  show_search_icon: boolean;
-  show_settings_icon: boolean;
-  roundness: number;
-  border_width: number;
+export interface SearchSettings {
+  show_settings_icon: boolean,
+  show_search_icon: boolean,
+  show_placeholder: boolean,
+  border_radius: number,
+  border_width: number
+}
+
+export interface ResultsSettings{
+  results_count: number,
+  split_ui: boolean,
+  layout: TypeEnum
+}
+
+export interface TypeEnum{
+  type: string
 }
 
 export interface ThemeSettings {
-  current: Theme,
-  themes: Theme[]
-}
-
-export interface Theme {
-  name: string,
   background: string;
   secondary_background: string;
   tertiary_background: string;
@@ -68,13 +60,30 @@ export interface Theme {
   secondary_text: string;
 }
 
-export interface SearchEngine {
+export interface SearchEngineSettings {
+  keyword: string,
   icon?: string,
   tint_icon: boolean,
   name: string,
-  keyword: string,
   query: string,
   default: boolean
+}
+
+export interface ExtensionSettings {
+  id: string,
+  keyword: string,
+  settings: ExtensionSetting
+}
+
+export interface ExtensionSetting {
+  any: ExtensionOptionSetting[],
+  linux: ExtensionOptionSetting[],
+  windows: ExtensionOptionSetting[]
+}
+
+export interface ExtensionOptionSetting {
+  id: string,
+  current_value: string
 }
 
 
@@ -85,7 +94,7 @@ export async function getSettings(): Promise<Settings> {
   return settings
 }
 
-export async function getTheme(): Promise<Theme> {
+export async function getTheme(): Promise<ThemeSettings> {
   let settings = await getSettings();
 
   return settings.theme;

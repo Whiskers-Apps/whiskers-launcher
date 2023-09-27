@@ -1,33 +1,63 @@
 <script setup lang="ts">
-import { appWindow, PhysicalSize, WebviewWindow } from "@tauri-apps/api/window"
+import { appWindow, WebviewWindow } from "@tauri-apps/api/window"
 import { invoke } from "@tauri-apps/api";
 import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { onMounted, ref, watch } from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
-import { getSettings, getRoundnessInPixels, getTheme } from "@pages/Settings/Settings";
-import { SimpleKlResult, OpenAppAction } from "@/data"
+import { getSettings, getTheme } from "@pages/Settings/Settings";
+import { SimpleKlResult } from "@/data"
 import { hexToCSSFilter } from "hex-to-css-filter"
-import { isCopyToClipboardAction, isDoNothingAction, isExtensionAction, isOpenAppAction, isOpenInBrowserAction, isIconWithTitleAndDescriptionResult, isTitleAndDescriptionResult, isIconWithTextResult, isTextResult } from "@pages/Search/SearchVM"
+import { isIconWithTitleAndDescriptionResult, isTitleAndDescriptionResult, isIconWithTextResult, isTextResult } from "@pages/Search/SearchVM"
 
 const showSearchIcon = ref();
 const showSettingsIcon = ref();
+const showPlaceholder = ref();
 const roundnessLevel = ref();
 const borderWidth = ref();
-const searchText = ref("")
-const backgroundColor = ref("")
-const secondaryBackgroundColor = ref("")
-const tertiaryBackgroundColor = ref("")
-const accentColor = ref("")
-const textColor = ref("")
-const secondaryTextColor = ref("")
+const searchText = ref("");
+const layout = ref("");
+const splitUI = ref();
+
+const backgroundColor = ref("");
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const accentColor = ref("");
+const textColor = ref("");
+const secondaryTextColor = ref("");
+
 const searchRef = ref();
 const results = ref<SimpleKlResult[]>([]);
-const resultsLimit = ref(0)
-const resultsBoxHeight = ref("70px");
+const resultsCount = ref(0)
+const resultsBoxHeight = ref("");
 const selectedIndex = ref(0);
 const resultsRef = ref([]);
 
+
+onMounted(async () => {
+
+  searchRef.value.focus();
+
+  let settings = await getSettings();
+
+  roundnessLevel.value = `${settings.search.border_radius}px`;
+  borderWidth.value = `${settings.search.border_width}px`
+  showSearchIcon.value = settings.search.show_search_icon;
+  showSettingsIcon.value = settings.search.show_settings_icon;
+  showPlaceholder.value = settings.search.show_placeholder;
+  resultsCount.value = settings.results.results_count;
+  layout.value = settings.results.layout.type;
+  splitUI.value = settings.results.split_ui;
+
+  let theme = await getTheme();
+
+  backgroundColor.value = theme.background;
+  secondaryBackgroundColor.value = theme.secondary_background;
+  accentColor.value = theme.accent;
+  textColor.value = theme.text;
+  secondaryTextColor.value = theme.secondary_text;
+
+})
 
 function openSettings() {
 
@@ -57,29 +87,6 @@ function getCSSFilterFromHexColor(hexColor?: string): string {
 
   return "none"
 }
-
-
-onMounted(async () => {
-
-  searchRef.value.focus();
-
-  let settings = await getSettings();
-
-  roundnessLevel.value = getRoundnessInPixels(settings.search_box.roundness);
-  borderWidth.value = `${settings.search_box.border_width}px`
-  showSearchIcon.value = settings.search_box.show_search_icon;
-  showSettingsIcon.value = settings.search_box.show_settings_icon;
-  resultsLimit.value = settings.general.limit;
-
-  let theme = await getTheme();
-
-  backgroundColor.value = theme.background;
-  secondaryBackgroundColor.value = theme.secondary_background;
-  accentColor.value = theme.accent;
-  textColor.value = theme.text;
-  secondaryTextColor.value = theme.secondary_text;
-
-})
 
 document.addEventListener('keydown', function (event) {
 
@@ -151,69 +158,103 @@ watch(searchText, async (_newText, _oldText) => {
   } else {
 
     results.value = await invoke("get_results", { search_text: searchText.value });
-    
-    var newHeight = 55;
 
-    if (results.value.length > resultsLimit.value) {
-      newHeight = newHeight + (resultsLimit.value * 55);
+    let newHeight = 0;
+
+    if (results.value.length > resultsCount.value) {
+      newHeight = newHeight + (resultsCount.value * getResultHeight());
     } else {
-      newHeight = newHeight + results.value.length * 55;
+      newHeight = newHeight + results.value.length * getResultHeight();
     }
 
-    resultsBoxHeight.value = `${newHeight}px`
-    
+    newHeight += 32;
+
+    resultsBoxHeight.value = `${newHeight}px`;
+
+    console.log(results.value.length)
+    console.log(getResultHeight())
+    console.log(resultsBoxHeight.value)
+
   }
 
   selectedIndex.value = 0;
 })
 
+function getResultHeight(): number {
+  
+  switch (layout.value) {
+    case "Small": { return 50 }
+    case "Medium": { return 60 }
+    default: { return 70 }
+  }
+}
+
+function getResultHeightClass(): string {
+  switch (layout.value) {
+    case "Small": { return "smallResult" }
+    case "Medium": { return "mediumResult" }
+    default: { return "largeResult" }
+  }
+}
+
+function getIconHeightClass(): string {
+  switch (layout.value) {
+    case "Small": { return "smallIcon" }
+    case "Medium": { return "mediumIcon" }
+    default: { return "largeIcon" }
+  }
+}
+
 </script>
 
 <template>
   <div class="items-center flex flex-col h-screen w-screen max-h-screen text maxHeight">
-    <div class="mainBox">
-      <div class="flex items-center searchBox">
+    <div :class="splitUI ? '' : 'mainBox'">
+      <div class="flex items-center " :class="`${getResultHeightClass()} ${splitUI ? 'splitSearchBox' : 'searchBox'}`">
         <div v-if="showSearchIcon" class="mr-2">
           <SearchSVG class="w-5 h-5 stroke" />
         </div>
         <div class="flex-grow">
-          <input ref="searchRef" class="w-full background outline-none placeholder" placeholder="Search"
-            v-model="searchText" />
+          <input ref="searchRef" class="w-full background outline-none placeholder"
+            :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText" />
         </div>
         <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings">
           <SettingsSVG class="w-5 h-5 stroke" />
         </button>
       </div>
-      <div v-if="results.length > 0" class="resultsBox">
+
+      <div v-if="splitUI" class="h-[10px]"></div>
+
+      <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`max-height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
-          <div :ref="`result-${index}`" class="h-[55px] p-2 flex overflow-hidden"
-            :class="index === selectedIndex ? 'selectedResult' : ''">
+          <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden"
+            :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
 
             <div v-if="isTextResult(result)" class="flex items-center">
-              <div>{{ result.text }}</div>
+              <div class="min-w-0 oneLineText">{{ result.text }}</div>
             </div>
 
             <div v-if="isIconWithTextResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class="h-[30px] w-[30px] object-contain icon"
-                :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
-              <div class="text-lg ml-2 flex-grow">{{ result.text }}</div>
+              <img :src="convertFileSrc(result.icon!!)" class=" object-contain h-full aspect-square icon"
+                :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+              <div class="text-lg ml-2 flex-grow min-w-0 oneLineText">{{ result.text }}</div>
             </div>
 
             <div v-if="isTitleAndDescriptionResult(result)" class="flex flex-col justify-center p-2">
-              <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">{{ result.title }}
+              <div class="text-[15px] font-bold min-w-0 oneLineText">{{ result.title }}
               </div>
-              <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">{{ result.description
+              <div class="text-[15px] subtext min-w-0 oneLineText">{{ result.description
               }}</div>
             </div>
 
             <div v-if="isIconWithTitleAndDescriptionResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class="h-[30px] w-[30px] object-contain icon"
+              <img :src="convertFileSrc(result.icon!!)" class=" object-contain icon" :class="getIconHeightClass()"
                 :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
-              <div class="flex-grow flex flex-col ml-2">
-                <div class="text-[16px] font-bold text-ellipsis whitespace-nowrap">
+              <div class="flex-grow flex flex-col ml-2 justify-center">
+                <div class="font-medium min-w-0 oneLineText">
                   {{ result.title }}
                 </div>
-                <div class="text-[15px] subtext text-ellipsis whitespace-nowrap">
+                <div class=" subtext min-w-0 oneLineText">
                   {{ result.description }}
                 </div>
               </div>
@@ -240,11 +281,13 @@ watch(searchText, async (_newText, _oldText) => {
 }
 
 .text {
-  color: v-bind(textColor)
+  color: v-bind(textColor);
+  line-height: 20px;
 }
 
 .subtext {
   color: v-bind(secondaryTextColor);
+  line-height: 10px;
 }
 
 .maxHeight {
@@ -258,22 +301,68 @@ watch(searchText, async (_newText, _oldText) => {
 }
 
 .mainBox {
+  width: 780px;
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
-  width: 700px;
 }
 
+
 .searchBox {
-  padding: 12px;
-  width: 700px;
+  padding-left: 16px;
+  padding-right: 16px;
+  width: 780px;
+}
+
+.splitSearchBox {
+  padding-left: 16px;
+  padding-right: 16px;
+  width: 780px;
+  background-color: v-bind(backgroundColor);
+  border: solid v-bind(borderWidth) v-bind(accentColor);
+  border-radius: v-bind(roundnessLevel);
 }
 
 .resultsBox {
-  max-height: v-bind(resultsBoxHeight);
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px;
+  padding: 8px;
+}
+
+.splitResultsBox {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  background-color: v-bind(backgroundColor);
+  border: solid v-bind(borderWidth) v-bind(accentColor);
+  border-radius: v-bind(roundnessLevel);
+}
+
+.smallResult {
+  min-height: 50px;
+}
+
+.mediumResult {
+  min-height: 60px;
+}
+
+.largeResult {
+  min-height: 70px;
+}
+
+.smallIcon {
+  height: 30px;
+  width: 30px;
+}
+
+.mediumIcon {
+  height: 35px;
+  width: 35px;
+}
+
+.largeIcon {
+  height: 40px;
+  width: 40px;
 }
 
 .placeholder::placeholder {

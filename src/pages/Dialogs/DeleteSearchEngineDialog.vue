@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SearchEngine, getSettings, getTheme, updateSettings } from '../Settings/Settings';
+import { SearchEngineSettings, getSettings, getTheme, updateSettings } from '../Settings/Settings';
 import { useRoute } from 'vue-router';
 import { invoke } from '@tauri-apps/api';
 
@@ -13,7 +13,7 @@ const dangerColor = ref("");
 const onDangerColor = ref("");
 
 const index = +useRoute().query.index!!;
-const searchEngine = ref<SearchEngine>();
+const searchEngine = ref<SearchEngineSettings>();
 
 
 onMounted(async () => {

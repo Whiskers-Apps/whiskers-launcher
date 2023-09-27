@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { onMounted, ref } from "vue";
-import { Settings, getSettings, SearchEngine, updateSettings, getTheme } from "../Settings/Settings"
+import { Settings, getSettings, SearchEngineSettings, updateSettings, getTheme } from "../Settings/Settings"
 import { useRoute } from "vue-router";
 import { convertFileSrc } from "@tauri-apps/api/tauri"
 import { open } from "@tauri-apps/api/dialog"
@@ -11,7 +11,7 @@ import { invoke } from "@tauri-apps/api";
 import Switch from "../../components/Switch.vue"
 import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
 
-const searchEngine = ref<SearchEngine>();
+const searchEngine = ref<SearchEngineSettings>();
 const index = +useRoute().params.index;
 const backgroundColor = ref("");
 const accentColor = ref("");

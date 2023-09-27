@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 import { getSettings, getTheme, updateSettings } from './Settings';
 import Slider from '../../components/Slider.vue';
 import { listen } from '@tauri-apps/api/event';
-import { invoke } from '@tauri-apps/api';
+import Switch from '@/components/Switch.vue';
 
 const backgroundColor = ref("");
 const secondaryBackgroundColor = ref("");
@@ -16,7 +16,8 @@ const updateThemeListener = ref();
 const firstKey = ref("");
 const secondKey = ref("");
 const thirdKey = ref("");
-const resultsLimit = ref<number>(-1);
+const autoStart = ref(false);
+
 const showFirstKeyOptions = ref(false);
 const showSecondKeyOptions = ref(false);
 const showThirdKeyOptions = ref(false);
@@ -31,11 +32,11 @@ onMounted(async () => {
     firstKey.value = settings.general.first_key;
     secondKey.value = settings.general.second_key;
     thirdKey.value = settings.general.third_key;
-    resultsLimit.value = settings.general.limit;
+    autoStart.value = settings.general.auto_start;
 
     loadTheme();
 
-    updateThemeListener.value = listen("update-theme", (_event)=>{
+    updateThemeListener.value = listen("updateTheme", (_event)=>{
         loadTheme();
     });
 })
@@ -95,12 +96,12 @@ function toggleShowKey(key: 1 | 2 | 3) {
     }
 }
 
-async function updateResultsLimit(value: number) {
+async function updateAutoStart(value: boolean) {
 
-    resultsLimit.value = value;
+    autoStart.value = value;
 
     let settings = await getSettings();
-    settings.general.limit = value;
+    settings.general.auto_start = value;
 
     updateSettings(settings);
 }
@@ -163,11 +164,13 @@ async function updateResultsLimit(value: number) {
             </div>
         </div>
 
-        <div class="p-6 secondaryBackground border rounded-[28px] mt-1">
-            <div class=" font-semibold text-lg">Results Limit ({{ resultsLimit }})</div>
-            <div class="">The amount of results to show</div>
-            <div class="flex mt-2">
-                <Slider :min="2" :max="8" :step="1" :value="resultsLimit" @update:value="updateResultsLimit($event)" />
+        <div class="p-6 flex secondaryBackground border rounded-[28px] mt-1">
+            <div class="flex-grow">
+                <div class=" font-semibold text-lg">Auto Start</div>
+                <div class="">Toggle this setting to make the app auto start on login</div>
+            </div>
+            <div class="flex ml-2">
+                <Switch :checked="autoStart" @update:checked="updateAutoStart($event)" />
             </div>
         </div>
     </div>
@@ -182,31 +185,7 @@ async function updateResultsLimit(value: number) {
     background: v-bind(secondaryBackgroundColor);
 }
 
-.secondaryBackground {
-    background-color: v-bind(secondaryBackgroundColor);
-}
-
-.tertiaryBackground {
-    background-color: v-bind(tertiaryBackgroundColor);
-}
-
 .warning{
     color: v-bind(dangerColor);
-}
-
-input[type="range"]::-webkit-slider-runnable-track {
-    background: v-bind(tertiaryBackgroundColor);
-    border-radius: 9999px;
-    height: 1rem;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    margin-top: -2px;
-    background-color: v-bind(accentColor);
-    height: 1.2rem;
-    width: 1.2rem;
-    border-radius: 9999px;
 }
 </style>

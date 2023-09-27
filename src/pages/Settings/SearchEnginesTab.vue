@@ -1,65 +1,61 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SearchEngine, getSettings, updateSettings } from './Settings';
+import { SearchEngineSettings, getSettings, getTheme, updateSettings } from './Settings';
 import { convertFileSrc } from '@tauri-apps/api/tauri';
 import { hexToCSSFilter } from "hex-to-css-filter"
 import EditSVG from "../../assets/icons/edit.svg"
 import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
-import { listen } from '@tauri-apps/api/event';
 import { WebviewWindow } from "@tauri-apps/api/window"
 import CheckSVG from "../../assets/icons/check-circle.svg"
-import { emit } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 
-const searchEngines = ref<SearchEngine[]>();
-const updateSettingsEvent = ref();
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const accentColor = ref("");
+const onAccentColor = ref("");
+const textColor = ref("");
+
+
+const searchEngines = ref<SearchEngineSettings[]>();
 const addButtonHovering = ref(false);
 
-const props = defineProps({
-    backgroundColor: {
-        required: true,
-        type: String
-    },
-    secondaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    tertiaryBackgroundColor: {
-        required: true,
-        type: String
-    },
-    accentColor: {
-        required: true,
-        type: String
-    },
-    textColor: {
-        required: true,
-        type: String
-    },
-    onAccentColor: {
-        required: true,
-        type: String
-    }
-})
+const updateSettingsListener = ref();
+
 
 onMounted(async () => {
     let settings = await getSettings();
     searchEngines.value = settings.search_engines;
 
-    updateSettingsEvent.value = await listen("updateSettings", async (_event) => {
+    loadTheme()
+
+    updateSettingsListener.value = await listen("updateSettings", async (_event) => {
         let settings = await getSettings();
         searchEngines.value = settings.search_engines;
     })
 })
 
+async function loadTheme() {
+    let theme = await getTheme();
+    secondaryBackgroundColor.value = theme.secondary_background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    accentColor.value = theme.accent;
+    onAccentColor.value = theme.on_accent;
+    textColor.value = theme.text;
+}
+
 function getIconFilter(tintIcon: boolean): string {
 
+
     if (tintIcon) {
-        let filter = hexToCSSFilter(props.accentColor);
+        let filter = hexToCSSFilter(accentColor.value);
         return filter.filter.replace(";", "")
 
     } else {
         return "none"
     }
+
+
+    return "none"
 }
 
 function openEditDialog(index: number) {
@@ -128,12 +124,12 @@ function closeMenus(exception?: number) {
     });
 }
 
-async function makeDefault(index: number){
+async function makeDefault(index: number) {
     let settings = await getSettings();
-    let newSearchEngines: SearchEngine[] = [];
+    let newSearchEngines: SearchEngineSettings[] = [];
 
-    settings.search_engines.forEach((searchEngine, se_index) =>{
-        
+    settings.search_engines.forEach((searchEngine, se_index) => {
+
         let newEngine = searchEngine;
         newEngine.default = se_index === index ? true : false;
         newSearchEngines.push(newEngine);
@@ -176,7 +172,7 @@ document.addEventListener('keydown', (event) => {
             <div class="ml-4 p-1 rounded-lg whitespace-nowrap text-ellipsis text-lg">{{ searchEngine.name }}</div>
 
             <div v-if="searchEngine.default" class="ml-2">
-                <CheckSVG class="h-[25px] w-[25px] accentStroke"/>
+                <CheckSVG class="h-[25px] w-[25px] accentStroke stroke-2" />
             </div>
 
             <div class="flex-grow"></div>
@@ -194,10 +190,12 @@ document.addEventListener('keydown', (event) => {
                 </button>
                 <div class="menu-content p-2 rounded-xl" :id="`menu-${index}`">
                     <div class="menuButton flex items-center">
-                        <button class="text-start w-full min-w-[140px] p-2 hover:opacity-80 focus:opacity-80" @click="makeDefault(index)">Make Default</button>
+                        <button class="text-start w-full whitespace-nowrap p-2 hover:opacity-80 focus:opacity-80"
+                            @click="makeDefault(index)">Make Default</button>
                     </div>
                     <div class="menuButton flex items-center">
-                        <button class="text-start w-full p-2 hover:opacity-80 focus:opacity-80" @click="openDeleteDialog(index)">Delete</button>
+                        <button class="text-start w-full p-2 hover:opacity-80 focus:opacity-80"
+                            @click="openDeleteDialog(index)">Delete</button>
                     </div>
                 </div>
             </div>
@@ -222,18 +220,11 @@ document.addEventListener('keydown', (event) => {
     fill: v-bind(accentColor);
 }
 
-.secondaryBackground {
-    background-color: v-bind(secondaryBackgroundColor);
-}
-
-.tertiaryBackground {
-    background-color: v-bind(tertiaryBackgroundColor);
-}
-
-.accentStroke{
+.accentStroke {
     fill: none;
     stroke: v-bind(accentColor);
 }
+
 .border {
     border: 2px solid v-bind(accentColor);
 }
@@ -277,6 +268,7 @@ document.addEventListener('keydown', (event) => {
     z-index: 9999;
     right: 0;
     border: 2px solid v-bind(accentColor);
+    
 }
 
 .stroke {

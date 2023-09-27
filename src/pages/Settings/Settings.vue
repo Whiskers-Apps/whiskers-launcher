@@ -1,14 +1,16 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { SettingsTab, getTheme } from "./Settings"
-import GeneralTab from './GeneralTab.vue';
-import ThemesTab from './ThemesTab.vue';
-import SearchBoxTab from './SearchBoxTab.vue'
-import SearchEnginesTab from './SearchEnginesTab.vue';
-import ExtensionsTab from './ExtensionsTab.vue';
+import { SettingsTab, getTheme } from "@pages/Settings/Settings"
 import { listen } from '@tauri-apps/api/event';
-import AboutTab from './AboutTab.vue';
-import Navbar from "./Navbar.vue";
+
+import GeneralTab from '@pages/Settings/GeneralTab.vue';
+import ThemesTab from '@pages/Settings/ThemesTab.vue';
+import SearchBoxTab from '@pages/Settings/SearchBoxTab.vue'
+import ResultsTab from "@pages/Settings/ResultsTab.vue"
+import SearchEnginesTab from '@pages/Settings/SearchEnginesTab.vue';
+import ExtensionsTab from '@pages/Settings/ExtensionsTab.vue';
+import AboutTab from '@pages/Settings/AboutTab.vue';
+import Navbar from "@pages/Settings/Navbar.vue";
 
 const currentTab = ref(SettingsTab.General);
 
@@ -56,24 +58,22 @@ async function loadTheme() {
 
             <div class="flex-grow ml-[40px] overflow-y-auto h-screen test">
                 <div v-if="currentTab === SettingsTab.General">
-                    <GeneralTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                        :accent-color="accentColor" :text-color="textColor"
-                        :tertiary-background-color="tertiaryBackgroundColor" />
+                    <GeneralTab/>
                 </div>
 
-                <div v-if="currentTab === SettingsTab.SearchBox">
-                    <SearchBoxTab :background-color="backgroundColor" :secondary-background-color="secondaryBackgroundColor"
-                        :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor" />
+                <div v-if="currentTab === SettingsTab.Search">
+                    <SearchBoxTab/>
+                </div>
+
+                <div v-if="currentTab === SettingsTab.Results">
+                    <ResultsTab/>
                 </div>
 
                 <div v-if="currentTab === SettingsTab.Theme">
                     <ThemesTab />
                 </div>
                 <div v-if="currentTab === SettingsTab.SearchEngines">
-                    <SearchEnginesTab :background-color="backgroundColor"
-                        :secondary-background-color="secondaryBackgroundColor"
-                        :tertiary-background-color="tertiaryBackgroundColor" :accent-color="accentColor"
-                        :text-color="textColor" :on-accent-color="onAccentColor" />
+                    <SearchEnginesTab/>
                 </div>
                 <div v-if="currentTab === SettingsTab.Extensions">
                     <ExtensionsTab :background-color="backgroundColor"
@@ -105,14 +105,6 @@ async function loadTheme() {
     background: v-bind(accentColor);
     border-radius: 48px;
 }
-</style>
-
-<style scoped>
-
-
-.text {
-    color: v-bind(textColor);
-}
 
 .background {
     background-color: v-bind(backgroundColor);
@@ -121,6 +113,29 @@ async function loadTheme() {
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
 }
+
+.tertiaryBackground {
+    background-color: v-bind(tertiaryBackgroundColor);
+}
+
+.text {
+    color: v-bind(textColor);
+}
+
+.fillAccent {
+    fill: v-bind(accentColor);
+    stroke: none;
+}
+
+.strokeAccent {
+    fill: none;
+    stroke: v-bind(accentColor);
+    stroke-width: 2;
+}
+</style>
+
+<style scoped>
+
 
 .placeholder::placeholder {
     color: v-bind(secondaryTextColor);
@@ -144,18 +159,5 @@ async function loadTheme() {
     background-color: v-bind(tertiaryBackgroundColor);
     font-weight: 600;
     cursor: pointer;
-}
-
-
-
-.fillAccent {
-    fill: v-bind(accentColor);
-    stroke: none;
-}
-
-.strokeAccent {
-    fill: none;
-    stroke: v-bind(accentColor);
-    stroke-width: 2;
 }
 </style>
