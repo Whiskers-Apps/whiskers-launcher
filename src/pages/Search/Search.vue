@@ -161,20 +161,17 @@ watch(searchText, async (_newText, _oldText) => {
 
     let newHeight = 0;
 
+    //If the results counts is bigger then the setting limit
     if (results.value.length > resultsCount.value) {
       newHeight = newHeight + (resultsCount.value * getResultHeight());
     } else {
       newHeight = newHeight + results.value.length * getResultHeight();
     }
 
-    newHeight += 32;
+    newHeight += 16;
 
     resultsBoxHeight.value = `${newHeight}px`;
-
-    console.log(results.value.length)
-    console.log(getResultHeight())
-    console.log(resultsBoxHeight.value)
-
+    
   }
 
   selectedIndex.value = 0;
@@ -225,7 +222,7 @@ function getIconHeightClass(): string {
 
       <div v-if="splitUI" class="h-[10px]"></div>
 
-      <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`max-height: ${resultsBoxHeight}`">
+      <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
           <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden"
             :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
@@ -241,9 +238,9 @@ function getIconHeightClass(): string {
             </div>
 
             <div v-if="isTitleAndDescriptionResult(result)" class="flex flex-col justify-center p-2">
-              <div class="text-[15px] font-bold min-w-0 oneLineText">{{ result.title }}
+              <div class="font-bold min-w-0 oneLineText">{{ result.title }}
               </div>
-              <div class="text-[15px] subtext min-w-0 oneLineText">{{ result.description
+              <div class="subtext text-xs min-w-0 oneLineText">{{ result.description
               }}</div>
             </div>
 
@@ -254,7 +251,7 @@ function getIconHeightClass(): string {
                 <div class="font-medium min-w-0 oneLineText">
                   {{ result.title }}
                 </div>
-                <div class=" subtext min-w-0 oneLineText">
+                <div class=" subtext text-xs min-w-0 oneLineText">
                   {{ result.description }}
                 </div>
               </div>
@@ -282,12 +279,11 @@ function getIconHeightClass(): string {
 
 .text {
   color: v-bind(textColor);
-  line-height: 20px;
+  line-height: 1em;
 }
 
 .subtext {
   color: v-bind(secondaryTextColor);
-  line-height: 10px;
 }
 
 .maxHeight {
@@ -339,15 +335,15 @@ function getIconHeightClass(): string {
 }
 
 .smallResult {
-  min-height: 50px;
+  height: 50px;
 }
 
 .mediumResult {
-  min-height: 60px;
+  height: 60px;
 }
 
 .largeResult {
-  min-height: 70px;
+  height: 70px;
 }
 
 .smallIcon {
