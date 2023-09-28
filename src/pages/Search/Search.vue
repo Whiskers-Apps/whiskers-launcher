@@ -222,7 +222,7 @@ function getIconHeightClass(): string {
 
       <div v-if="splitUI" class="h-[10px]"></div>
 
-      <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`height: ${resultsBoxHeight}`">
+      <div v-if="results.length > 0"  :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
           <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden"
             :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
@@ -308,12 +308,14 @@ function getIconHeightClass(): string {
   padding-left: 16px;
   padding-right: 16px;
   width: 780px;
+  overflow: hidden;
 }
 
 .splitSearchBox {
   padding-left: 16px;
   padding-right: 16px;
   width: 780px;
+  overflow: hidden;
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
