@@ -5,11 +5,12 @@ import { invoke } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 import { open as openLink } from "@tauri-apps/api/shell"
 import BranchSVG from "@icons/branch.svg"
-import CheckSVG from "@icons/check.svg"
 import DownloadSVG from "@icons/download.svg"
 import TrashSVG from "@icons/trash.svg"
 import { ExtensionManifest, getExtensions } from '@/data';
 import { WebviewWindow } from '@tauri-apps/api/window';
+import ChevronRightSVG from "@icons/chevron-right.svg"
+import ChevronLeftSVG from "@icons/chevron-left.svg"
 
 interface CommunityExtension {
     id: string,
@@ -29,9 +30,13 @@ const updateThemeEmit = ref();
 const updateExtensionsEmit = ref();
 const searchInput = ref("");
 const installedExtensions = ref<ExtensionManifest[]>([]);
+const disableButtons = ref(false);
+
+const extensionsGrid = ref()
+const currentPage = ref(1);
 const extensions = ref<CommunityExtension[]>([]);
 const currentExtensions = ref<CommunityExtension[]>([]);
-const disableButtons = ref(false);
+const pageExtensions = ref<CommunityExtension[]>([]);
 
 onMounted(async () => {
     loadTheme();
@@ -45,12 +50,15 @@ onMounted(async () => {
     updateExtensionsEmit.value = listen("updateExtensions", (_event) => {
         loadExtensions();
     });
+
+
 })
 
 async function loadExtensions() {
     installedExtensions.value = await getExtensions();
     extensions.value = await invoke("get_community_extensions");
     currentExtensions.value = extensions.value;
+    filterByPage()
 }
 
 async function loadTheme() {
@@ -63,14 +71,30 @@ async function loadTheme() {
     secondaryTextColor.value = theme.secondary_text;
 }
 
-function filter() {
-    currentExtensions.value = extensions.value.filter((extension) => extension.name.toLowerCase().trim().includes(searchInput.value.toLowerCase().trim()) || extension.description.toLowerCase().trim().includes(searchInput.value.toLowerCase().trim()));
+function filterByPage() {
+    const startIndex = (currentPage.value - 1) * 20;
+    const endIndex = Math.min(startIndex + 20, currentExtensions.value.length);
+
+    pageExtensions.value = currentExtensions.value.slice(startIndex, endIndex);
+    extensionsGrid.value.scrollTop = 0;
 }
+
+function filter() {
+    currentPage.value = 1
+    currentExtensions.value = extensions.value.filter((extension) => extension.name.toLowerCase().trim().includes(searchInput.value.toLowerCase().trim()) || extension.description.toLowerCase().trim().includes(searchInput.value.toLowerCase().trim()));
+    filterByPage()
+}
+
+
 
 async function installExtension(extension: CommunityExtension) {
     disableButtons.value = true;
     await invoke("install_community_extension", { id: extension.id, repo: extension.repo });
     disableButtons.value = false;
+}
+
+function getPagesCount(): number {
+    return currentExtensions.value.length / 20 + (currentExtensions.value.length % 20 ? 1 : 0)
 }
 
 function isExtensionInstalled(extension: CommunityExtension) {
@@ -97,55 +121,99 @@ function openDeleteDialog(extension: CommunityExtension) {
 
 </script>
 <template>
-    <div class="main flex flex-col">
-        <div class="flex items-center">
-            <div class="text-3xl">Community Extensions</div>
-            <div class="flex-grow flex justify-end ml-4">
-                <input class="input" v-model="searchInput" @input="filter()" placeholder="Search Extensions">
-            </div>
-        </div>
-        <div class="grid 2xl:grid-cols-2 xl:grid-cols-2 lg:grid-cols-2 grid-cols-1 gap-4 mt-4 overflow-scroll ">
-            <div class="extensionCard grid grid-cols-3 col-span-1" v-for="(extension, index) in currentExtensions"
-                :key="index">
-                <div class="col-span-1">
-                    <img :src="extension.preview" class="h-[200px] object-contain">
-                </div>
-                <div class="h-full flex col-span-2 ml-4">
-                    <div class="flex-grow overflow-hidden whitespace-break-spaces text-start">
-                        <div class="col-span-2 oneLineText text-lg font-bold">
-                            {{ extension.name }}
-                        </div>
-                        <div class="mt-4 h-full">
-                            {{ extension.description }}
-                        </div>
-                    </div>
+    <div class="main h-screen max-h-screen grid grid-cols-12">
 
-                    <div class="flex items-center">
-                        <button class="cardButton ml-4" :disabled="disableButtons" @click="openLink(extension.repo)">
-                            <BranchSVG class="h-6 w-6 fillIcon" />
-                        </button>
-                        <button v-if="isExtensionInstalled(extension)" @click="openDeleteDialog(extension)"
-                            class="cardButton ml-4" :disabled="disableButtons">
-                            <TrashSVG class="h-6 w-6 strokeIcon" />
-                        </button>
-                        <button v-else class="ml-4 cardButton" @click="installExtension(extension)"
-                            :disabled="disableButtons">
-                            <DownloadSVG class="h-6 w-6 strokeIcon" />
-                        </button>
+        <div class="2xl:col-span-2 2xl:block xl:col-span-2 xl:block lg:col-span-1 lg:block hidden "></div>
+
+        <div class="2xl:col-span-10 xl:col-span-10 lg:col-span-12 col-span-12 flex-grow flex flex-col overflow-auto">
+            <div class="text-3xl ml-2">Community Extensions</div>
+
+            <input class="input mt-2" placeholder="Search for extensions" v-model="searchInput" v-on:keyup.enter="filter()"
+                @input="if (searchInput.length === 0) { filter(); }">
+
+            <div class=" flex-grow max-w-[900px] overflow-auto mt-4 grid grid-cols-2 gap-4" ref="extensionsGrid">
+                <div v-for="(extension, index) in pageExtensions" :key="index" class="h-fit themeCard">
+                    <div class="flex justify-center items-center">
+                        <img :src="extension.preview" class="h-[200px] object-contain rounded-lg">
+                    </div>
+                    <div class="">
+                        <div class="min-w-0 ml-1 mt-4 mb-2 oneLineText text-lg font-medium w-full">{{ extension.name }}
+                        </div>
+                        <div class="mb-4 ml-1">{{ extension.description }}</div>
+                        <div class="flex-grow flex flex-col items-center justify-center">
+                            <button class="cardButton w-full" :disabled="disableButtons" @click="openLink(extension.repo)">
+                                <div class="flex justify-center items-center">
+                                    <BranchSVG class="h-5 w-5 mr-2 fillIcon" />
+                                    Source
+                                </div>
+                            </button>
+
+                            <button v-if="isExtensionInstalled(extension)" class="cardButton w-full mt-4"
+                                :disabled="disableButtons" @click="openDeleteDialog(extension)">
+                                <div class="flex justify-center items-center">
+                                    <TrashSVG class="h-5 w-5 mr-2 strokeIcon stroke-2" />
+                                    Uninstall
+                                </div>
+                            </button>
+
+                            <button v-else class="cardButton w-full mt-4" :disabled="disableButtons"
+                                @click="installExtension(extension)">
+                                <div class="flex justify-center items-center">
+
+                                    <DownloadSVG class="h-5 w-5 mr-2 strokeIcon" />
+                                    Install
+
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="mt-4 pageSelector flex">
+                <button class="pageSelectorButton mr-4 " :disabled="currentPage === 1"
+                    :class="currentPage === 1 ? 'disabled' : ''"
+                    @click="currentPage -= 1; filterByPage(); extensionsGrid.scrollTop = 0;">
+                    <ChevronLeftSVG class="h-5 w-5 pageSelectorButtonIcon" />
+                </button>
+                <div class="tertiaryBackground p-2 flex text-center rounded-lg">
+                    <div class="h-5 w-5">
+                        {{ currentPage }}
+                    </div>
+                </div>
+                <button class="pageSelectorButton ml-4" :class="currentPage + 1 > getPagesCount() ? 'disabled' : ''"
+                    :disabled="currentPage + 1 > getPagesCount()"
+                    @click="currentPage += 1; filterByPage(); extensionsGrid.scrollTop = 0;">
+                    <ChevronRightSVG class="h-5 w-5 pageSelectorButtonIcon" />
+                </button>
+            </div>
         </div>
+
     </div>
 </template>
 <style scoped>
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    border-radius: 48px;
+}
+
+::-webkit-scrollbar-track {
+    background: v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: v-bind(accentColor);
+    border-radius: 48px;
+}
+
+.tertiaryBackground {
+    background-color: v-bind(tertiaryBackgroundColor);
+}
+
 .main {
-    height: 100vh;
-    width: 100vw;
-    max-height: 100vh;
-    max-width: 100vw;
-    background-color: v-bind(backgroundColor);
     color: v-bind(textColor);
+    background-color: v-bind(backgroundColor);
     padding: 16px;
 }
 
@@ -157,7 +225,6 @@ function openDeleteDialog(extension: CommunityExtension) {
     padding-right: 16px;
     background-color: v-bind(tertiaryBackgroundColor);
     border-radius: 48px;
-    outline: 1px solid v-bind(textColor);
 }
 
 .input::placeholder {
@@ -168,7 +235,7 @@ input:focus {
     outline: 2px solid v-bind(accentColor);
 }
 
-.extensionCard {
+.themeCard {
     padding: 16px;
     background-color: v-bind(secondaryBackgroundColor);
     border-radius: 24px;
@@ -177,7 +244,7 @@ input:focus {
 
 .cardButton {
     background-color: v-bind(tertiaryBackgroundColor);
-    padding: 16px;
+    padding: 8px;
     border-radius: 48px;
 }
 
@@ -186,7 +253,7 @@ input:focus {
 }
 
 .cardButton:hover:enabled {
-    outline: 2px solid v-bind(accentColor);
+    filter: brightness(0.95);
 }
 
 .fillIcon {
@@ -196,5 +263,32 @@ input:focus {
 .strokeIcon {
     stroke: v-bind(textColor);
     stroke-width: 2px;
+}
+
+.pageSelector {
+    padding: 8px;
+    border-radius: 16px;
+    background-color: v-bind(secondaryBackgroundColor);
+    width: fit-content;
+}
+
+.pageSelectorButton {
+    padding: 8px;
+    background-color: v-bind(tertiaryBackgroundColor);
+    border-radius: 8px;
+}
+
+.pageSelectorButton:hover:enabled,
+.pageSelectorButton:focus:enabled {
+    opacity: 0.9;
+}
+
+.pageSelectorButtonIcon {
+    stroke: v-bind(textColor);
+    stroke-width: 2;
+}
+
+.disabled {
+    opacity: 0.2;
 }
 </style>

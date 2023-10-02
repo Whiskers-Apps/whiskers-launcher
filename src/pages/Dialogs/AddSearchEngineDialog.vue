@@ -119,7 +119,7 @@ document.addEventListener('keydown', (event) => {
         <div class="flex rounded-2xl items-start">
             <button class="icon p-2 rounded-2xl" @click="selectIcon()">
                 <div v-if="iconPath !== ''">
-                    <img class="h-[150px] w-[150px] object-contain tintIcon" :src="iconPath">
+                    <img class="h-[150px] w-[150px] object-contain tintIcon" :src="iconPath" alt="">
                 </div>
                 <div v-else>
                     <div class="h-[150px] w-[150px]"></div>
@@ -233,9 +233,6 @@ document.addEventListener('keydown', (event) => {
     fill: v-bind(accentColor);
 }
 
-.divider{
-    background-color: v-bind(accentColor);
-}
 .secondaryBackground {
     background-color: v-bind(secondaryBackgroundColor);
 }

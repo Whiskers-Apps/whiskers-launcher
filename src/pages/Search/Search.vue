@@ -1,14 +1,19 @@
 <script setup lang="ts">
-import { appWindow, WebviewWindow } from "@tauri-apps/api/window"
-import { invoke } from "@tauri-apps/api";
-import { convertFileSrc } from "@tauri-apps/api/tauri"
-import { onMounted, ref, watch } from "vue";
+import {appWindow, PhysicalSize, WebviewWindow} from "@tauri-apps/api/window"
+import {invoke} from "@tauri-apps/api";
+import {convertFileSrc} from "@tauri-apps/api/tauri"
+import {onMounted, ref, watch} from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
-import { getSettings, getTheme } from "@pages/Settings/Settings";
-import { SimpleKlResult } from "@/data"
-import { hexToCSSFilter } from "hex-to-css-filter"
-import { isIconWithTitleAndDescriptionResult, isTitleAndDescriptionResult, isIconWithTextResult, isTextResult } from "@pages/Search/SearchVM"
+import {getSettings, getTheme} from "@pages/Settings/Settings";
+import {SimpleKlResult} from "@/data"
+import {hexToCSSFilter} from "hex-to-css-filter"
+import {
+  isIconWithTitleAndDescriptionResult,
+  isTitleAndDescriptionResult,
+  isIconWithTextResult,
+  isTextResult
+} from "@pages/Search/SearchVM"
 
 const showSearchIcon = ref();
 const showSettingsIcon = ref();
@@ -32,6 +37,7 @@ const resultsCount = ref(0)
 const resultsBoxHeight = ref("");
 const selectedIndex = ref(0);
 const resultsRef = ref([]);
+const appHeight = ref(120);
 
 
 onMounted(async () => {
@@ -57,6 +63,7 @@ onMounted(async () => {
   textColor.value = theme.text;
   secondaryTextColor.value = theme.secondary_text;
 
+  appWindow.setSize(new PhysicalSize(800, 100));
 })
 
 function openSettings() {
@@ -96,10 +103,10 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value < results.value.length - 1) {
       selectedIndex.value = selectedIndex.value + 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
     } else if (selectedIndex.value == results.value.length - 1) {
       selectedIndex.value = 0;
-      (resultsRef.value[0] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[0] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
     }
   }
 
@@ -109,10 +116,10 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value > 0) {
       selectedIndex.value = selectedIndex.value - 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
     } else if (selectedIndex.value == 0) {
       selectedIndex.value = results.value.length - 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
     }
   }
 
@@ -137,11 +144,11 @@ async function runAction() {
 
   if (results.value.length > 0) {
 
-    var result = results.value[selectedIndex.value];
-    var type = result.action?.type;
+    let result = results.value[selectedIndex.value];
+    let type = result.action?.type;
 
     if (type != null) {
-      invoke("run_action", {
+      await invoke("run_action", {
         action_type: type,
         action_json: JSON.stringify(result.action)
       });
@@ -155,77 +162,110 @@ watch(searchText, async (_newText, _oldText) => {
 
     results.value = [];
     resultsBoxHeight.value = `0px`
+
+    appWindow.setSize(new PhysicalSize(800, 120));
   } else {
 
-    results.value = await invoke("get_results", { search_text: searchText.value });
+    results.value = await invoke("get_results", {search_text: searchText.value});
 
-    let newHeight = 0;
+    let newResultsHeight = 0;
 
     //If the results counts is bigger then the setting limit
     if (results.value.length > resultsCount.value) {
-      newHeight = newHeight + (resultsCount.value * getResultHeight());
+      newResultsHeight = newResultsHeight + (resultsCount.value * getResultHeight());
     } else {
-      newHeight = newHeight + results.value.length * getResultHeight();
+      newResultsHeight = newResultsHeight + results.value.length * getResultHeight();
     }
 
-    newHeight += 16;
+    newResultsHeight += 20;
 
-    resultsBoxHeight.value = `${newHeight}px`;
-    
+    resultsBoxHeight.value = `${newResultsHeight}px`;
+
+    let newAppHeight = newResultsHeight;
+
+    if (splitUI) {
+      newAppHeight += 10; //Add 10 pixels height if it has split ui
+    }
+
+    newAppHeight += getResultHeight();
+    newAppHeight += 40;
+
+    appWindow.setSize(new PhysicalSize(800, newAppHeight));
+
+    appHeight.value = newAppHeight;
   }
 
   selectedIndex.value = 0;
 })
 
 function getResultHeight(): number {
-  
+
   switch (layout.value) {
-    case "Small": { return 50 }
-    case "Medium": { return 60 }
-    default: { return 70 }
+    case "Small": {
+      return 50
+    }
+    case "Medium": {
+      return 60
+    }
+    default: {
+      return 70
+    }
   }
 }
 
 function getResultHeightClass(): string {
   switch (layout.value) {
-    case "Small": { return "smallResult" }
-    case "Medium": { return "mediumResult" }
-    default: { return "largeResult" }
+    case "Small": {
+      return "smallResult"
+    }
+    case "Medium": {
+      return "mediumResult"
+    }
+    default: {
+      return "largeResult"
+    }
   }
 }
 
 function getIconHeightClass(): string {
   switch (layout.value) {
-    case "Small": { return "smallIcon" }
-    case "Medium": { return "mediumIcon" }
-    default: { return "largeIcon" }
+    case "Small": {
+      return "smallIcon"
+    }
+    case "Medium": {
+      return "mediumIcon"
+    }
+    default: {
+      return "largeIcon"
+    }
   }
 }
 
 </script>
 
 <template>
-  <div class="items-center flex flex-col h-screen w-screen max-h-screen text maxHeight">
+  <div class="overflow-x-hidden p-2 flex mt-2 flex-col text">
     <div :class="splitUI ? '' : 'mainBox'">
       <div class="flex items-center " :class="`${getResultHeightClass()} ${splitUI ? 'splitSearchBox' : 'searchBox'}`">
         <div v-if="showSearchIcon" class="mr-2">
-          <SearchSVG class="w-5 h-5 stroke" />
+          <SearchSVG class="w-5 h-5 stroke"/>
         </div>
         <div class="flex-grow">
           <input ref="searchRef" class="w-full background outline-none placeholder"
-            :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText" />
+                 :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText"/>
         </div>
         <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings">
-          <SettingsSVG class="w-5 h-5 stroke" />
+          <SettingsSVG class="w-5 h-5 stroke"/>
         </button>
       </div>
 
       <div v-if="splitUI" class="h-[10px]"></div>
 
-      <div v-if="results.length > 0"  :class="splitUI ? 'splitResultsBox' : 'resultsBox'" :style="`height: ${resultsBoxHeight}`">
+      <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'"
+           :style="`height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
           <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden"
-            :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
+               :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
 
             <div v-if="isTextResult(result)" class="flex items-center">
               <div class="min-w-0 oneLineText">{{ result.text }}</div>
@@ -233,20 +273,22 @@ function getIconHeightClass(): string {
 
             <div v-if="isIconWithTextResult(result)" class="flex items-center">
               <img :src="convertFileSrc(result.icon!!)" class=" object-contain h-full aspect-square icon"
-                :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+                   :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="text-lg ml-2 flex-grow min-w-0 oneLineText">{{ result.text }}</div>
             </div>
 
             <div v-if="isTitleAndDescriptionResult(result)" class="flex flex-col justify-center p-2">
               <div class="font-bold min-w-0 oneLineText">{{ result.title }}
               </div>
-              <div class="subtext text-xs min-w-0 oneLineText">{{ result.description
-              }}</div>
+              <div class="subtext text-xs min-w-0 oneLineText">{{
+                  result.description
+                }}
+              </div>
             </div>
 
             <div v-if="isIconWithTitleAndDescriptionResult(result)" class="flex items-center">
               <img :src="convertFileSrc(result.icon!!)" class=" object-contain icon" :class="getIconHeightClass()"
-                :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+                   :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="flex-grow flex flex-col ml-2 justify-center">
                 <div class="font-medium min-w-0 oneLineText">
                   {{ result.title }}
@@ -286,11 +328,6 @@ function getIconHeightClass(): string {
   color: v-bind(secondaryTextColor);
 }
 
-.maxHeight {
-
-  max-height: v-bind(resultsBoxHeight);
-}
-
 .selectedResult {
   background-color: v-bind(secondaryBackgroundColor);
   border-radius: v-bind(roundnessLevel);
@@ -301,6 +338,7 @@ function getIconHeightClass(): string {
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
+  overflow: hidden;
 }
 
 
@@ -308,14 +346,15 @@ function getIconHeightClass(): string {
   padding-left: 16px;
   padding-right: 16px;
   width: 780px;
-  overflow: hidden;
+  overflow-y: auto;
+  background-color: v-bind(backgroundColor);
 }
 
 .splitSearchBox {
   padding-left: 16px;
   padding-right: 16px;
   width: 780px;
-  overflow: hidden;
+  overflow-y: auto;
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);

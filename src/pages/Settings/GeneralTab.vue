@@ -4,6 +4,7 @@ import { getSettings, getTheme, updateSettings } from './Settings';
 import Slider from '../../components/Slider.vue';
 import { listen } from '@tauri-apps/api/event';
 import Switch from '@/components/Switch.vue';
+import { invoke } from '@tauri-apps/api';
 
 const backgroundColor = ref("");
 const secondaryBackgroundColor = ref("");
@@ -104,6 +105,8 @@ async function updateAutoStart(value: boolean) {
     settings.general.auto_start = value;
 
     updateSettings(settings);
+
+    invoke("update_auto_start");
 }
 
 </script>

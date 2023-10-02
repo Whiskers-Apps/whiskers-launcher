@@ -21,7 +21,7 @@ use structs::structs::AppIndex;
 use themes::CommunityTheme;
 
 use simple_kl_rs::actions::{DialogAction, DialogResult};
-use simple_kl_rs::paths::get_dialog_action_path;
+use simple_kl_rs::paths::{get_autostart_path, get_dialog_action_path};
 use std::{
     env,
     fs::{self, File},
@@ -431,7 +431,6 @@ fn update_extension_setting(extension_id: String, setting_id: String, new_value:
 
 #[tauri::command(rename_all = "snake_case")]
 fn update_extension_keyword(extension_id: String, keyword: String) {
-
     simple_kl_rs::extensions::update_extension_keyword(&extension_id, &keyword);
 }
 
@@ -784,6 +783,37 @@ fn open_settings(app: AppHandle) {
     main_window.close().expect("Error closing search window");
 }
 
+#[tauri::command]
+fn update_auto_start() {
+    let path = get_autostart_path().unwrap();
+    let settings = get_settings();
+    let auto_start = settings.general.auto_start;
+
+    if !path.exists() && auto_start {
+        fs::create_dir_all(&path).expect("Error creating autostart folder");
+    }
+
+    match env::consts::OS {
+        "linux" => {
+            let desktop_file_content = include_str!("files/simple-kl-service.desktop");
+            let mut desktop_file_path = path.to_owned();
+            desktop_file_path.push("simple-kl-service.desktop");
+
+            if auto_start {
+                fs::write(&desktop_file_path, &desktop_file_content)
+                    .expect("Error creating autostart file");
+            } else {
+                if desktop_file_path.exists() {
+                    fs::remove_file(&desktop_file_path)
+                        .expect("Error removing autostart file");
+                }
+            }
+        }
+        "windows" => {}
+        _ => {}
+    }
+}
+
 #[tokio::main]
 async fn main() {
     tauri::Builder::default()
@@ -813,7 +843,8 @@ async fn main() {
             install_community_extension,
             get_dialog_action,
             write_dialog_result,
-            open_settings
+            open_settings,
+            update_auto_start
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
@@ -877,7 +908,7 @@ async fn main() {
                             //Hides the window when user clicks outside
                             if !focused {
                                 let window = app.get_window("main").unwrap();
-                                //window.close().unwrap();
+                                window.close().unwrap();
                             }
                         }
                         _ => {}
