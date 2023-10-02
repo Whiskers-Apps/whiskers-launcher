@@ -3524,6 +3524,7 @@ dependencies = [
 [[package]]
 name = "simple_kl_rs"
 version = "0.0.0"
+source = "git+https://github.com/lighttigerXIV/simple-kl-rs?branch=master#2cff3be0d701aaea2373768f4d7ee1863f2b69fa"
 dependencies = [
  "dirs 5.0.1",
  "notify-rust",

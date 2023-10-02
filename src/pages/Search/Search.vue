@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {appWindow, PhysicalSize, WebviewWindow} from "@tauri-apps/api/window"
+import {appWindow, LogicalSize, WebviewWindow} from "@tauri-apps/api/window"
 import {invoke} from "@tauri-apps/api";
 import {convertFileSrc} from "@tauri-apps/api/tauri"
 import {onMounted, ref, watch} from "vue";
@@ -63,7 +63,7 @@ onMounted(async () => {
   textColor.value = theme.text;
   secondaryTextColor.value = theme.secondary_text;
 
-  appWindow.setSize(new PhysicalSize(800, 100));
+  appWindow.setSize(new LogicalSize(800, 100));
 })
 
 function openSettings() {
@@ -163,7 +163,7 @@ watch(searchText, async (_newText, _oldText) => {
     results.value = [];
     resultsBoxHeight.value = `0px`
 
-    appWindow.setSize(new PhysicalSize(800, 120));
+    appWindow.setSize(new LogicalSize(800, 120));
   } else {
 
     results.value = await invoke("get_results", {search_text: searchText.value});
@@ -190,7 +190,7 @@ watch(searchText, async (_newText, _oldText) => {
     newAppHeight += getResultHeight();
     newAppHeight += 40;
 
-    appWindow.setSize(new PhysicalSize(800, newAppHeight));
+    appWindow.setSize(new LogicalSize(800, newAppHeight));
 
     appHeight.value = newAppHeight;
   }

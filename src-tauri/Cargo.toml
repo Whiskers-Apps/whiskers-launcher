@@ -11,9 +11,9 @@ edition = "2021"
 tauri-build = { version = "1.5.0", features = [] }
 
 [dependencies]
-simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
+#simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
 #simple_kl_rs = {path = "C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl-rs"}
-
+simple_kl_rs = { git="https://github.com/lighttigerXIV/simple-kl-rs", branch = "master"}
 
 tauri = { version = "1.5.0", features = [ "protocol-all", "fs-all", "global-shortcut-all", "system-tray", "macos-private-api", "window-all", "shell-open"] }
 serde = { version = "1.0.164", features = ["derive"] }

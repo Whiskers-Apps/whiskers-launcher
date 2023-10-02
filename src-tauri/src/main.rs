@@ -2,26 +2,33 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 #[cfg(target_os = "windows")]
-use {
-    os::windows::process::CommandExt,
-};
+use std::os::windows::process::CommandExt;
 
 use enigo::MouseControllable;
 use extensions::CommunityExtension;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use git2::Repository;
-use simple_kl_rs::{actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction}, extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters}, paths::{
-    get_apps_index_path, get_community_extensions_directory,
-    get_community_extensions_file_path, get_community_themes_file_path,
-    get_community_themes_path, get_extension_parameters_path, get_extension_path,
-    get_extension_results_path, get_extensions_path, get_resources_directory,
-    get_temp_themes_path,
-}, results::{IconWithTextResult, SimpleKLResult}, settings::{Settings}, settings};
+use simple_kl_rs::{
+    actions::{ExtensionAction, OpenApp, OpenInBrowser, ResultAction},
+    extensions::{get_extensions, init_extensions, ExtensionManifest, Parameters},
+    paths::{
+        get_apps_index_path, get_community_extensions_directory,
+        get_community_extensions_file_path, get_community_themes_file_path,
+        get_community_themes_path, get_extension_parameters_path, get_extension_path,
+        get_extension_results_path, get_extensions_path, get_resources_directory,
+        get_temp_themes_path,
+    },
+    results::{IconWithTextResult, SimpleKLResult},
+    settings,
+    settings::Settings,
+};
 use structs::structs::AppIndex;
 use themes::CommunityTheme;
 
 use simple_kl_rs::actions::{DialogAction, DialogResult};
-use simple_kl_rs::paths::{get_autostart_path, get_dialog_action_path};
+use simple_kl_rs::others::FLAG_NO_WINDOW;
+use simple_kl_rs::paths::{get_autostart_path, get_dialog_action_path, get_local_dir};
+use simple_kl_rs::settings::{get_settings, init_settings, ThemeSettings};
 use std::{
     env,
     fs::{self, File},
@@ -29,7 +36,6 @@ use std::{
     path::Path,
     process::Command,
 };
-use simple_kl_rs::settings::{get_settings, init_settings, ThemeSettings};
 
 use tauri::{
     AppHandle, Manager, PhysicalPosition, PhysicalSize, RunEvent, Window, WindowBuilder,
@@ -84,7 +90,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             format!("Search for {}", search_words).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -94,7 +100,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             &format!("Search for {}", search_words),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -123,7 +129,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_path_buf(),
+                            .to_path_buf(),
                             format!("Search for {}", search_text).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -131,7 +137,7 @@ fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             &format!("Search for {}", search_text),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -230,8 +236,7 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
                                 .arg("/C")
                                 .arg("start extension.exe")
                                 .current_dir(&folder_path)
-                                .creation_flags(FLAG_CREATE_NO_WINDOW)
-                                .creation_flags(FLAG_DETACHED_PROCESS)
+                                .creation_flags(FLAG_NO_WINDOW)
                                 .output()
                                 .expect("Error running extension");
 
@@ -381,8 +386,7 @@ async fn run_action(
                     .arg("/C")
                     .arg("start extension.exe")
                     .current_dir(get_extension_path(&action.extension_id).unwrap())
-                    .creation_flags(FLAG_CREATE_NO_WINDOW)
-                    .creation_flags(FLAG_DETACHED_PROCESS)
+                    .creation_flags(FLAG_NO_WINDOW)
                     .output()
                     .expect("Error running extension action");
             }
@@ -412,11 +416,11 @@ async fn run_action(
                 "extension_dialog",
                 WindowUrl::App("extension-dialog".parse().unwrap()),
             )
-                .max_inner_size(300.0, 800.0)
-                .resizable(false)
-                .title(action.title)
-                .build()
-                .expect("Error spawning extension dialog");
+            .max_inner_size(300.0, 800.0)
+            .resizable(false)
+            .title(action.title)
+            .build()
+            .expect("Error spawning extension dialog");
         }
         _ => {}
     };
@@ -485,7 +489,11 @@ fn add_search_engine(
         .search_engines
         .push(settings::SearchEngineSettings {
             keyword,
-            icon: if icon.is_some() { Some(icon.unwrap()) } else { None },
+            icon: if icon.is_some() {
+                Some(icon.unwrap())
+            } else {
+                None
+            },
             tint_icon,
             name,
             query,
@@ -510,8 +518,8 @@ fn import_theme(path: String) {
     let file_content = fs::read_to_string(&path).expect("Error reading theme file");
     let mut settings = get_settings();
 
-    let theme: ThemeSettings = serde_yaml::from_str(&file_content)
-        .expect("Error converting file to a theme");
+    let theme: ThemeSettings =
+        serde_yaml::from_str(&file_content).expect("Error converting file to a theme");
 
     settings.theme = theme;
 
@@ -585,7 +593,6 @@ fn get_extension_default_setting(setting_id: String, extension_id: String) -> Re
                     }
                 }
 
-
                 for setting in settings.linux {
                     if setting.id == setting_id {
                         return Ok(setting.default_value);
@@ -618,7 +625,7 @@ async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-themes-hub",
         &themes_path,
     )
-        .expect("Error cloning themes repo");
+    .expect("Error cloning themes repo");
 
     let mut themes_file =
         File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
@@ -691,7 +698,7 @@ async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-extensions-hub",
         &extensions_dir,
     )
-        .expect("Error cloning extensions repo");
+    .expect("Error cloning extensions repo");
 
     let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
         .expect("Error opening extensions file");
@@ -763,8 +770,7 @@ fn write_dialog_result(result: DialogResult, window: Window) {
             .arg("/C")
             .arg("start extension.exe")
             .current_dir(get_extension_path(&result.extension_id).unwrap())
-            .creation_flags(FLAG_CREATE_NO_WINDOW)
-            .creation_flags(FLAG_DETACHED_PROCESS)
+            .creation_flags(FLAG_NO_WINDOW)
             .output()
             .expect("Error running extension action");
     }
@@ -804,12 +810,25 @@ fn update_auto_start() {
                     .expect("Error creating autostart file");
             } else {
                 if desktop_file_path.exists() {
-                    fs::remove_file(&desktop_file_path)
-                        .expect("Error removing autostart file");
+                    fs::remove_file(&desktop_file_path).expect("Error removing autostart file");
                 }
             }
         }
-        "windows" => {}
+        "windows" => {
+
+            let script = if auto_start {"enable-autostart.ps1"} else { "disable-autostart.ps1" };
+
+            let mut path = get_local_dir().unwrap();
+            path.push("scripts");
+            path.push(script);
+
+            Command::new("powershell")
+                .arg("-File")
+                .arg(&path.into_os_string().into_string().unwrap())
+                .creation_flags(FLAG_NO_WINDOW)
+                .output()
+                .expect("Error running autostart script");
+        }
         _ => {}
     }
 }
