@@ -814,6 +814,7 @@ fn update_auto_start() {
                 }
             }
         }
+        #[cfg(target_os = "windows")]
         "windows" => {
 
             let script = if auto_start {"enable-autostart.ps1"} else { "disable-autostart.ps1" };

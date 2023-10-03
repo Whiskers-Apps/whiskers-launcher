@@ -4,6 +4,7 @@ import { getTheme } from '@pages/Settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 import { open as openLink } from "@tauri-apps/api/shell"
+import { platform } from '@tauri-apps/api/os';
 import BranchSVG from "@icons/branch.svg"
 import DownloadSVG from "@icons/download.svg"
 import TrashSVG from "@icons/trash.svg"
@@ -11,6 +12,8 @@ import { ExtensionManifest, getExtensions } from '@/data';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import ChevronRightSVG from "@icons/chevron-right.svg"
 import ChevronLeftSVG from "@icons/chevron-left.svg"
+import TuxSVG from "@icons/tux.svg"
+import WindowsSVG from "@icons/windows.svg"
 
 interface CommunityExtension {
     id: string,
@@ -18,6 +21,7 @@ interface CommunityExtension {
     description: string,
     repo: string,
     preview: string,
+    platforms: string[]
 }
 
 const backgroundColor = ref("");
@@ -31,6 +35,7 @@ const updateExtensionsEmit = ref();
 const searchInput = ref("");
 const installedExtensions = ref<ExtensionManifest[]>([]);
 const disableButtons = ref(false);
+const os = ref("")
 
 const extensionsGrid = ref()
 const currentPage = ref(1);
@@ -51,12 +56,15 @@ onMounted(async () => {
         loadExtensions();
     });
 
-
+    os.value = await platform();
 })
 
 async function loadExtensions() {
     installedExtensions.value = await getExtensions();
-    extensions.value = await invoke("get_community_extensions");
+
+    let temp: CommunityExtension[] = await invoke("get_community_extensions");
+
+    extensions.value = temp.filter(extension => extension.platforms.includes(os.value));
     currentExtensions.value = extensions.value;
     filterByPage()
 }
@@ -137,9 +145,17 @@ function openDeleteDialog(extension: CommunityExtension) {
                         <img :src="extension.preview" class="h-[200px] object-contain rounded-lg">
                     </div>
                     <div class="">
-                        <div class="min-w-0 ml-1 mt-4 mb-2 oneLineText text-lg font-medium w-full">{{ extension.name }}
+
+                        <div class="min-w-0 mt-4 mb-2 oneLineText text-lg font-medium w-full ml-2">
+                            {{ extension.name }}
                         </div>
-                        <div class="mb-4 ml-1">{{ extension.description }}</div>
+
+                        <div class="flex ml-1 mb-2">
+                            <div class="osCard mr-2">Linux</div>
+                            <div class="osCard mr-2">Windows</div>
+                        </div>
+
+                        <div class="mb-4 ml-2">{{ extension.description }}</div>
                         <div class="flex-grow flex flex-col items-center justify-center">
                             <button class="cardButton w-full" :disabled="disableButtons" @click="openLink(extension.repo)">
                                 <div class="flex justify-center items-center">
@@ -241,6 +257,14 @@ input:focus {
     border-radius: 24px;
 }
 
+.osCard{
+    padding-top: 4px;
+    padding-left: 16px;
+    padding-bottom: 4px;
+    padding-right: 16px;
+    background-color: v-bind(tertiaryBackgroundColor);
+    border-radius: 48px;
+}
 
 .cardButton {
     background-color: v-bind(tertiaryBackgroundColor);
