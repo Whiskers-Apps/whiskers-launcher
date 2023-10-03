@@ -57,6 +57,10 @@ onMounted(async () => {
     });
 
     os.value = await platform();
+
+    if(os.value === "win32"){
+        os.value = "windows";
+    }
 })
 
 async function loadExtensions() {
@@ -150,7 +154,7 @@ function openDeleteDialog(extension: CommunityExtension) {
                             {{ extension.name }}
                         </div>
 
-                        <div class="flex ml-1 mb-2">
+                        <div class="flex ml-1 mb-2 overflow-auto">
                             <div class="osCard mr-2">Linux</div>
                             <div class="osCard mr-2">Windows</div>
                         </div>
