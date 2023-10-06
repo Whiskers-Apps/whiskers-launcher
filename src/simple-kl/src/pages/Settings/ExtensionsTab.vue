@@ -2,13 +2,14 @@
 import { onMounted, ref } from 'vue';
 import { Settings, getSettings, ExtensionSettings as SettingsExtensionsSettings, getTheme } from './Settings';
 import { invoke } from '@tauri-apps/api';
-import { ExtensionManifest, ExtensionSettings } from '../../data';
+import { ExtensionManifest, ExtensionSetting, ExtensionSettings } from '../../data';
 import ChevronDownSVG from "../../assets/icons/chevron-down.svg"
 import TrashSVG from "../../assets/icons/trash.svg"
 import ThreeDotsSVG from "../../assets/icons/three_dots_vertical.svg"
 import { listen } from '@tauri-apps/api/event';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import RestoreButton from '../../components/RestoreButton.vue';
+import Select, { SelectOption } from '@/components/Select.vue';
 
 const settings = ref<Settings>();
 const tabExtensions = ref<TabExtensionManifest[]>();
@@ -128,7 +129,7 @@ function canShowSetting(extensionID: string, settingID: string): boolean {
     return showSetting
 }
 
-function getSettingValue(extensionID: string, settingID: string): String {
+function getSettingValue(extensionID: string, settingID: string): string {
 
     let settingValue = ""
 
@@ -200,6 +201,20 @@ async function getExtensions() {
     });
 
     tabExtensions.value = newTabExtensions;
+}
+
+function getSettingOptions(setting: ExtensionSetting): SelectOption[] {
+
+    let options: SelectOption[] = [];
+
+    setting.options?.forEach(option => {
+        options.push({
+            value: option.value,
+            text: option.name
+        })
+    });
+
+    return options
 }
 
 function toggleIconMenu() {
@@ -330,18 +345,8 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
                         <div class="ml-3">{{ setting.name }}</div>
 
                         <div v-if="setting.input === 'select'" class="flex">
-                            <div class="flex w-full selectBox">
-                                <select class="dropdown flex-grow" :id="`select-${extension.id}-${setting.id}`"
-                                    :value="getSettingValue(extension.id, setting.id)"
-                                    @change="event => updateSetting(extension.id, setting.id, (event.target as HTMLSelectElement).value)">
-                                    <option v-for="option in setting.options" :value="option.value" :key="option.value">
-                                        <div>{{ option.name }}</div>
-                                    </option>
-                                </select>
-                                <div class="flex items-center justify-center chevron">
-                                    <ChevronDownSVG class="h-3 w-3 fill" />
-                                </div>
-                            </div>
+                            <Select :value="getSettingValue(extension.id, setting.id)" :options="getSettingOptions(setting)"
+                                @update-value="updateSetting(extension.id, setting.id, $event)" />
 
                             <RestoreButton class="ml-2" @click="restoreSetting(extension.id, setting.id, 'select')" />
                         </div>
@@ -411,13 +416,6 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
 .deleteIcon {
     stroke: v-bind(onDangerColor);
     stroke-width: 2px;
-}
-
-
-.selectBox {
-    background-color: v-bind(tertiaryBackgroundColor);
-    border: 1px solid v-bind(tertiaryBackgroundColor);
-    border-radius: 48px;
 }
 
 

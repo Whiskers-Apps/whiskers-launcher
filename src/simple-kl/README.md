@@ -5,6 +5,5 @@
 # To-Do
 - [x] App Basics
 - [x] Extensions Support
-- [ ] Windows Support
-- [ ] Website
+- [x] Windows Support
 - [ ] Documentation

@@ -41,7 +41,8 @@ export interface SearchSettings {
 export interface ResultsSettings{
   results_count: number,
   split_ui: boolean,
-  layout: TypeEnum
+  layout: TypeEnum,
+  blacklist: string[]
 }
 
 export interface TypeEnum{

@@ -1,6 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+// Imports only used in windows
 #[cfg(target_os = "windows")]
 use{
     std::os::windows::process::CommandExt,

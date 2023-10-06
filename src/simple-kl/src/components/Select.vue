@@ -1,38 +1,19 @@
 <script setup lang="ts">
 import { getTheme } from "@/pages/Settings/Settings";
 import ChevronDownSVG from "@icons/chevron-down.svg";
-import { PropType, onMounted, ref } from "vue";
+import { PropType, onMounted, ref, watch } from "vue";
 
-const tertiaryBackgroundColor = ref("");
-const textColor = ref("");
-
-onMounted(async()=>{
-
-    loadTheme();
-});
-
-async function loadTheme(){
-    let theme = await getTheme();
-    tertiaryBackgroundColor.value = theme.tertiary_background;
-    textColor.value = theme.text;
-}
-
-
-export interface SelectOption{
-    value: string,
-    text: string
-}
 
 const props = defineProps({
-    value:{
+    value: {
         required: true,
         type: String
     },
-    options:{
+    options: {
         required: true,
         type: Object as PropType<SelectOption[]>
     },
-    id:{
+    id: {
         required: false,
         type: String
     }
@@ -41,19 +22,125 @@ const props = defineProps({
 const emit = defineEmits([
     "updateValue"
 ])
+
+const secondaryBackgroundColor = ref("");
+const tertiaryBackgroundColor = ref("");
+const textColor = ref("");
+const accentColor = ref("");
+
+const input = ref("");
+const showOptions = ref(false);
+const searchText = ref("");
+const selectedIndex = ref(0);
+const currentOptions = ref<SelectOption[]>([])
+
+onMounted(async () => {
+
+    loadTheme();
+
+    input.value = props.options.find(option => option.value === props.value)?.text ?? '';
+    searchText.value = input.value;
+
+    selectedIndex.value = props.options.findIndex(it => it.value === props.value) ?? 0;
+
+    currentOptions.value = props.options;
+});
+
+document.addEventListener('keydown', function (event) {
+
+    if (event.key === "ArrowDown") {
+
+        event.preventDefault();
+
+        if (selectedIndex.value < currentOptions.value.length - 1) {
+            selectedIndex.value += 1;
+        }
+    }
+
+    if (event.key === "ArrowUp") {
+
+        event.preventDefault();
+
+        if (selectedIndex.value > 0) {
+            selectedIndex.value -= 1;
+        }
+    }
+
+    if (event.key === "Enter") {
+        updateValue(currentOptions.value[selectedIndex.value])
+    }
+});
+
+async function loadTheme() {
+    let theme = await getTheme();
+    secondaryBackgroundColor.value = theme.secondary_background;
+    tertiaryBackgroundColor.value = theme.tertiary_background;
+    textColor.value = theme.text;
+    accentColor.value = theme.accent;
+}
+
+
+export interface SelectOption {
+    value: string,
+    text: string
+}
+
+
+function updateValue(option: SelectOption) {
+
+    if (option.value !== "") {
+        emit('updateValue', option.value);
+        showOptions.value = false;
+
+        selectedIndex.value = currentOptions.value.findIndex(it => it.value === option.value) ?? 0;
+
+        currentOptions.value = props.options;
+        input.value = option.text;
+    }
+}
+
+function filter() {
+
+    showOptions.value = true;
+
+    let newOptions = props.options.filter(it => it.text.toLowerCase().includes(input.value.toLowerCase()));
+
+    if (newOptions.length === 0) {
+        newOptions.push({
+            value: "",
+            text: "Couldn't find any value"
+        });
+    }
+
+    currentOptions.value = newOptions;
+
+    selectedIndex.value = 0;
+
+}
+
+
 </script>
 
 <template>
-    <div class="flex w-full selectBox">
-        <select class="dropdown flex-grow" :id="id"
-            :value="value"
-            @change="event => emit('updateValue',(event.target as HTMLSelectElement).value)">
-            <option v-for="option in options" :value="option.value" :key="option.value">
-                <div>{{ option.text }}</div>
-            </option>
-        </select>
-        <div class="flex items-center justify-center chevron">
-            <ChevronDownSVG class="h-3 w-3 fill" />
+    <div class="w-full  flex flex-col">
+        <div class="w-full flex selectBox">
+            <input v-model="input" class="flex-grow dropdown relative" @click="showOptions = !showOptions"
+                v-on:input="filter()" />
+
+            <div class="flex items-center justify-center chevron">
+                <ChevronDownSVG class="h-3 w-3 fillText" />
+            </div>
+        </div>
+
+        <div class=" flex  ">
+            <div v-if="showOptions" class=" overflow-clip optionsDiv w-full">
+                <div v-for="(option, index) in currentOptions" class="option"
+                    :class="index === selectedIndex ? 'selectedOption' : ''">
+                    <button @click="updateValue(option);" class="w-full text-start">
+                        {{ option.text }}
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -63,26 +150,42 @@ const emit = defineEmits([
     background-color: v-bind(tertiaryBackgroundColor);
     border: 1px solid v-bind(tertiaryBackgroundColor);
     border-radius: 48px;
+    padding: 8px 16px 8px 16px;
+    overflow: auto;
 }
 
-.fill {
-    fill: v-bind(textColor);
-}
-
-.chevron {
-    padding: 8px;
-    padding-right: 16px;
-    border-top-right-radius: 48px;
-    border-bottom-right-radius: 48px;
+.selectBox:focus-within {
+    outline: 1px solid v-bind(accentColor);
 }
 
 .dropdown {
     all: unset;
     display: flex;
     width: 100%;
-    padding: 8px;
-    padding-left: 16px;
-    padding-right: 16px;
     cursor: pointer;
+}
+
+.optionsDiv {
+    margin-top: 16px;
+    position: relative;
+    background-color: v-bind(tertiaryBackgroundColor);
+    padding: 4px;
+    border-radius: 16px;
+    border: 2px solid v-bind(secondaryBackgroundColor);
+}
+
+.option {
+    padding: 10px;
+    border-radius: 14px;
+    text-align: start;
+    flex-grow: 1;
+}
+
+.option:hover {
+    background-color: v-bind(secondaryBackgroundColor);
+}
+
+.selectedOption {
+    background-color: v-bind(secondaryBackgroundColor);
 }
 </style>

@@ -1,8 +1,19 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+//Imports only used in windows
 #[cfg(target_os = "windows")]
-use std::os::windows::process::CommandExt;
+use{
+    simple_kl_rs::others::FLAG_NO_WINDOW,
+    simple_kl_rs::paths::get_local_dir,
+    std::os::windows::process::CommandExt,
+};
+
+//Imports only used in Linux
+#[cfg(target_os = "linux")]
+use{
+    structs::structs::AppIndex
+};
 
 use enigo::MouseControllable;
 use extensions::CommunityExtension;
@@ -22,12 +33,12 @@ use simple_kl_rs::{
     settings,
     settings::Settings,
 };
-use structs::structs::AppIndex;
+
 use themes::CommunityTheme;
 
 use simple_kl_rs::actions::{DialogAction, DialogResult};
-use simple_kl_rs::others::FLAG_NO_WINDOW;
-use simple_kl_rs::paths::{get_autostart_path, get_dialog_action_path, get_local_dir};
+
+use simple_kl_rs::paths::{get_autostart_path, get_dialog_action_path};
 use simple_kl_rs::settings::{get_settings, init_settings, ThemeSettings};
 use std::{
     env,
@@ -269,6 +280,8 @@ fn get_extension_results(id: String, search_text: String) -> Vec<SimpleKLResult>
     return Vec::new();
 }
 
+
+
 #[tauri::command]
 fn get_current_settings() -> String {
     init_settings();
@@ -352,7 +365,7 @@ async fn run_action(
             let action: OpenInBrowser = serde_json::from_str(&action_json).unwrap();
             open::that(action.url).expect("Error opening url");
         }
-        "CopyToClipbard" => {}
+        "CopyToClipboard" => {}
         "ExtensionAction" => {
             let action: ExtensionAction = serde_json::from_str(&action_json).unwrap();
 
@@ -726,7 +739,7 @@ async fn install_community_extension(id: String, repo: String, app: AppHandle) {
 
     init_extensions();
 
-    app.emit_all("updateExtensions", ()).expect("Error emiting");
+    app.emit_all("updateExtensions", ()).expect("Error calling listener");
 }
 
 #[tauri::command]
@@ -870,6 +883,7 @@ async fn main() {
             let arguments: Vec<String> = env::args().collect();
             let open_settings = arguments.iter().any(|e| e == "--settings");
 
+            
             //Opens settings if the argument is found
             if open_settings {
                 WindowBuilder::new(app, "settings", WindowUrl::App("settings".into()))

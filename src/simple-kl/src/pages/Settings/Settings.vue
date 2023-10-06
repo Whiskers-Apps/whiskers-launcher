@@ -92,6 +92,7 @@ async function loadTheme() {
 </template>\
 
 <style>
+
 ::-webkit-scrollbar {
     width: 6px;
 }
@@ -127,6 +128,14 @@ async function loadTheme() {
     stroke: none;
 }
 
+.fillText{
+    fill: v-bind(textColor);
+}
+
+.strokeText{
+    stroke: v-bind(textColor);
+}
+
 .strokeAccent {
     fill: none;
     stroke: v-bind(accentColor);
@@ -136,6 +145,13 @@ async function loadTheme() {
 
 <style scoped>
 
+html{
+    background: black;
+}
+
+body{
+    background-color: red;
+}
 
 .placeholder::placeholder {
     color: v-bind(secondaryTextColor);
@@ -160,4 +176,6 @@ async function loadTheme() {
     font-weight: 600;
     cursor: pointer;
 }
+
+
 </style>

@@ -2,9 +2,12 @@
 import { onMounted, ref } from 'vue';
 import { getSettings, updateSettings } from '@pages/Settings/Settings';
 
+
 import Slider from '@/components/Slider.vue';
 import Switch from '@/components/Switch.vue';
 import Select from '@/components/Select.vue';
+import ChevronDownSVG from "@icons/chevron-down.svg";
+import ChevronUpSVG from "@icons/chevron-up.svg";
 
 import { SelectOption } from '@/components/Select.vue';
 
@@ -25,6 +28,8 @@ const layoutOptions: SelectOption[] = [
         text: "Large"
     }
 ]
+
+const showBlacklist = ref(false)
 
 onMounted(async () => {
 
@@ -72,8 +77,16 @@ async function update() {
         <div class="secondaryBackground p-6 rounded-[28px] mb-1 mt-1">
             <div class=" font-semibold">Layout</div>
             <div>The density of the results layout.</div>
-            <div class="flex mt-2">
-                <Select :value="layout" :options="layoutOptions" @update-value="layout = $event; update();"/>
+            <div class="flex mt-2" v-if="layout !== ''">
+                <Select :value="layout" :options="layoutOptions" @update-value="layout = $event; update();" />
+            </div>
+        </div>
+
+        <div class="secondaryBackground p-6 rounded-[28px] mb-1 mt-1">
+            <div class="flex w-full items-center" @click="showBlacklist = !showBlacklist">
+                <div class=" flex-grow font-semibold">Blacklist</div>
+                <ChevronDownSVG v-if="!showBlacklist" class="h-3 w-3 fillText" />
+                <ChevronUpSVG v-if="showBlacklist" class="h-3 w-3 strokeText"/>
             </div>
         </div>
     </div>
