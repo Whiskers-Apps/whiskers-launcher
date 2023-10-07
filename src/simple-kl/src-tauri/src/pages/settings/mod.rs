@@ -1,0 +1,258 @@
+use std::{env, fs};
+use std::fs::File;
+use std::io::{Read, Write};
+use std::path::Path;
+use git2::Repository;
+use simple_kl_rs::extensions::init_extensions;
+use simple_kl_rs::paths::{get_autostart_path, get_community_extensions_directory, get_community_extensions_file_path, get_community_themes_file_path, get_community_themes_path, get_extensions_path, get_temp_themes_path};
+use simple_kl_rs::settings;
+use simple_kl_rs::settings::{get_settings, init_settings, Settings, ThemeSettings};
+use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
+use crate::extensions::CommunityExtension;
+use crate::themes::CommunityTheme;
+
+
+#[tauri::command]
+pub fn open_settings(app: AppHandle) {
+    WindowBuilder::new(&app, "settings", WindowUrl::App("settings".into()))
+        .title("Settings")
+        .build()
+        .expect("Error creating settings window");
+
+    let main_window = &app.get_window("main").unwrap();
+    main_window.close().expect("Error closing search window");
+}
+
+
+#[tauri::command]
+pub fn get_current_settings() -> String {
+    init_settings();
+    return serde_json::to_string(&get_settings()).unwrap();
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn update_settings(settings_json: String) {
+    init_settings();
+
+    let settings: Settings = serde_json::from_str(&settings_json).unwrap();
+
+    settings::update_settings(&settings);
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub fn add_search_engine(
+    keyword: String,
+    icon_path: String,
+    tint_icon: bool,
+    name: String,
+    query: String,
+) {
+    let mut settings = get_settings();
+    let icon: Option<String> = match icon_path.is_empty() {
+        true => None,
+        false => Some(icon_path),
+    };
+
+    settings
+        .search_engines
+        .push(settings::SearchEngineSettings {
+            keyword,
+            icon: if icon.is_some() {
+                Some(icon.unwrap())
+            } else {
+                None
+            },
+            tint_icon,
+            name,
+            query,
+            default: false,
+        });
+
+    settings::update_settings(&settings);
+}
+
+#[tauri::command()]
+pub fn export_theme(path: String) {
+    let mut file = File::create(&path).expect("Error creating theme file");
+    let themes = get_settings().theme;
+    let themes_json = serde_yaml::to_string(&themes).expect("Error converting theme");
+
+    file.write_all(&themes_json.as_bytes())
+        .expect("Error saving theme");
+}
+
+#[tauri::command()]
+pub fn import_theme(path: String) {
+    let file_content = fs::read_to_string(&path).expect("Error reading theme file");
+    let mut settings = get_settings();
+
+    let theme: ThemeSettings =
+        serde_yaml::from_str(&file_content).expect("Error converting file to a theme");
+
+    settings.theme = theme;
+
+    settings::update_settings(&settings);
+}
+
+#[tauri::command()]
+pub async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
+    let themes_path = get_community_themes_path().unwrap();
+
+    if Path::new(&themes_path).exists() {
+        fs::remove_dir_all(&themes_path).expect("Error deleting themes directory");
+    }
+
+    fs::create_dir_all(&themes_path).expect("Error creating themes directory");
+
+    Repository::clone(
+        "https://github.com/lighttigerXIV/simple-kl-themes",
+        &themes_path,
+    )
+        .expect("Error cloning themes repo");
+
+    let mut themes_file =
+        File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
+
+    let mut themes_file_content = "".to_string();
+
+    themes_file
+        .read_to_string(&mut themes_file_content)
+        .expect("Error reading themes file");
+
+    let themes = serde_yaml::from_str(&themes_file_content);
+
+    return match themes {
+        Ok(themes) => Ok(themes),
+        Err(_) => Err(()),
+    };
+}
+
+#[tauri::command()]
+pub async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
+    if Path::new(&get_temp_themes_path().unwrap()).exists() {
+        fs::remove_dir_all(&get_temp_themes_path().unwrap())
+            .expect("Error deleting temp themes directory");
+    }
+
+    fs::create_dir(&get_temp_themes_path().unwrap()).expect("Error creating themes directory");
+
+    Repository::clone(&repo, &get_temp_themes_path().unwrap()).expect("Error cloning theme repo");
+
+    let mut theme_file_path = get_temp_themes_path().unwrap();
+    theme_file_path.push(file);
+
+    let mut theme_file_content = "".to_string();
+
+    let mut theme_file = File::open(&theme_file_path).expect("Error opening theme file");
+    theme_file
+        .read_to_string(&mut theme_file_content)
+        .expect("Error reading theme content");
+
+    let theme: ThemeSettings =
+        serde_yaml::from_str(&theme_file_content).expect("Error getting theme from file");
+
+    let mut settings = get_settings();
+    settings.theme.background = theme.background;
+    settings.theme.secondary_background = theme.secondary_background;
+    settings.theme.tertiary_background = theme.tertiary_background;
+    settings.theme.accent = theme.accent;
+    settings.theme.on_accent = theme.on_accent;
+    settings.theme.danger = theme.danger;
+    settings.theme.on_danger = theme.on_danger;
+    settings.theme.text = theme.text;
+    settings.theme.secondary_text = theme.secondary_text;
+
+    settings::update_settings(&settings);
+
+    app.emit_all("updateTheme", ()).expect("Error running emit");
+}
+
+#[tauri::command()]
+pub async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
+    let extensions_dir = get_community_extensions_directory().unwrap();
+
+    if Path::new(&extensions_dir).exists() {
+        fs::remove_dir_all(&extensions_dir).expect("Error deleting extensions directory");
+    }
+
+    fs::create_dir_all(&extensions_dir).expect("Error creating extensions directory");
+
+    Repository::clone(
+        "https://github.com/lighttigerXIV/simple-kl-extensions",
+        &extensions_dir,
+    )
+        .expect("Error cloning extensions repo");
+
+    let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
+        .expect("Error opening extensions file");
+
+    let mut extensions_file_content = "".to_string();
+
+    extensions_file
+        .read_to_string(&mut extensions_file_content)
+        .expect("Error reading extensions file");
+
+    let extensions = serde_yaml::from_str(&extensions_file_content);
+
+    return match extensions {
+        Ok(extensions) => Ok(extensions),
+        Err(_) => Err(()),
+    };
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn install_community_extension(id: String, repo: String, app: AppHandle) {
+    let mut path = get_extensions_path().unwrap();
+    path.push(id);
+
+    Repository::clone(&repo, &path).expect("Error cloning repo");
+
+    init_extensions();
+
+    app.emit_all("updateExtensions", ()).expect("Error calling listener");
+}
+
+
+#[tauri::command]
+pub fn update_auto_start() {
+    let path = get_autostart_path().unwrap();
+    let settings = get_settings();
+    let auto_start = settings.general.auto_start;
+
+    if !path.exists() && auto_start {
+        fs::create_dir_all(&path).expect("Error creating autostart folder");
+    }
+
+    match env::consts::OS {
+        "linux" => {
+            let desktop_file_content = include_str!("../../files/simple-kl-service.desktop");
+            let mut desktop_file_path = path.to_owned();
+            desktop_file_path.push("simple-kl-service.desktop");
+
+            if auto_start {
+                fs::write(&desktop_file_path, &desktop_file_content)
+                    .expect("Error creating autostart file");
+            } else {
+                if desktop_file_path.exists() {
+                    fs::remove_file(&desktop_file_path).expect("Error removing autostart file");
+                }
+            }
+        }
+        #[cfg(target_os = "windows")]
+        "windows" => {
+            let script = if auto_start { "enable-autostart.ps1" } else { "disable-autostart.ps1" };
+
+            let mut path = get_local_dir().unwrap();
+            path.push("scripts");
+            path.push(script);
+
+            Command::new("powershell")
+                .arg("-File")
+                .arg(&path.into_os_string().into_string().unwrap())
+                .creation_flags(FLAG_NO_WINDOW)
+                .output()
+                .expect("Error running autostart script");
+        }
+        _ => {}
+    }
+}
