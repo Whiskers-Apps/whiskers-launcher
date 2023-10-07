@@ -2,15 +2,21 @@ use std::{env, fs};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
+use std::process::Command;
 use git2::Repository;
 use simple_kl_rs::extensions::init_extensions;
-use simple_kl_rs::paths::{get_autostart_path, get_community_extensions_directory, get_community_extensions_file_path, get_community_themes_file_path, get_community_themes_path, get_extensions_path, get_temp_themes_path};
+use simple_kl_rs::paths::{get_autostart_path, get_community_extensions_directory, get_community_extensions_file_path, get_community_themes_file_path, get_community_themes_path, get_extensions_path, get_local_dir, get_temp_themes_path};
 use simple_kl_rs::settings;
 use simple_kl_rs::settings::{get_settings, init_settings, Settings, ThemeSettings};
 use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
 use crate::extensions::CommunityExtension;
 use crate::themes::CommunityTheme;
 
+#[cfg(target_os = "windows")]
+use{
+    std::os::windows::process::CommandExt,
+    simple_kl_rs::others::FLAG_NO_WINDOW
+};
 
 #[tauri::command]
 pub fn open_settings(app: AppHandle) {

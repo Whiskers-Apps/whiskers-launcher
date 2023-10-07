@@ -16,15 +16,10 @@ use tauri::{AppHandle, Window, WindowBuilder, WindowUrl};
 #[cfg(target_os = "windows")]
 use {
     simple_kl_rs::others::FLAG_NO_WINDOW,
-    simple_kl_rs::paths::get_local_dir,
     std::os::windows::process::CommandExt,
 };
+use crate::structs::structs::AppIndex;
 
-//Imports only used in Linux
-#[cfg(target_os = "linux")]
-use {
-    crate::structs::structs::AppIndex
-};
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {

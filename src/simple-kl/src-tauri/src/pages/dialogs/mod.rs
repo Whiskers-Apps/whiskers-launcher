@@ -7,6 +7,11 @@ use simple_kl_rs::extensions::Parameters;
 use simple_kl_rs::paths::{get_dialog_action_path, get_extension_parameters_path, get_extension_path};
 use tauri::Window;
 
+#[cfg(target_os = "windows")]
+use{
+    std::os::windows::process::CommandExt,
+    simple_kl_rs::others::FLAG_NO_WINDOW
+};
 #[tauri::command]
 pub fn get_dialog_action() -> Result<DialogAction, ()> {
     let dialog_actions_yaml = fs::read_to_string(&get_dialog_action_path().unwrap())
