@@ -20,7 +20,7 @@
     },
     "bundle": {
       "active": true,
-      "targets": "all",
+      "targets": "app",
       "identifier": "simple-kl-service",
       "icon": [
         "icons/32x32.png",
