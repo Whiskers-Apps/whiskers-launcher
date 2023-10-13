@@ -2,12 +2,12 @@
   "build": {
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1421",
+    "devPath": "http://localhost:1420",
     "distDir": "../dist",
-    "withGlobalTauri": true
+    "withGlobalTauri": false
   },
   "package": {
-    "productName": "simple-kl-service",
+    "productName": "simple-kl-manager",
     "version": "0.0.0"
   },
   "tauri": {
@@ -20,8 +20,8 @@
     },
     "bundle": {
       "active": true,
-      "targets": "app",
-      "identifier": "simple-kl-service",
+      "targets": "all",
+      "identifier": "com.tauri.dev",
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
@@ -37,16 +37,10 @@
       {
         "fullscreen": false,
         "resizable": false,
-        "title": "Simple Keyboard Launcher Service",
-        "width": 100,
-        "height": 100,
-        "decorations": false,
-        "transparent": true
+        "title": "Simple Keyboard Launcher Manager",
+        "width": 800,
+        "height": 400
       }
-    ],
-    "systemTray": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true
-    }
+    ]
   }
 }

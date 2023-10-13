@@ -12,12 +12,14 @@ use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
 use crate::extensions::CommunityExtension;
 use crate::themes::CommunityTheme;
 
+
 #[cfg(target_os = "windows")]
 use{
     std::os::windows::process::CommandExt,
     simple_kl_rs::others::FLAG_NO_WINDOW
 };
 
+///Opens the settings page in a new window
 #[tauri::command]
 pub fn open_settings(app: AppHandle) {
     WindowBuilder::new(&app, "settings", WindowUrl::App("settings".into()))
@@ -29,13 +31,14 @@ pub fn open_settings(app: AppHandle) {
     main_window.close().expect("Error closing search window");
 }
 
-
+/// Returns the user settings as a json string
 #[tauri::command]
 pub fn get_current_settings() -> String {
     init_settings();
     return serde_json::to_string(&get_settings()).unwrap();
 }
 
+///
 #[tauri::command(rename_all = "snake_case")]
 pub fn update_settings(settings_json: String) {
     init_settings();
@@ -261,4 +264,32 @@ pub fn update_auto_start() {
         }
         _ => {}
     }
+}
+
+
+#[tauri::command]
+pub fn add_to_blacklist(path: String){
+
+    let mut settings = get_settings();
+    let mut blacklist = settings.results.blacklist;
+
+    if !blacklist.contains(&path){
+        blacklist.push(path.to_owned());
+    }
+
+    settings.results.blacklist = blacklist;
+
+    settings::update_settings(&settings);
+}
+
+#[tauri::command]
+pub fn remove_from_blacklist(path: String){
+
+    let mut settings = get_settings();
+    let mut blacklist = settings.results.blacklist;
+
+    blacklist = blacklist.iter().map(|p| p.to_owned()).filter(|p| p == &path).collect();
+
+    settings.results.blacklist = blacklist.to_owned();
+    settings::update_settings(&settings);
 }

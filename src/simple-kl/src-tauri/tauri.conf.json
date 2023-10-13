@@ -42,7 +42,7 @@
     "macOSPrivateApi": true,
     "bundle": {
       "active": true,
-      "targets": "all",
+      "targets": "app",
       "identifier": "com.lighttigerxiv.simple.keyboard.launcher",
       "icon": [
         "icons/32x32.png",

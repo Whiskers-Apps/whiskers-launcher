@@ -37,7 +37,7 @@ onMounted(async () => {
 
     resultsCount.value = settings.results.results_count;
     splitUI.value = settings.results.split_ui;
-    layout.value = settings.results.layout.type;
+    layout.value = settings.results.layout;
 });
 
 async function update() {
@@ -45,7 +45,7 @@ async function update() {
     let settings = await getSettings();
     settings.results.results_count = resultsCount.value;
     settings.results.split_ui = splitUI.value;
-    settings.results.layout.type = layout.value;
+    settings.results.layout = layout.value;
 
     updateSettings(settings);
 }

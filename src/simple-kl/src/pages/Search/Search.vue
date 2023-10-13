@@ -52,7 +52,7 @@ onMounted(async () => {
   showSettingsIcon.value = settings.search.show_settings_icon;
   showPlaceholder.value = settings.search.show_placeholder;
   resultsCount.value = settings.results.results_count;
-  layout.value = settings.results.layout.type;
+  layout.value = settings.results.layout;
   splitUI.value = settings.results.split_ui;
 
   let theme = await getTheme();

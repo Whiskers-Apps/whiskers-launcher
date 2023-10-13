@@ -30,7 +30,7 @@ onMounted(async () => {
     showSearchIcon.value = settings.search.show_search_icon;
     showSettingsIcon.value = settings.search.show_settings_icon;
     showPlaceholder.value = settings.search.show_placeholder;
-    layout.value = settings.results.layout.type;
+    layout.value = settings.results.layout;
 
     borderRadius.value = `${settings.search.border_radius}px`;
     borderRadiusInput.value = settings.search.border_radius;
