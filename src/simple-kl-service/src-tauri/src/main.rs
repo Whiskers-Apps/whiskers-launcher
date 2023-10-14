@@ -29,7 +29,7 @@ use simple_kl_rs::{
     extensions::init_extensions,
     paths::{get_apps_index_path, get_temp_directory},
 };
-use simple_kl_rs::settings::{get_settings, init_settings};
+use simple_kl_rs::settings::{get_settings, init_settings, self};
 use structs::App;
 use tauri::{
     CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, SystemTray, SystemTrayEvent,
@@ -198,6 +198,7 @@ async fn main() {
 
             init_settings();
             init_extensions();
+            settings::update_auto_start();
 
             //Re-indexes the apps every 2 minutes
             tokio::spawn(async move {

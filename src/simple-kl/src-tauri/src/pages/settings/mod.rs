@@ -224,46 +224,7 @@ pub async fn install_community_extension(id: String, repo: String, app: AppHandl
 
 #[tauri::command]
 pub fn update_auto_start() {
-    let path = get_autostart_path().unwrap();
-    let settings = get_settings();
-    let auto_start = settings.general.auto_start;
-
-    if !path.exists() && auto_start {
-        fs::create_dir_all(&path).expect("Error creating autostart folder");
-    }
-
-    match env::consts::OS {
-        "linux" => {
-            let desktop_file_content = include_str!("../../files/simple-kl-service.desktop");
-            let mut desktop_file_path = path.to_owned();
-            desktop_file_path.push("simple-kl-service.desktop");
-
-            if auto_start {
-                fs::write(&desktop_file_path, &desktop_file_content)
-                    .expect("Error creating autostart file");
-            } else {
-                if desktop_file_path.exists() {
-                    fs::remove_file(&desktop_file_path).expect("Error removing autostart file");
-                }
-            }
-        }
-        #[cfg(target_os = "windows")]
-        "windows" => {
-            let script = if auto_start { "enable-autostart.ps1" } else { "disable-autostart.ps1" };
-
-            let mut path = get_local_dir().unwrap();
-            path.push("scripts");
-            path.push(script);
-
-            Command::new("powershell")
-                .arg("-File")
-                .arg(&path.into_os_string().into_string().unwrap())
-                .creation_flags(FLAG_NO_WINDOW)
-                .output()
-                .expect("Error running autostart script");
-        }
-        _ => {}
-    }
+    simple_kl_rs::settings::update_auto_start();
 }
 
 
