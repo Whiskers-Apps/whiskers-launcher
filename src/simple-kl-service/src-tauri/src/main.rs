@@ -137,8 +137,7 @@ async fn main() {
                         if cfg!(target_os = "linux"){
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 ./simple-keyboard-launcher")
-                                .current_dir("/home/lighttigerxiv/Development/Rust-Target/release")
+                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -164,8 +163,7 @@ async fn main() {
                         if cfg!(target_os = "linux"){
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 ./simple-keyboard-launcher --settings")
-                                .current_dir("/home/lighttigerxiv/Development/Rust-Target/release")
+                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher --settings")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -247,8 +245,7 @@ async fn main() {
                             if cfg!(target_os = "linux"){
                                 Command::new("sh")
                                     .arg("-c")
-                                    .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 ./simple-keyboard-launcher")
-                                    .current_dir("/home/lighttigerxiv/Development/Rust-Target/release")
+                                    .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher")
                                     .output()
                                     .expect("Error opening app");
                             }
@@ -258,7 +255,7 @@ async fn main() {
 
                                 Command::new("cmd")
                                     .arg("/C")
-                                    .arg("start Simple-Keyboard-Launcher")
+                                    .arg("start simple-keyboard-launcher")
                                     .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
                                     .creation_flags(FLAG_NO_WINDOW)
                                     .spawn()
