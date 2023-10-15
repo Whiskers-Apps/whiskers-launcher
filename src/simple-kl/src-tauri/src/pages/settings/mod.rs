@@ -114,30 +114,17 @@ pub fn import_theme(path: String) {
 
 #[tauri::command()]
 pub async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
-    let themes_path = get_community_themes_path().unwrap();
-
-    if Path::new(&themes_path).exists() {
-        fs::remove_dir_all(&themes_path).expect("Error deleting themes directory");
-    }
-
-    fs::create_dir_all(&themes_path).expect("Error creating themes directory");
-
-    Repository::clone(
-        "https://github.com/lighttigerXIV/simple-kl-themes",
-        &themes_path,
+    let body = reqwest::get(
+        "https://raw.githubusercontent.com/lighttigerXIV/simple-kl-themes/master/themes.yml",
     )
-    .expect("Error cloning themes repo");
+    .await
+    .expect("Error getting response")
+    .text()
+    .await
+    .expect("Error getting body");
 
-    let mut themes_file =
-        File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
-
-    let mut themes_file_content = "".to_string();
-
-    themes_file
-        .read_to_string(&mut themes_file_content)
-        .expect("Error reading themes file");
-
-    let themes = serde_yaml::from_str(&themes_file_content);
+ 
+    let themes = serde_yaml::from_str(&body);
 
     return match themes {
         Ok(themes) => Ok(themes),
@@ -187,30 +174,17 @@ pub async fn apply_community_theme(repo: String, file: String, app: AppHandle) {
 
 #[tauri::command()]
 pub async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
-    let extensions_dir = get_community_extensions_directory().unwrap();
-
-    if Path::new(&extensions_dir).exists() {
-        fs::remove_dir_all(&extensions_dir).expect("Error deleting extensions directory");
-    }
-
-    fs::create_dir_all(&extensions_dir).expect("Error creating extensions directory");
-
-    Repository::clone(
-        "https://github.com/lighttigerXIV/simple-kl-extensions",
-        &extensions_dir,
+    
+    let body = reqwest::get(
+        "https://raw.githubusercontent.com/lighttigerXIV/simple-kl-extensions/main/extensions.yml",
     )
-    .expect("Error cloning extensions repo");
+    .await
+    .expect("Error getting response")
+    .text()
+    .await
+    .expect("Error getting body");
 
-    let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
-        .expect("Error opening extensions file");
-
-    let mut extensions_file_content = "".to_string();
-
-    extensions_file
-        .read_to_string(&mut extensions_file_content)
-        .expect("Error reading extensions file");
-
-    let extensions = serde_yaml::from_str(&extensions_file_content);
+    let extensions = serde_yaml::from_str(&body);
 
     return match extensions {
         Ok(extensions) => Ok(extensions),
@@ -292,7 +266,7 @@ pub fn add_to_blacklist(path: String, app: AppHandle) {
 
     settings::update_settings(&settings);
 
-    app.emit_all("update-blacklist",()).unwrap();
+    app.emit_all("update-blacklist", ()).unwrap();
 }
 
 #[tauri::command]
@@ -309,5 +283,5 @@ pub fn remove_from_blacklist(path: String, app: AppHandle) {
     settings.results.blacklist = blacklist.to_owned();
     settings::update_settings(&settings);
 
-    app.emit_all("update-blacklist",()).unwrap();
+    app.emit_all("update-blacklist", ()).unwrap();
 }

@@ -3525,6 +3525,7 @@ dependencies = [
  "open 5.0.0",
  "powershell_script",
  "rand 0.8.5",
+ "reqwest",
  "serde",
  "serde_json",
  "serde_yaml",
