@@ -12,8 +12,7 @@ import { ExtensionManifest, getExtensions } from '@/data';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import ChevronRightSVG from "@icons/chevron-right.svg"
 import ChevronLeftSVG from "@icons/chevron-left.svg"
-import TuxSVG from "@icons/tux.svg"
-import WindowsSVG from "@icons/windows.svg"
+
 
 interface CommunityExtension {
     id: string,
@@ -58,7 +57,7 @@ onMounted(async () => {
 
     os.value = await platform();
 
-    if(os.value === "win32"){
+    if (os.value === "win32") {
         os.value = "windows";
     }
 })
@@ -155,8 +154,8 @@ function openDeleteDialog(extension: CommunityExtension) {
                         </div>
 
                         <div class="flex ml-1 mb-2 overflow-auto">
-                            <div class="osCard mr-2">Linux</div>
-                            <div class="osCard mr-2">Windows</div>
+                            <div v-if="extension.platforms.includes('linux')" class="osCard mr-2">Linux</div>
+                            <div v-if="extension.platforms.includes('windows')" class="osCard mr-2">Windows</div>
                         </div>
 
                         <div class="mb-4 ml-2">{{ extension.description }}</div>
@@ -261,7 +260,7 @@ input:focus {
     border-radius: 24px;
 }
 
-.osCard{
+.osCard {
     padding-top: 4px;
     padding-left: 16px;
     padding-bottom: 4px;
