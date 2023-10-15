@@ -7,6 +7,8 @@ import lighttigerxivPFP from "@images/lighttigerxiv.jpeg";
 import GitHubSVG from "@icons/github.svg";
 import DiscordSVG from "@icons/discord.svg"
 
+import SectionDivider from '@components/SectionDivider.vue';
+
 const secondaryBackgroundColor = ref("");
 const tertiaryBackgroundColor = ref("");
 const accentColor = ref("");
@@ -36,48 +38,50 @@ async function loadTheme() {
 
 </script>
 <template>
-    <div class="p-4 max-w-[700px]">
+    <div class="p-4">
         <div class="text-2xl ml-2">About</div>
         <div class="mt-2 ml-2 text-xl">App</div>
-        <div class="card flex mt-2">
-            <b>Version:</b>
-            <div class="flex-grow"></div>
-            <div class="ml-4 oneLineText">0.0.1-alpha</div>
-        </div>
+        <div class="section">
+            <div class="p-4 items flex mt-2 ">
+                <b>Version</b>
+                <div class="flex-grow"></div>
+                <div class="ml-4 oneLineText">0.0.1-alpha</div>
+            </div>
 
-        <div class="card flex mt-1">
-            <b>Extensions:</b>
-            <div class="flex-grow"></div>
-            <div class="oneLineText">{{ extensions.length }}</div>
-        </div>
+            <SectionDivider />
 
-        <div class="card flex items-center mt-1">
-            <b>Source:</b>
-            <div class="flex-grow"></div>
-            <button @click="openLink('https://github.com/lighttigerXIV/simple-keyboard-launcher')">
-                <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
-            </button>
+            <div class="p-4 flex mt-1 ">
+                <b>Extensions</b>
+                <div class="flex-grow"></div>
+                <div class="oneLineText">{{ extensions.length }}</div>
+            </div>
+
+            <SectionDivider />
+
+            <div class="p-4 flex items-center mt-1 ">
+                <b>Source</b>
+                <div class="flex-grow"></div>
+                <button @click="openLink('https://github.com/lighttigerXIV/simple-keyboard-launcher')">
+                    <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
+                </button>
+            </div>
         </div>
         <div class="mt-4 ml-3 text-xl">Developers</div>
-        <div class="card flex items-center">
-            <img :src="lighttigerxivPFP" class="h-[50px] w-[50px] rounded-full">
-            <div class="ml-4 flex-grow">lighttigerXIV</div>
-            <button @click="openLink('https://discord.com/users/598945126089228327')">
-                <DiscordSVG class="h-[35px] w-[35px] fillIcon"/>
-            </button>
-            <button @click="openLink('https://github.com/lighttigerXIV')" class="ml-4">
-                <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
-            </button>
+        <div class="section">
+            <div class="p-4 flex items-center">
+                <img :src="lighttigerxivPFP" class="h-[50px] w-[50px] rounded-full profilePicture">
+                <div class="ml-4 flex-grow">lighttigerXIV</div>
+                <button @click="openLink('https://discord.com/users/598945126089228327')">
+                    <DiscordSVG class="h-[35px] w-[35px] fillIcon" />
+                </button>
+                <button @click="openLink('https://github.com/lighttigerXIV')" class="ml-4">
+                    <GitHubSVG class="h-[35px] w-[35px] fillIcon" />
+                </button>
+            </div>
         </div>
     </div>
 </template>
 <style>
-.card {
-    background-color: v-bind(secondaryBackgroundColor);
-    padding: 24px;
-    border-radius: 24px;
-}
-
 .link {
     color: v-bind(accentColor);
 }
@@ -88,5 +92,9 @@ async function loadTheme() {
 
 .fillIcon {
     fill: v-bind(textColor);
+}
+
+.profilePicture{
+    outline: 2px solid v-bind(tertiaryBackgroundColor);
 }
 </style>

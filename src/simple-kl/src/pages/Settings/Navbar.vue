@@ -71,7 +71,7 @@ async function loadTheme() {
                     <SearchSVG class="h-6 w-6 strokeAccent" />
                 </div>
                 <div class="ml-3">
-                    Search
+                    Search Box
                 </div>
             </div>
 

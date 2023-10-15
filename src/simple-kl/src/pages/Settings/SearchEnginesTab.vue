@@ -150,7 +150,7 @@ document.addEventListener('keydown', (event) => {
 </script>
 
 <template>
-    <div class="max-w-[700px] p-4">
+    <div class="p-4">
         <div class="flex items-start">
             <div class="text-2xl flex-grow ml-2">Search Engines</div>
             <button @mouseover="addButtonHovering = true" @mouseout="addButtonHovering = false"

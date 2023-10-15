@@ -8,6 +8,8 @@ import { emit, listen } from '@tauri-apps/api/event';
 import PrimaryButton from '../../components/PrimaryButton.vue';
 import { WebviewWindow } from '@tauri-apps/api/window';
 
+import SectionDivider from '@components/SectionDivider.vue';
+
 const menu = ref();
 
 const backgroundColor = ref("");
@@ -212,64 +214,90 @@ function openCommunityThemesDialog() {
                     <button
                         class=" ml-4 previewDangerButton p-2 pr-4 pl-4 rounded-full hover:opacity-80 w-full">Abc</button>
                 </div>
-                <div class="p-4 previewCurrentSecondaryBackground rounded-3xl mt-4">
+                <div class="p-6 previewCurrentSecondaryBackground rounded-3xl mt-4">
                     <div class="ml-3 previewText">Abc</div>
                     <input class="previewInput w-full" placeholder="Abc" />
                 </div>
             </div>
             <div class="ml-2 mt-2 text-xl">Colors</div>
-            <div class=" items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Background</div>
-                    <input v-model="currentBackgroundColor" type="color" class="colorInput">
+            <div class="section">
+                <div class=" items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Background</div>
+                        <input v-model="currentBackgroundColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Secondary Background</div>
-                    <input v-model="currentSecondaryBackgroundColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Secondary Background</div>
+                        <input v-model="currentSecondaryBackgroundColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Tertiary Background</div>
-                    <input v-model="currentTertiaryBackgroundColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Tertiary Background</div>
+                        <input v-model="currentTertiaryBackgroundColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Accent</div>
-                    <input v-model="currentAccentColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Accent</div>
+                        <input v-model="currentAccentColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">On Accent</div>
-                    <input v-model="currentOnAccentColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">On Accent</div>
+                        <input v-model="currentOnAccentColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Danger</div>
-                    <input v-model="currentDangerColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Danger</div>
+                        <input v-model="currentDangerColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">On Danger</div>
-                    <input v-model="currentOnDangerColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">On Danger</div>
+                        <input v-model="currentOnDangerColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Text</div>
-                    <input v-model="currentTextColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Text</div>
+                        <input v-model="currentTextColor" type="color" class="colorInput">
+                    </div>
                 </div>
-            </div>
-            <div class=" mt-1 items-center secondaryBackground p-6 rounded-[28px]">
-                <div class="flex items-center">
-                    <div class="flex-grow">Secondary Text</div>
-                    <input v-model="currentSecondaryTextColor" type="color" class="colorInput">
+
+                <SectionDivider/>
+
+                <div class=" mt-1 items-center  p-6">
+                    <div class="flex items-center">
+                        <div class="flex-grow">Secondary Text</div>
+                        <input v-model="currentSecondaryTextColor" type="color" class="colorInput">
+                    </div>
                 </div>
             </div>
             <div class="flex mt-4">
@@ -280,9 +308,6 @@ function openCommunityThemesDialog() {
 </template>
 
 <style scoped>
-
-
-
 .previewBox {
     background-color: v-bind(currentBackgroundColor);
     outline: 2px solid v-bind(currentSecondaryBackgroundColor);
@@ -398,14 +423,12 @@ function openCommunityThemesDialog() {
 }
 
 .menu-content {
-    margin-top: 60px;
-    margin-right: 20px;
+    margin-top: 50px;
     display: none;
     position: absolute;
     background-color: v-bind(tertiaryBackgroundColor);
     padding: 10px;
     z-index: 9999;
-    right: 0;
     border-radius: 14px;
     outline: 2px solid v-bind(accentColor);
 }

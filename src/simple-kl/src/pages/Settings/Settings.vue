@@ -56,7 +56,7 @@ async function loadTheme() {
         <div class="flex">
             <Navbar :current-tab="currentTab" @click="currentTab = $event" />
 
-            <div class="flex-grow ml-[40px] overflow-y-auto h-screen test">
+            <div class="flex-grow ml-[40px] max-w-[750px] overflow-y-auto h-screen test">
                 <div v-if="currentTab === SettingsTab.General">
                     <GeneralTab/>
                 </div>
@@ -94,17 +94,22 @@ async function loadTheme() {
 <style>
 
 ::-webkit-scrollbar {
-    width: 6px;
+    width: 3px;
 }
 
 ::-webkit-scrollbar-track {
-    background: v-bind(tertiaryBackgroundColor);
+    background: transparent;
     border-radius: 48px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: v-bind(accentColor);
     border-radius: 48px;
+}
+
+.section{
+    background-color: v-bind(secondaryBackgroundColor);
+    border-radius: 24px;
 }
 
 .background {

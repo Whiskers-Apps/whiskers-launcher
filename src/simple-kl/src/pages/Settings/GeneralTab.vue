@@ -5,6 +5,7 @@ import Slider from '../../components/Slider.vue';
 import { listen } from '@tauri-apps/api/event';
 import Switch from '@/components/Switch.vue';
 import { invoke } from '@tauri-apps/api';
+import SectionDivider from '@/components/SectionDivider.vue';
 
 const backgroundColor = ref("");
 const secondaryBackgroundColor = ref("");
@@ -37,12 +38,12 @@ onMounted(async () => {
 
     loadTheme();
 
-    updateThemeListener.value = listen("updateTheme", (_event)=>{
+    updateThemeListener.value = listen("updateTheme", (_event) => {
         loadTheme();
     });
 })
 
-async function loadTheme(){
+async function loadTheme() {
 
     let theme = await getTheme();
     backgroundColor.value = theme.background;
@@ -116,79 +117,81 @@ async function updateAutoStart(value: boolean) {
 
         <div class="ml-2 text-2xl">General</div>
 
-        <div class=" secondaryBackground p-6 border rounded-[28px] mt-2">
-            <div class=" font-semibold text-lg">Keybinding</div>
-            <div class="">Key combination to launch the search box</div>
-            <div v-if="showRelaunchWarning" class="warning">Setting will apply on next app launch. You can manually restart using the system tray.</div>
+        <div class="section">
+            <div class=" p-6 ">
+                <div class=" font-semibold text-lg">Keybinding</div>
+                <div class="">Key combination to launch the search box</div>
+                <div v-if="showRelaunchWarning" class="warning">Setting will apply on next app launch. You can manually
+                    restart using the system tray.</div>
 
-            <div class="grid grid-cols-11 mt-2 ">
+                <div class="grid grid-cols-11 mt-2 ">
 
-                <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
-                    @click="toggleShowKey(1)">
-                    {{ firstKey }}
-                </button>
-                <div class="col-span-1 flex items-center justify-center ">+</div>
-                <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
-                    @click="toggleShowKey(2)">
-                    {{ secondKey }}
-                </button>
-                <div class="col-span-1 flex items-center justify-center ">+</div>
-                <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
-                    @click="toggleShowKey(3)">
-                    {{ thirdKey }}
-                </button>
-            </div>
-
-            <div v-if="showFirstKeyOptions" class="grid grid-cols-8 gap-2 mt-10">
-                <div v-for="option in firstKeyOptions">
-                    <button class="p-2 pr-4 pl-4 w-full tertiaryBackground flex justify-center rounded-full key border"
-                        @click="updateKey(1, option)">
-                        {{ option }}
+                    <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
+                        @click="toggleShowKey(1)">
+                        {{ firstKey }}
                     </button>
+                    <div class="col-span-1 flex items-center justify-center ">+</div>
+                    <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
+                        @click="toggleShowKey(2)">
+                        {{ secondKey }}
+                    </button>
+                    <div class="col-span-1 flex items-center justify-center ">+</div>
+                    <button class="col-span-3 tertiaryBackground rounded-full p-2 flex items-center justify-center"
+                        @click="toggleShowKey(3)">
+                        {{ thirdKey }}
+                    </button>
+                </div>
+
+                <div v-if="showFirstKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
+                    <div v-for="option in firstKeyOptions">
+                        <button class="p-2 pr-4 pl-4 w-full tertiaryBackground flex justify-center rounded-full key border"
+                            @click="updateKey(1, option)">
+                            {{ option }}
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="showSecondKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
+                    <div v-for="option in secondKeyOptions">
+                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
+                            @click="updateKey(2, option)">
+                            {{ option }}
+                        </button>
+                    </div>
+                </div>
+
+                <div v-if="showThirdKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
+                    <div v-for="option in thirdKeyOptions">
+                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
+                            @click="updateKey(3, option)">
+                            {{ option }}
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <div v-if="showSecondKeyOptions" class="grid grid-cols-8 gap-2 mt-10">
-                <div v-for="option in secondKeyOptions">
-                    <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
-                        @click="updateKey(2, option)">
-                        {{ option }}
-                    </button>
-                </div>
-            </div>
+            <SectionDivider/>
 
-            <div v-if="showThirdKeyOptions" class="grid grid-cols-8 gap-2 mt-10">
-                <div v-for="option in thirdKeyOptions">
-                    <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
-                        @click="updateKey(3, option)">
-                        {{ option }}
-                    </button>
+            <div class="p-6 flex">
+                <div class="flex-grow">
+                    <div class=" font-semibold text-lg">Auto Start</div>
+                    <div class="">Toggle this setting to make the app auto start on login</div>
                 </div>
-            </div>
-        </div>
-
-        <div class="p-6 flex secondaryBackground border rounded-[28px] mt-1">
-            <div class="flex-grow">
-                <div class=" font-semibold text-lg">Auto Start</div>
-                <div class="">Toggle this setting to make the app auto start on login</div>
-            </div>
-            <div class="flex ml-2">
-                <Switch :checked="autoStart" @update:checked="updateAutoStart($event)" />
+                <div class="flex ml-2">
+                    <Switch :checked="autoStart" @update:checked="updateAutoStart($event)" />
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-.border {
-    border: 1px solid v-bind(tertiaryBackgroundColor);
-}
 
 .key:hover {
     background: v-bind(secondaryBackgroundColor);
 }
 
-.warning{
+.warning {
     color: v-bind(dangerColor);
 }
 </style>

@@ -1,23 +1,32 @@
-use std::{env, fs};
+use crate::extensions::CommunityExtension;
+use crate::structs::structs::AppIndex;
+use crate::themes::CommunityTheme;
+use git2::Repository;
+use simple_kl_rs::extensions::init_extensions;
+use simple_kl_rs::paths::{
+    get_apps_index_path, get_autostart_path, get_community_extensions_directory,
+    get_community_extensions_file_path, get_community_themes_file_path, get_community_themes_path,
+    get_extensions_path, get_local_dir, get_temp_themes_path,
+};
+use simple_kl_rs::settings;
+use simple_kl_rs::settings::{get_settings, init_settings, Settings, ThemeSettings};
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::Command;
-use git2::Repository;
-use simple_kl_rs::extensions::init_extensions;
-use simple_kl_rs::paths::{get_autostart_path, get_community_extensions_directory, get_community_extensions_file_path, get_community_themes_file_path, get_community_themes_path, get_extensions_path, get_local_dir, get_temp_themes_path};
-use simple_kl_rs::settings;
-use simple_kl_rs::settings::{get_settings, init_settings, Settings, ThemeSettings};
+use std::{env, fs};
 use tauri::{AppHandle, Manager, WindowBuilder, WindowUrl};
-use crate::extensions::CommunityExtension;
-use crate::themes::CommunityTheme;
 
+#[derive(serde::Serialize)]
+pub struct WhiteListApp {
+    icon: String,
+    name: String,
+    path: String,
+    checked: bool,
+}
 
 #[cfg(target_os = "windows")]
-use{
-    std::os::windows::process::CommandExt,
-    simple_kl_rs::others::FLAG_NO_WINDOW
-};
+use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt};
 
 ///Opens the settings page in a new window
 #[tauri::command]
@@ -117,7 +126,7 @@ pub async fn get_community_themes() -> Result<Vec<CommunityTheme>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-themes",
         &themes_path,
     )
-        .expect("Error cloning themes repo");
+    .expect("Error cloning themes repo");
 
     let mut themes_file =
         File::open(get_community_themes_file_path().unwrap()).expect("Error opening themes file");
@@ -190,7 +199,7 @@ pub async fn get_community_extensions() -> Result<Vec<CommunityExtension>, ()> {
         "https://github.com/lighttigerXIV/simple-kl-extensions",
         &extensions_dir,
     )
-        .expect("Error cloning extensions repo");
+    .expect("Error cloning extensions repo");
 
     let mut extensions_file = File::open(get_community_extensions_file_path().unwrap())
         .expect("Error opening extensions file");
@@ -218,39 +227,87 @@ pub async fn install_community_extension(id: String, repo: String, app: AppHandl
 
     init_extensions();
 
-    app.emit_all("updateExtensions", ()).expect("Error calling listener");
+    app.emit_all("updateExtensions", ())
+        .expect("Error calling listener");
 }
-
 
 #[tauri::command]
 pub fn update_auto_start() {
     simple_kl_rs::settings::update_auto_start();
 }
 
+#[tauri::command]
+pub fn get_whitelist_apps() -> Vec<WhiteListApp> {
+    let mut apps: Vec<WhiteListApp> = Vec::new();
+    let settings = get_settings();
+    let blacklist = settings.results.blacklist;
+
+    let indexed_apps_yaml = fs::read_to_string(get_apps_index_path().unwrap()).unwrap();
+    let indexed_apps: Vec<AppIndex> = serde_yaml::from_str(&indexed_apps_yaml).unwrap();
+
+    for app in indexed_apps {
+        if !&blacklist.contains(&app.exec_path) {
+            apps.push(WhiteListApp {
+                icon: app.icon_path,
+                name: app.name,
+                path: app.exec_path,
+                checked: false,
+            });
+        }
+    }
+
+    return apps;
+}
 
 #[tauri::command]
-pub fn add_to_blacklist(path: String){
+pub fn get_blacklist_apps() -> Vec<AppIndex> {
+    let mut apps: Vec<AppIndex> = Vec::new();
+    let settings = get_settings();
+    let blacklist = settings.results.blacklist;
 
+    let indexed_apps_yaml = fs::read_to_string(get_apps_index_path().unwrap()).unwrap();
+    let indexed_apps: Vec<AppIndex> = serde_yaml::from_str(&indexed_apps_yaml).unwrap();
+
+    for app in indexed_apps {
+        if blacklist.contains(&app.exec_path) {
+            apps.push(app);
+        }
+    }
+
+    apps.sort_by(|a, b| a.name.cmp(&b.name));
+
+    return apps;
+}
+
+#[tauri::command]
+pub fn add_to_blacklist(path: String, app: AppHandle) {
     let mut settings = get_settings();
     let mut blacklist = settings.results.blacklist;
 
-    if !blacklist.contains(&path){
+    if !blacklist.contains(&path) {
         blacklist.push(path.to_owned());
     }
 
     settings.results.blacklist = blacklist;
 
     settings::update_settings(&settings);
+
+    app.emit_all("update-blacklist",()).unwrap();
 }
 
 #[tauri::command]
-pub fn remove_from_blacklist(path: String){
-
+pub fn remove_from_blacklist(path: String, app: AppHandle) {
     let mut settings = get_settings();
     let mut blacklist = settings.results.blacklist;
 
-    blacklist = blacklist.iter().map(|p| p.to_owned()).filter(|p| p == &path).collect();
+    blacklist = blacklist
+        .iter()
+        .map(|p| p.to_owned())
+        .filter(|p| p != &path)
+        .collect();
 
     settings.results.blacklist = blacklist.to_owned();
     settings::update_settings(&settings);
+
+    app.emit_all("update-blacklist",()).unwrap();
 }

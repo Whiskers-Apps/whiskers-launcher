@@ -1,25 +1,24 @@
+use fuzzy_matcher::skim::SkimMatcherV2;
+use fuzzy_matcher::FuzzyMatcher;
+use simple_kl_rs::actions::{DialogAction, ExtensionAction, OpenApp, OpenInBrowser, ResultAction};
+use simple_kl_rs::extensions::{ExtensionManifest, Parameters};
+use simple_kl_rs::paths::{
+    get_apps_index_path, get_dialog_action_path, get_extension_parameters_path, get_extension_path,
+    get_extension_results_path, get_extensions_path, get_resources_directory,
+};
+use simple_kl_rs::results::{IconWithTextResult, SimpleKLResult};
+use simple_kl_rs::settings::get_settings;
 use std::fs;
 use std::fs::File;
 use std::io::{Read, Write};
 use std::path::Path;
 use std::process::Command;
-use fuzzy_matcher::FuzzyMatcher;
-use fuzzy_matcher::skim::SkimMatcherV2;
-use simple_kl_rs::actions::{DialogAction, ExtensionAction, OpenApp, OpenInBrowser, ResultAction};
-use simple_kl_rs::extensions::{ExtensionManifest, Parameters};
-use simple_kl_rs::paths::{get_apps_index_path, get_dialog_action_path, get_extension_parameters_path, get_extension_path, get_extension_results_path, get_extensions_path, get_resources_directory};
-use simple_kl_rs::results::{IconWithTextResult, SimpleKLResult};
-use simple_kl_rs::settings::get_settings;
 use tauri::{AppHandle, Window, WindowBuilder, WindowUrl};
 
 //Imports only used in windows
-#[cfg(target_os = "windows")]
-use {
-    simple_kl_rs::others::FLAG_NO_WINDOW,
-    std::os::windows::process::CommandExt,
-};
 use crate::structs::structs::AppIndex;
-
+#[cfg(target_os = "windows")]
+use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt};
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
@@ -63,7 +62,7 @@ pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             format!("Search for {}", search_words).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -73,7 +72,7 @@ pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             &format!("Search for {}", search_words),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         )
@@ -102,7 +101,7 @@ pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_path_buf(),
+                            .to_path_buf(),
                             format!("Search for {}", search_text).as_str(),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -110,7 +109,7 @@ pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
                             Path::new(&search_engine.icon.unwrap_or(
                                 search_svg_path.into_os_string().into_string().unwrap(),
                             ))
-                                .to_owned(),
+                            .to_owned(),
                             &format!("Search for {}", search_text),
                             ResultAction::OpenInBrowser(OpenInBrowser { url }),
                         ),
@@ -127,6 +126,7 @@ pub fn get_results(search_text: String) -> Vec<SimpleKLResult> {
 
 pub fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
     let mut results: Vec<SimpleKLResult> = Vec::new();
+    let blacklist = get_settings().results.blacklist;
 
     let indexed_apps_yaml = fs::read_to_string(get_apps_index_path().unwrap()).unwrap();
     let apps: Vec<AppIndex> = serde_yaml::from_str(&indexed_apps_yaml).unwrap();
@@ -135,6 +135,7 @@ pub fn get_apps_results(search_text: &str) -> Vec<SimpleKLResult> {
         if SkimMatcherV2::default()
             .fuzzy_match(&app.name, search_text)
             .is_some()
+            && !blacklist.contains(&app.exec_path)
         {
             let action = OpenApp::new(app.exec_path);
 
@@ -359,11 +360,11 @@ pub async fn run_action(
                 "extension_dialog",
                 WindowUrl::App("extension-dialog".parse().unwrap()),
             )
-                .max_inner_size(300.0, 800.0)
-                .resizable(false)
-                .title(action.title)
-                .build()
-                .expect("Error spawning extension dialog");
+            .max_inner_size(300.0, 800.0)
+            .resizable(false)
+            .title(action.title)
+            .build()
+            .expect("Error spawning extension dialog");
         }
         _ => {}
     };

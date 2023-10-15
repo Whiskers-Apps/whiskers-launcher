@@ -8,6 +8,8 @@ import Slider from '../../components/Slider.vue';
 import Switch from '../../components/Switch.vue';
 import { listen } from '@tauri-apps/api/event';
 
+import SectionDivider from '@components/SectionDivider.vue';
+
 
 const showSearchIcon = ref(false);
 const showSettingsIcon = ref(false);
@@ -52,12 +54,12 @@ async function loadTheme() {
     accentColor.value = theme.accent;
 }
 
-function getSearchHeightClass(): string{
-  switch(layout.value){
-    case "Small": { return "smallHeight" }
-    case "Medium": { return "mediumHeight" }
-    default: { return "largeHeight" }
-  }
+function getSearchHeightClass(): string {
+    switch (layout.value) {
+        case "Small": { return "smallHeight" }
+        case "Medium": { return "mediumHeight" }
+        default: { return "largeHeight" }
+    }
 }
 
 function updateBorderRadius() {
@@ -86,79 +88,88 @@ async function update() {
 </script>
 
 <template>
-    <div class="max-w-[700px] p-4">
+    <div class=" p-4">
 
-        <div class="text-2xl ml-2">Search</div>
+        <div class="text-2xl ml-2">Search Box</div>
 
         <div class="text-lg mt-1 ml-2">Preview</div>
 
         <div class="background flex items-center rounded  preview " :class="getSearchHeightClass()">
-            <div v-if="showSearchIcon" class="">
+            <div v-if="showSearchIcon" class="mr-2">
                 <SearchSVG class="w-5 h-5 stroke" />
             </div>
             <div class="flex-grow">
                 <div v-if="showPlaceholder">Search</div>
             </div>
-            <div v-if="showSettingsIcon" class="">
+            <div v-if="showSettingsIcon" class="ml-2">
                 <SettingsSVG class="w-5 h-5 stroke" />
             </div>
         </div>
 
         <div class="text-lg mt-2 ml-2">Settings</div>
 
-        <div class="secondaryBackground p-6 rounded-[28px] flex mb-1">
-            <div class="flex-grow">
-                <div class=" font-semibold">Show Search Icon</div>
-                <div>If enabled it will show the search icon</div>
+        <div class="section">
+            <div class="p-6 flex">
+                <div class="flex-grow">
+                    <div class=" font-semibold">Show Search Icon</div>
+                    <div>If enabled it will show the search icon</div>
+                </div>
+                <div>
+                    <Switch :checked="showSearchIcon" @update:checked="showSearchIcon = $event; update()" />
+                </div>
             </div>
-            <div>
-                <Switch :checked="showSearchIcon" @update:checked="showSearchIcon = $event; update()" />
-            </div>
-        </div>
+            
+            <SectionDivider/>
 
-        <div class="secondaryBackground p-6 rounded-[28px] flex mb-1">
-            <div class="flex-grow">
-                <div class=" font-semibold">Show Settings Icon</div>
-                <div>If enabled it will show the settings icon</div>
+            <div class="p-6 flex">
+                <div class="flex-grow">
+                    <div class=" font-semibold">Show Settings Icon</div>
+                    <div>If enabled it will show the settings icon</div>
+                </div>
+                <div>
+                    <Switch :checked="showSettingsIcon" @update:checked="showSettingsIcon = $event; update()" />
+                </div>
             </div>
-            <div>
-                <Switch :checked="showSettingsIcon" @update:checked="showSettingsIcon = $event; update()" />
-            </div>
-        </div>
 
-        <div class="secondaryBackground p-6 rounded-[28px] flex mb-1">
-            <div class="flex-grow">
-                <div class=" font-semibold">Show Placeholder</div>
-                <div>If enabled it will show the placeholder text</div>
-            </div>
-            <div>
-                <Switch :checked="showPlaceholder" @update:checked="showPlaceholder = $event; update()" />
-            </div>
-        </div>
+            <SectionDivider/>
 
-        <div class="secondaryBackground p-6 rounded-[28px] mb-1">
-
-            <div class=" font-semibold">Border Radius ({{ borderRadius }})</div>
-            <div>It changes the border radius of the search box.</div>
-            <div class=" mt-2">
-                <Slider :min="0" :max="48" :step="1" :value="borderRadiusInput"
-                    @update:value="borderRadiusInput = $event; updateBorderRadius()" />
+            <div class="p-6 flex">
+                <div class="flex-grow">
+                    <div class=" font-semibold">Show Placeholder</div>
+                    <div>If enabled it will show the placeholder text</div>
+                </div>
+                <div>
+                    <Switch :checked="showPlaceholder" @update:checked="showPlaceholder = $event; update()" />
+                </div>
             </div>
-        </div>
 
-        <div class="secondaryBackground p-6 rounded-[28px] mb-1">
-            <div class=" font-semibold">Border Width ({{ borderWidth }})</div>
-            <div>It changes the border width of the search box. From 0px to 10px</div>
-            <div class=" mt-2">
-                <Slider :min="0" :max="10" :step="1" :value="borderWidthInput"
-                    @update:value="borderWidthInput = $event; updateBorderWidth()" />
+            <SectionDivider/>
+
+            <div class="p-6">
+
+                <div class=" font-semibold">Border Radius ({{ borderRadius }})</div>
+                <div>It changes the border radius of the search box.</div>
+                <div class=" mt-2">
+                    <Slider :min="0" :max="48" :step="1" :value="borderRadiusInput"
+                        @update:value="borderRadiusInput = $event; updateBorderRadius()" />
+                </div>
+            </div>
+
+            <SectionDivider/>
+
+            <div class="p-6">
+                <div class=" font-semibold">Border Width ({{ borderWidth }})</div>
+                <div>It changes the border width of the search box. From 0px to 10px</div>
+                <div class=" mt-2">
+                    <Slider :min="0" :max="10" :step="1" :value="borderWidthInput"
+                        @update:value="borderWidthInput = $event; updateBorderWidth()" />
+                </div>
             </div>
         </div>
     </div>
 </template>
 
 <style scoped>
-
 .border {
     border-color: v-bind(tertiaryBackgroundColor);
 }
@@ -197,15 +208,15 @@ input[type="range"]::-webkit-slider-thumb {
     stroke-width: 2;
 }
 
-.smallHeight{
-  min-height: 50px;
+.smallHeight {
+    min-height: 50px;
 }
 
-.mediumHeight{
-  min-height: 60px;
+.mediumHeight {
+    min-height: 60px;
 }
 
-.largeHeight{
-  min-height: 70px;
+.largeHeight {
+    min-height: 70px;
 }
 </style>

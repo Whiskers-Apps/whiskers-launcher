@@ -468,14 +468,12 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
 }
 
 .menu-content {
-    margin-top: 60px;
-    margin-right: 20px;
+    margin-top: 50px;
     display: none;
     position: absolute;
     background-color: v-bind(tertiaryBackgroundColor);
     padding: 10px;
     z-index: 9999;
-    right: 0;
     border-radius: 14px;
     outline: 2px solid v-bind(accentColor);
 }

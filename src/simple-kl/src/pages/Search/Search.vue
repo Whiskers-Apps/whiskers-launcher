@@ -72,7 +72,8 @@ function openSettings() {
 
   new WebviewWindow("settings", {
     url: "settings",
-    title: "Settings"
+    title: "Settings",
+    width: 1000
   });
 
 }
@@ -311,6 +312,8 @@ function getIconHeightClass(): string {
 }
 
 ::-webkit-scrollbar-track {
+  margin-top: 20px;
+  margin-bottom: 20px;
   background: v-bind(tertiaryBackgroundColor);
 }
 

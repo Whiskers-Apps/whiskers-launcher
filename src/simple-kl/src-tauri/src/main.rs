@@ -45,7 +45,11 @@ async fn main() {
             get_dialog_action,
             write_dialog_result,
             open_settings,
-            update_auto_start
+            update_auto_start,
+            get_whitelist_apps,
+            get_blacklist_apps,
+            add_to_blacklist,
+            remove_from_blacklist
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
