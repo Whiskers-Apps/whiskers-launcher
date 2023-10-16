@@ -140,7 +140,7 @@ async fn main() {
                             Command::new("cmd")
                                 .arg("/C")
                                 .arg("start simple-keyboard-launcher")
-                                .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
+                                .current_dir(get_local_dir().unwrap())
                                 .spawn()
                                 .expect("Error opening app");
                         }  
@@ -167,7 +167,7 @@ async fn main() {
                             Command::new("cmd")
                                 .arg("/C")
                                 .arg("start simple-keyboard-launcher --settings")
-                                .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
+                                .current_dir(get_local_dir().unwrap())
                                 .creation_flags(FLAG_NO_WINDOW)
                                 .spawn()
                                 .expect("Error opening app");
@@ -250,7 +250,7 @@ async fn main() {
                                 Command::new("cmd")
                                     .arg("/C")
                                     .arg("start simple-keyboard-launcher")
-                                    .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
+                                    .current_dir(get_local_dir().unwrap())
                                     .creation_flags(FLAG_NO_WINDOW)
                                     .spawn()
                                     .expect("Error opening app");
