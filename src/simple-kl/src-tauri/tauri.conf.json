@@ -7,7 +7,7 @@
     "withGlobalTauri": false
   },
   "package": {
-    "productName": "Simple-Keyboard-Launcher",
+    "productName": "simple-keyboard-launcher",
     "version": "0.0.0"
   },
   "tauri": {

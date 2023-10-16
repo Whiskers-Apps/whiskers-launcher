@@ -103,17 +103,10 @@ fn index_apps() {
     if cfg!(target_os = "windows") {
 
         let mut script_path = get_local_dir().unwrap();
-        script_path.push("scripts");
-        script_path.push("index-apps.ps1");
+        script_path.push("resources\\ps-scripts\\index-apps.ps1");
 
-
-        Command::new("powershell")
-        .arg("-File")
-        .arg(&script_path.into_os_string().into_string().unwrap())
-        .creation_flags(FLAG_NO_WINDOW)
-        .spawn()
-        .expect("Error running index apps");
-    
+        let script_content = fs::read_to_string(&script_path).unwrap();
+        powershell_script::run(&script_content).expect("Error running index script");
     }
 }
 
@@ -146,7 +139,7 @@ async fn main() {
 
                             Command::new("cmd")
                                 .arg("/C")
-                                .arg("start Simple-Keyboard-Launcher")
+                                .arg("start simple-keyboard-launcher")
                                 .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
                                 .spawn()
                                 .expect("Error opening app");
@@ -173,7 +166,7 @@ async fn main() {
 
                             Command::new("cmd")
                                 .arg("/C")
-                                .arg("start Simple-Keyboard-Launcher --settings")
+                                .arg("start simple-keyboard-launcher --settings")
                                 .current_dir(Path::new("C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl\\src-tauri\\target\\release"))
                                 .creation_flags(FLAG_NO_WINDOW)
                                 .spawn()
