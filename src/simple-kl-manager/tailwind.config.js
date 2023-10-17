@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -8,6 +7,7 @@ export default {
     extend: {
       colors:{
         background: "#24273a",
+        mantle: "#1e2030",
         text: "#cad3f5",
         accent: "#8aadf4",
         "on-accent": "#181926",
