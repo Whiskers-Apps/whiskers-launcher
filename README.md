@@ -40,7 +40,7 @@ The launcher is still in **alpha**, so bug reports and suggestions are welcome a
 <details>
   <summary>Arch Linux Dependencies</summary>
   
-    sudo pacman -S --needed webkit2gtk base-devel curl wget file openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips 
+    sudo pacman -S --needed webkit2gtk base-devel curl wget file openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips xdotool
 
 </details>
 
