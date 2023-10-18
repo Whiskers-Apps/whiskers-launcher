@@ -1,5 +1,5 @@
 [package]
-name = "install-cli"
+name = "install"
 version = "0.1.0-alpha"
 edition = "2021"
 
@@ -8,3 +8,7 @@ edition = "2021"
 [dependencies]
 simple_kl_rs = { git = "https://github.com/lighttigerXIV/simple-kl-rs", branch = "master" }
 fs_extra = "1.3.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+powershell_script = "1.1.0"
+is_elevated = "0.1.2"

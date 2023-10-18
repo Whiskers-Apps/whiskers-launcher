@@ -1,12 +1,25 @@
-use std::{fs, process::Command};
+use std::{io::stdin, process::exit};
 
-use simple_kl_rs::paths::{get_autostart_path, get_local_dir};
+use is_elevated::is_elevated;
+
+//Imports only used in linux
+#[cfg(target_os = "linux")]
+use {
+    simple_kl_rs::paths::{get_autostart_path, get_local_dir},
+    std::{fs, process::Command},
+};
+
+fn press_to_close() {
+    let mut s = String::new();
+    println!("Press any key to close ...");
+    stdin().read_line(&mut s).unwrap();
+    exit(0);
+}
 
 fn main() {
-    let local_dir = get_local_dir().unwrap();
-
     #[cfg(target_os = "linux")]
     if cfg!(target_os = "linux") {
+        let local_dir = get_local_dir().unwrap();
 
         let remove_root_files_cmd = format!("sudo rm -f /usr/bin/simple-keyboard-launcher /usr/bin/simple-kl-service /usr/share/pixmaps/simple-kl.png /usr/share/applications/simple-kl.desktop");
 
@@ -31,15 +44,34 @@ fn main() {
         if auto_start_file.exists() {
             fs::remove_file(&auto_start_file).expect("Error deleting autostart file");
         }
+
+        //Removing files
+        if local_dir.exists() {
+            fs::remove_dir_all(&local_dir).expect("Error removing local folder");
+        }
+
+        println!("Uninstall successfull");
     }
 
     #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {}
+    if cfg!(target_os = "windows") {
 
-    //Removing files
-    if local_dir.exists() {
-        fs::remove_dir_all(&local_dir).expect("Error removing local folder");
+        if !is_elevated(){
+            eprintln!("Please run the uninstall script as administrator");
+            press_to_close();
+        }
+
+        let uninstall_script = include_str!("windows-uninstall.ps1").to_owned();
+
+        match powershell_script::run(&uninstall_script) {
+            Ok(_) => {
+                println!("Uninstall successfull");
+            }
+            Err(e) => {
+                eprintln!("Error running uninstall script: {}", e.to_string());
+            }
+        };
+
+        press_to_close();
     }
-
-    println!("Uninstall successfull");
 }
