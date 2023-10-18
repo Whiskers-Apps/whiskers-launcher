@@ -36,6 +36,21 @@ The launcher is still in **alpha**, so bug reports and suggestions are welcome a
 
 # Installation
 ### Linux
+#### Dependencies
+<details>
+  <summary>Arch Linux Dependencies</summary>
+  
+    sudo pacman -S --needed webkit2gtk base-devel curl wget file openssl appmenu-gtk-module gtk3 libappindicator-gtk3 librsvg libvips 
+
+</details>
+
+<details>
+  <summary>Debian/Ubuntu Dependencies</summary>
+  
+    sudo apt install libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+
+</details>
+
 1. Download the zip file in [releases](https://github.com/lighttigerXIV/simple-keyboard-launcher/releases) page (Linux-Simple-KL)
 2. Extract It
 3. Open the terminal inside the folder and run `./install`
