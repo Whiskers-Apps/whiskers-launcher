@@ -1,18 +1,19 @@
-use std::{env, io::stdin, process::exit};
+use std::{env, process::exit};
 
-use is_elevated::is_elevated;
-
+//Imports only used in windows
+#[cfg(target_os = "windows")]
+use {is_elevated::is_elevated, std::io::stdin};
 
 //Imports only used in linux
 #[cfg(target_os = "linux")]
 use {
     fs_extra::dir::CopyOptions,
-    std::{fs, process::{Command, exit}},
-    simple_kl_rs::paths::{get_local_dir, get_resources_directory},
+    simple_kl_rs::paths::get_resources_directory,
+    std::{fs, process::Command},
 };
 
-
-fn press_to_close(){
+#[cfg(target_os = "windows")]
+fn press_to_close() {
     let mut s = String::new();
     println!("Press any key to close ...");
     stdin().read_line(&mut s).unwrap();
@@ -20,7 +21,6 @@ fn press_to_close(){
 }
 
 fn main() {
-
     let binary_path = env::current_exe().expect("Error getting path");
     let binary_dir = binary_path.parent().unwrap();
 
@@ -36,7 +36,6 @@ fn main() {
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
-
         let resources_dir = get_resources_directory().unwrap();
 
         let mut launcher_bin = installation_files.to_owned();
@@ -48,13 +47,12 @@ fn main() {
         let mut desktop_file = installation_files.to_owned();
         desktop_file.push("simple-kl.desktop");
 
-
         let copy_binaries_cmd = format!(
             "sudo cp '{}' '{}' /usr/bin",
             launcher_bin.into_os_string().into_string().unwrap(),
             service_bin.into_os_string().into_string().unwrap()
         );
-        
+
         println!("Copying files ...");
 
         let copy_binaries_result = Command::new("sh")
@@ -128,20 +126,22 @@ fn main() {
 
     #[cfg(target_os = "windows")]
     if env::consts::OS == "windows" {
-
-        if !is_elevated(){
+        if !is_elevated() {
             eprintln!("Please run the install script as administrator");
             press_to_close();
         }
 
         let mut install_script = include_str!("windows-install.ps1").to_owned();
-        install_script = install_script.replace("%installation_files_dir%", &installation_files.into_os_string().into_string().unwrap());
+        install_script = install_script.replace(
+            "%installation_files_dir%",
+            &installation_files.into_os_string().into_string().unwrap(),
+        );
 
-        match powershell_script::run(&install_script){
-            Ok(_) =>{
+        match powershell_script::run(&install_script) {
+            Ok(_) => {
                 println!("Installation completed. Enjoy the launcher :D");
-            },
-            Err(e)=>{
+            }
+            Err(e) => {
                 eprintln!("Error running install script: {}", e.to_string());
             }
         };

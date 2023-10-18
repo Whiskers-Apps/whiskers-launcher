@@ -1,6 +1,9 @@
-use std::{io::stdin, process::exit};
-
-use is_elevated::is_elevated;
+//Imports only used in windows
+#[cfg(target_os = "windows")]
+use {
+    is_elevated::is_elevated,
+    std::{io::stdin, process::exit},
+};
 
 //Imports only used in linux
 #[cfg(target_os = "linux")]
@@ -9,6 +12,7 @@ use {
     std::{fs, process::Command},
 };
 
+#[cfg(target_os = "windows")]
 fn press_to_close() {
     let mut s = String::new();
     println!("Press any key to close ...");
@@ -55,8 +59,7 @@ fn main() {
 
     #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
-
-        if !is_elevated(){
+        if !is_elevated() {
             eprintln!("Please run the uninstall script as administrator");
             press_to_close();
         }
