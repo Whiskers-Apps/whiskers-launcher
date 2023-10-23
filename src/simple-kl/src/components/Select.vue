@@ -89,7 +89,7 @@ export interface SelectOption {
 function updateValue(option: SelectOption) {
 
     if (option.value !== "") {
-        emit('updateValue', option.value);
+        emit('updateValue', option);
         showOptions.value = false;
 
         selectedIndex.value = currentOptions.value.findIndex(it => it.value === option.value) ?? 0;
@@ -134,9 +134,9 @@ function filter() {
 
         <div class=" flex  ">
             <div v-if="showOptions" class=" overflow-clip optionsDiv w-full">
-                <div v-for="(option, index) in currentOptions" class="option"
-                    :class="index === selectedIndex ? 'selectedOption' : ''">
-                    <button @click="updateValue(option);" class="w-full text-start">
+                <div v-for="(option, index) in currentOptions" 
+                    :class="index === selectedIndex ? 'selectedOption' : ''" :id="option.value">
+                    <button  @click="updateValue(option);" class="w-full text-start option">
                         {{ option.text }}
                     </button>
                 </div>
@@ -150,8 +150,8 @@ function filter() {
     background-color: v-bind(tertiaryBackgroundColor);
     border: 1px solid v-bind(tertiaryBackgroundColor);
     border-radius: 48px;
-    padding: 8px 16px 8px 16px;
     overflow: auto;
+    padding: 8px 16px 8px 16px;
 }
 
 .selectBox:focus-within {
@@ -169,16 +169,14 @@ function filter() {
     margin-top: 16px;
     position: relative;
     background-color: v-bind(tertiaryBackgroundColor);
-    padding: 4px;
     border-radius: 16px;
     border: 2px solid v-bind(secondaryBackgroundColor);
 }
 
 .option {
-    padding: 10px;
-    border-radius: 14px;
     text-align: start;
     flex-grow: 1;
+    padding: 16px;
 }
 
 .option:hover {
@@ -187,5 +185,9 @@ function filter() {
 
 .selectedOption {
     background-color: v-bind(secondaryBackgroundColor);
+}
+
+.fillText{
+    fill: v-bind(textColor);
 }
 </style>

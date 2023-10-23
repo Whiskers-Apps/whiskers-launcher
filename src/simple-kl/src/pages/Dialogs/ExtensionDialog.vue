@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { getTheme } from '../Settings/Settings';
 import { listen } from '@tauri-apps/api/event';
-import { DialogResult, DialogFieldResult, DialogAction, CheckOption } from '@/data';
+import { DialogResult, DialogFieldResult, DialogAction, CheckOption, DialogField } from '@/data';
 import { invoke } from '@tauri-apps/api';
 import ChevronDown from "@icons/chevron-down.svg"
 import PrimaryButton from '@components/PrimaryButton.vue';
@@ -19,6 +19,7 @@ const textColor = ref("");
 const secondaryTextColor = ref("");
 const accentColor = ref("");
 const dialogAction = ref<DialogAction>();
+const selectFieldsValues = ref<SelectFieldValue[]>([]);
 
 onMounted(async () => {
 
@@ -29,7 +30,19 @@ onMounted(async () => {
     });
 
     dialogAction.value = await invoke("get_dialog_action");
+
+    dialogAction.value?.fields.forEach((f) => {
+        selectFieldsValues.value.push({
+            fieldID: f.id,
+            optionID: getSelectDefaultValue(f.id)
+        })
+    });
 });
+
+interface SelectFieldValue {
+    fieldID: string,
+    optionID: string,
+}
 
 
 async function loadTheme() {
@@ -43,7 +56,7 @@ async function loadTheme() {
     accentColor.value = theme.accent;
 }
 
-function getSelectValue(fieldID: string): string {
+function getSelectDefaultValue(fieldID: string): string {
 
     let field = dialogAction.value?.fields.find(field => field.id === fieldID);
 
@@ -60,11 +73,33 @@ function getSelectOptions(fieldID: string): SelSelectOption[] {
         options.push({
             value: option.id,
             text: option.value
-        }) 
+        })
     })
 
     return options
 }
+
+function updateSelectValues(field: DialogField, selectOption: SelSelectOption) {
+    let newSelectFieldsValues: SelectFieldValue[] = [];
+
+    selectFieldsValues.value.forEach((sv) => {
+        if (sv.fieldID === field.id) {
+            newSelectFieldsValues.push({
+                fieldID: sv.fieldID,
+                optionID: selectOption.value
+            })
+        } else {
+            newSelectFieldsValues.push({
+                fieldID: sv.fieldID,
+                optionID: sv.optionID,
+            })
+        }
+    });
+
+    selectFieldsValues.value = newSelectFieldsValues;
+
+}
+
 
 function finish() {
 
@@ -80,9 +115,10 @@ function finish() {
         }
 
         if (field.type === "Select") {
+
             results.push({
                 field_id: field.id,
-                value: (document.getElementById(field.id) as HTMLSelectElement).value
+                value: selectFieldsValues.value.find((fv) => fv.fieldID === field.id)!!.optionID
             })
         }
 
@@ -159,10 +195,12 @@ function finish() {
                     <div class="font-bold ml-2">{{ field.title }}</div>
                     <div class="ml-2">{{ field.description }}</div>
 
-                    <input v-if="field.type === 'Input'" :value="field.value" :id="field.id" class="input" :placeholder="field.placeholder">
+                    <input v-if="field.type === 'Input'" :value="field.value" :id="field.id" class="input"
+                        :placeholder="field.placeholder">
 
                     <div v-if="field.type === 'Select'">
-                        <Select :id="field.id" :value="getSelectValue(field.id)" :options="getSelectOptions(field.id)"  />
+                        <Select :id="field.id"  :value="getSelectDefaultValue(field.id)" :options="getSelectOptions(field.id)"
+                            @update-value="updateSelectValues(field, $event)" />
                     </div>
                 </div>
             </div>
