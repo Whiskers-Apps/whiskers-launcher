@@ -137,15 +137,15 @@ document.addEventListener('keydown', function (event) {
   }
 
   if (event.key === "Enter") {
-    runAction();
+    runAction(selectedIndex.value);
   }
 });
 
-async function runAction() {
+async function runAction(index: number) {
 
   if (results.value.length > 0) {
 
-    let result = results.value[selectedIndex.value];
+    let result = results.value[index];
     let type = result.action?.type;
 
     if (type != null) {
@@ -265,8 +265,8 @@ function getIconHeightClass(): string {
       <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'"
            :style="`height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
-          <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden"
-               :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`">
+          <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden result"
+               :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`" @click="runAction(index)">
 
             <div v-if="isTextResult(result)" class="flex items-center">
               <div class="min-w-0 oneLineText">{{ result.text }}</div>
@@ -334,6 +334,12 @@ function getIconHeightClass(): string {
 .selectedResult {
   background-color: v-bind(secondaryBackgroundColor);
   border-radius: v-bind(roundnessLevel);
+}
+
+.result:hover{
+  background-color: v-bind(secondaryBackgroundColor);
+  border-radius: v-bind(roundnessLevel);
+  cursor: pointer;
 }
 
 .mainBox {

@@ -2,11 +2,14 @@
 import { onMounted, ref } from 'vue';
 import { getTheme } from '../Settings/Settings';
 import { listen } from '@tauri-apps/api/event';
-import { DialogResult, DialogFieldResult, DialogAction, CheckOption, SelectOption } from '@/data';
+import { DialogResult, DialogFieldResult, DialogAction, CheckOption } from '@/data';
 import { invoke } from '@tauri-apps/api';
 import ChevronDown from "@icons/chevron-down.svg"
-import PrimaryButton from '@/components/PrimaryButton.vue';
-import Switch from '@/components/Switch.vue';
+import PrimaryButton from '@components/PrimaryButton.vue';
+import Switch from '@components/Switch.vue';
+import Select from '@components/Select.vue';
+import { SelectOption as SelSelectOption } from '@components/Select.vue';
+import { SelectOption } from '@/data';
 
 const updateThemeListener = ref();
 const backgroundColor = ref("");
@@ -26,8 +29,6 @@ onMounted(async () => {
     });
 
     dialogAction.value = await invoke("get_dialog_action");
-
-    console.log(dialogAction.value)
 });
 
 
@@ -47,6 +48,22 @@ function getSelectValue(fieldID: string): string {
     let field = dialogAction.value?.fields.find(field => field.id === fieldID);
 
     return field !== undefined ? String(field.default_value) : ""
+}
+
+function getSelectOptions(fieldID: string): SelSelectOption[] {
+    let field = dialogAction.value?.fields.find(field => field.id === fieldID);
+    let options: SelSelectOption[] = []
+
+    field?.options?.forEach((it) => {
+        let option = it as SelectOption;
+
+        options.push({
+            value: option.id,
+            text: option.value
+        }) 
+    })
+
+    return options
 }
 
 function finish() {
@@ -144,13 +161,8 @@ function finish() {
 
                     <input v-if="field.type === 'Input'" :value="field.value" :id="field.id" class="input" :placeholder="field.placeholder">
 
-                    <div v-if="field.type === 'Select'" class="select flex items-center">
-                        <select class="select-input" :id="field.id" :value="getSelectValue(field.id)">
-                            <option v-for="option in (field.options as SelectOption[])" :value="option.id">{{ option.value
-                            }}</option>
-                        </select>
-
-                        <ChevronDown class="h-3 w-3 select-chevron" />
+                    <div v-if="field.type === 'Select'">
+                        <Select :id="field.id" :value="getSelectValue(field.id)" :options="getSelectOptions(field.id)"  />
                     </div>
                 </div>
             </div>
