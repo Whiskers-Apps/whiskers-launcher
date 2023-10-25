@@ -18,7 +18,6 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     let home_icons_location_str = home_icons_location.into_os_string().into_string().unwrap();
 
     xdg_data_dirs.push(&home_icons_location_str);
-    xdg_data_dirs.push("/usr/share/pixmaps");
 
     if Path::new(&icon).exists() {
         return Some(Path::new(&icon).to_owned());
@@ -31,7 +30,7 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
         .output()
         .expect("Error getting current icon theme. Using hicolor instead");
 
-    let icon_theme = String::from_utf8(icon_theme_command.stdout)
+    let mut icon_theme = String::from_utf8(icon_theme_command.stdout)
         .unwrap()
         .replace("'", "")
         .replace("\n", "");
@@ -49,6 +48,50 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
         }
     }
 
+    //Use light theme if icon in dark icon themes wasn't found (Papirus and Breeze for example)
+    if icon_theme.to_lowercase().contains("_dark") {
+        icon_theme = icon_theme.replace("_dark", "");
+        icon_theme = icon_theme.replace("_Dark", "");
+    }
+
+    if icon_theme.to_lowercase().contains("-dark") {
+        icon_theme = icon_theme.replace("-dark", "");
+        icon_theme = icon_theme.replace("-Dark", "");
+    }
+
+    for data_dir in xdg_data_dirs.to_owned() {
+        if Path::new(data_dir).exists() {
+            let mut path = Path::new(&data_dir).to_owned();
+            path.push("icons");
+            path.push(&icon_theme);
+
+            match get_icon_from_dir(path.to_owned(), &icon) {
+                Some(icon_path) => return Some(icon_path),
+                None => {}
+            }
+        }
+    }
+
+    //Gets Icons From Pixmaps
+    match get_icon_from_dir(Path::new("/usr/share/pixmaps").to_owned(), &icon) {
+        Some(icon_path) => return Some(icon_path),
+        None => {}
+    }
+
+    //Gets Icons From Hicolor
+    for data_dir in xdg_data_dirs.to_owned() {
+        if Path::new(data_dir).exists() {
+            let mut path = Path::new(&data_dir).to_owned();
+            path.push("icons/hicolor");
+
+            match get_icon_from_dir(path.to_owned(), &icon) {
+                Some(icon_path) => return Some(icon_path),
+                None => {}
+            }
+        }
+    }
+
+    // Just Yolo and find any icon that matches
     for data_dir in xdg_data_dirs.to_owned() {
         if Path::new(data_dir).exists() {
             let mut path = Path::new(&data_dir).to_owned();
@@ -60,7 +103,6 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
             }
         }
     }
-
 
     return None;
 }

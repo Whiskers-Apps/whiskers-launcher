@@ -346,7 +346,7 @@ async function restoreSetting(extensionID: string, settingID: string, type: "inp
 
                         <div v-if="setting.input === 'select'" class="flex">
                             <Select :value="getSettingValue(extension.id, setting.id)" :options="getSettingOptions(setting)"
-                                @update-value="updateSetting(extension.id, setting.id, $event)" />
+                                @update-value="updateSetting(extension.id, setting.id, $event.value)" />
 
                             <RestoreButton class="ml-2" @click="restoreSetting(extension.id, setting.id, 'select')" />
                         </div>

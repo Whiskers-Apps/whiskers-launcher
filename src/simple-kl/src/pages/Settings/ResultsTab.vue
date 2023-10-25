@@ -115,7 +115,7 @@ async function openAddToBlacklistDialog() {
                 <div class=" font-semibold">Layout</div>
                 <div>The density of the results layout.</div>
                 <div class="flex mt-2" v-if="layout !== ''">
-                    <Select :value="layout" :options="layoutOptions" @update-value="layout = $event; update();" />
+                    <Select :value="layout" :options="layoutOptions" @update-value="layout = $event.value; update();" />
                 </div>
             </div>
 

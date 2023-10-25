@@ -170,7 +170,7 @@ function filter() {
     position: relative;
     background-color: v-bind(tertiaryBackgroundColor);
     border-radius: 16px;
-    border: 2px solid v-bind(secondaryBackgroundColor);
+    border: 1px solid v-bind(accentColor);
 }
 
 .option {
