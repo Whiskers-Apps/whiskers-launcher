@@ -5,6 +5,7 @@ use std::{
 };
 
 use simple_kl_rs::paths::get_home_path;
+use walkdir::WalkDir;
 
 pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     let data_dirs_string = env::var("XDG_DATA_DIRS").unwrap();
@@ -18,23 +19,6 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
 
     xdg_data_dirs.push(&home_icons_location_str);
     xdg_data_dirs.push("/usr/share/pixmaps");
-
-    let icon_dirs: Vec<&str> = vec![
-        "apps",
-        "actions",
-        "categories",
-        "devices",
-        "emblems",
-        "mimetypes",
-        "places",
-        "status",
-        "scalable",
-    ];
-
-    let sizes_dirs: Vec<&str> = vec![
-        "48x48", "8x8", "16x16", "18x18", "20x20", "22x22", "24x24", "32x32", "36x36", "40x40", "42x42", "64x64", "72x72" , "84x84",
-        "96x96", "128x128", "256x256", "384x384", "480x480", "512x512"
-    ];
 
     if Path::new(&icon).exists() {
         return Some(Path::new(&icon).to_owned());
@@ -52,65 +36,53 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
         .replace("'", "")
         .replace("\n", "");
 
-    for data_dir in xdg_data_dirs {
+    for data_dir in xdg_data_dirs.to_owned() {
         if Path::new(data_dir).exists() {
-            let mut path = Path::new(data_dir).to_owned();
+            let mut path = Path::new(&data_dir).to_owned();
+            path.push("icons");
+            path.push(&icon_theme);
 
-            //Searches the icon in pixmaps (it doesn't have any scale)
-            if path == Path::new("/usr/share/pixmaps") {
-                match get_icon_with_extension(path, icon.to_owned()) {
-                    Some(path) => return Some(path),
-                    None => return None
-                }
+            match get_icon_from_dir(path.to_owned(), &icon) {
+                Some(icon_path) => return Some(icon_path),
+                None => {}
             }
+        }
+    }
 
-            //Searches the icon inside the icon theme folders
-            for icon_dir in icon_dirs.to_owned() {
-                for size_dir in sizes_dirs.to_owned() {
-                    path = Path::new(&data_dir).to_owned();
-                    path.push("icons");
-                    path.push(icon_theme.to_owned());
-                    path.push(&size_dir);
-                    path.push(&icon_dir);
+    for data_dir in xdg_data_dirs.to_owned() {
+        if Path::new(data_dir).exists() {
+            let mut path = Path::new(&data_dir).to_owned();
+            path.push("icons");
+
+            match get_icon_from_dir(path.to_owned(), &icon) {
+                Some(icon_path) => return Some(icon_path),
+                None => {}
+            }
+        }
+    }
 
 
-                    match get_icon_with_extension(path.to_owned(), icon.to_owned()) {
-                        Some(path) => return Some(path),
-                        None => {}
-                    }
+    return None;
+}
 
-                    path = Path::new(&data_dir).to_owned();
-                    path.push("icons");
-                    path.push("hicolor");
-                    path.push(&size_dir);
-                    path.push(&icon_dir);
-                    
-                    match get_icon_with_extension(path.to_owned(), icon.to_owned()) {
-                        Some(path) => return Some(path),
-                        None => {}
+pub fn get_icon_from_dir(path: PathBuf, icon: &str) -> Option<PathBuf> {
+    if path.exists() && path.is_dir() {
+        for entry in WalkDir::new(&path) {
+            let entry = entry;
+
+            if entry.is_ok() {
+                let entry = entry.unwrap();
+
+                if entry.path().is_file() {
+                    let file_stem = entry.path().file_stem().unwrap().to_str().unwrap();
+
+                    if icon == file_stem {
+                        return Some(entry.path().to_owned());
                     }
                 }
             }
         }
     }
 
-    println!("Icon not found: {}", icon.to_owned());
-
     return None;
-}
-
-fn get_icon_with_extension(path: PathBuf, icon: String) -> Option<PathBuf> {
-    let mut png_path = path.to_owned();
-    let mut svg_path = path.to_owned();
-
-    png_path.push(icon.to_owned() + ".svg");
-    svg_path.push(icon.to_owned() + ".png");
-
-    return if png_path.exists() {
-        Some(png_path)
-    } else if svg_path.exists() {
-        Some(svg_path)
-    } else {
-        None
-    };
 }

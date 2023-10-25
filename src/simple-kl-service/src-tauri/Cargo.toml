@@ -13,9 +13,6 @@ edition = "2021"
 tauri-build = { version = "1.4", features = [] }
 
 [dependencies]
-#Ignore the following 2 lines
-#simple_kl_rs = {path = "/home/lighttigerxiv/Development/Crates/simple-kl-rs"}
-#simple_kl_rs = {path = "C:\\Users\\lighttigerxiv\\Documents\\Development\\Simple-Keyboard-Launcher\\simple-kl-rs"}
 simple_kl_rs = { git="https://github.com/lighttigerXIV/simple-kl-rs", branch = "master"}
 
 tauri = { version = "1.4", features = ["system-tray", "shell-open"] }
@@ -26,6 +23,7 @@ tauri-plugin-positioner = "1.0.4"
 
 tokio = { version = "1.32.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+walkdir = "2.4.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 freedesktop-desktop-entry = "0.5.0"
