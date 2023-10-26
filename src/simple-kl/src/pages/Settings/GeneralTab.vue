@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { getSettings, getTheme, updateSettings } from './Settings';
-import Slider from '../../components/Slider.vue';
 import { listen } from '@tauri-apps/api/event';
 import Switch from '@/components/Switch.vue';
 import { invoke } from '@tauri-apps/api';
+import { platform } from "@tauri-apps/api/os"
 import SectionDivider from '@/components/SectionDivider.vue';
+
 
 const backgroundColor = ref("");
 const secondaryBackgroundColor = ref("");
@@ -24,11 +25,19 @@ const showFirstKeyOptions = ref(false);
 const showSecondKeyOptions = ref(false);
 const showThirdKeyOptions = ref(false);
 const showRelaunchWarning = ref(false);
-const firstKeyOptions = ["Ctrl", "Alt", "Super", "Shift"]
-const secondKeyOptions = ["-", "Alt", "Shift", "Super"]
+const firstKeyOptions = ref(["Ctrl", "Alt", "Super", "Shift"])
+const secondKeyOptions = ref(["-", "Alt", "Shift", "Super"])
 const thirdKeyOptions = ["Space", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z",]
 
 onMounted(async () => {
+
+    let os = await platform();
+
+    if(os === "win32"){
+        firstKeyOptions.value = ["Ctrl", "Alt", "Shift"];
+        secondKeyOptions.value = ["-", "Alt", "Shift"];
+    }
+
     let settings = await getSettings();
 
     firstKey.value = settings.general.first_key;
@@ -144,7 +153,7 @@ async function updateAutoStart(value: boolean) {
 
                 <div v-if="showFirstKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
                     <div v-for="option in firstKeyOptions">
-                        <button class="p-2 pr-4 pl-4 w-full tertiaryBackground flex justify-center rounded-full key border"
+                        <button class="p-2 pr-4 pl-4 w-full tertiaryBackground flex justify-center rounded-full key"
                             @click="updateKey(1, option)">
                             {{ option }}
                         </button>
@@ -153,7 +162,7 @@ async function updateAutoStart(value: boolean) {
 
                 <div v-if="showSecondKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
                     <div v-for="option in secondKeyOptions">
-                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
+                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key"
                             @click="updateKey(2, option)">
                             {{ option }}
                         </button>
@@ -162,7 +171,7 @@ async function updateAutoStart(value: boolean) {
 
                 <div v-if="showThirdKeyOptions" class="grid grid-cols-6 gap-2 mt-10">
                     <div v-for="option in thirdKeyOptions">
-                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key border"
+                        <button class="p-2 w-full tertiaryBackground flex justify-center rounded-full key"
                             @click="updateKey(3, option)">
                             {{ option }}
                         </button>
@@ -170,7 +179,7 @@ async function updateAutoStart(value: boolean) {
                 </div>
             </div>
 
-            <SectionDivider/>
+            <SectionDivider />
 
             <div class="p-6 flex">
                 <div class="flex-grow">
@@ -187,8 +196,12 @@ async function updateAutoStart(value: boolean) {
 
 <style scoped>
 
+.key{
+    outline: 1px solid v-bind(tertiaryBackgroundColor);
+}
 .key:hover {
-    background: v-bind(secondaryBackgroundColor);
+    outline: 1px solid v-bind(accentColor);
+    opacity: 0.95;
 }
 
 .warning {
