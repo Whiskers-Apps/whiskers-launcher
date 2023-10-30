@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import {appWindow, LogicalSize, WebviewWindow} from "@tauri-apps/api/window"
-import {invoke} from "@tauri-apps/api";
-import {convertFileSrc} from "@tauri-apps/api/tauri"
-import {onMounted, ref, watch} from "vue";
+import { appWindow, LogicalSize, WebviewWindow } from "@tauri-apps/api/window"
+import { invoke } from "@tauri-apps/api";
+import { convertFileSrc } from "@tauri-apps/api/tauri"
+import { onMounted, ref, watch } from "vue";
 import SearchSVG from "../../assets/icons/search.svg";
 import SettingsSVG from "../../assets/icons/settings.svg";
-import {getSettings, getTheme} from "@pages/Settings/Settings";
-import {SimpleKlResult} from "@/data"
-import {hexToCSSFilter} from "hex-to-css-filter"
+import FileSVG from "@icons/file.svg";
+import { getSettings, getTheme } from "@pages/Settings/Settings";
+import { SimpleKlResult } from "@/data"
+import { hexToCSSFilter } from "hex-to-css-filter"
 import {
   isIconWithTitleAndDescriptionResult,
   isTitleAndDescriptionResult,
@@ -104,10 +105,10 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value < results.value.length - 1) {
       selectedIndex.value = selectedIndex.value + 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     } else if (selectedIndex.value == results.value.length - 1) {
       selectedIndex.value = 0;
-      (resultsRef.value[0] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
+      (resultsRef.value[0] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -117,10 +118,10 @@ document.addEventListener('keydown', function (event) {
 
     if (selectedIndex.value > 0) {
       selectedIndex.value = selectedIndex.value - 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     } else if (selectedIndex.value == 0) {
       selectedIndex.value = results.value.length - 1;
-      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({behavior: 'smooth'});
+      (resultsRef.value[selectedIndex.value - 1] as HTMLDivElement).scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -167,7 +168,7 @@ watch(searchText, async (_newText, _oldText) => {
     appWindow.setSize(new LogicalSize(800, 120));
   } else {
 
-    results.value = await invoke("get_results", {search_text: searchText.value});
+    results.value = await invoke("get_results", { search_text: searchText.value });
 
     let newResultsHeight = 0;
 
@@ -249,32 +250,37 @@ function getIconHeightClass(): string {
     <div :class="splitUI ? '' : 'mainBox'">
       <div class="flex items-center " :class="`${getResultHeightClass()} ${splitUI ? 'splitSearchBox' : 'searchBox'}`">
         <div v-if="showSearchIcon" class="mr-2">
-          <SearchSVG class="w-5 h-5 stroke"/>
+          <SearchSVG class="w-5 h-5 stroke" />
         </div>
         <div class="flex-grow">
           <input ref="searchRef" class="w-full background outline-none placeholder"
-                 :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText"/>
+            :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText" />
         </div>
         <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings">
-          <SettingsSVG class="w-5 h-5 stroke"/>
+          <SettingsSVG class="w-5 h-5 stroke" />
         </button>
       </div>
 
       <div v-if="splitUI" class="h-[10px]"></div>
 
       <div v-if="results.length > 0" :class="splitUI ? 'splitResultsBox' : 'resultsBox'"
-           :style="`height: ${resultsBoxHeight}`">
+        :style="`height: ${resultsBoxHeight}`">
         <div v-for="(result, index) in results" ref="resultsRef">
           <div :ref="`result-${index}`" class="pl-4 pr-4 pt-2 pb-2 min-w-0 flex overflow-hidden result"
-               :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`" @click="runAction(index)">
+            :class="`${index === selectedIndex ? 'selectedResult' : ''} ${getResultHeightClass()}`"
+            @click="runAction(index)">
 
             <div v-if="isTextResult(result)" class="flex items-center">
               <div class="min-w-0 oneLineText">{{ result.text }}</div>
             </div>
 
             <div v-if="isIconWithTextResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class=" object-contain h-full aspect-square icon"
-                   :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+              <FileSVG v-if="result.icon === ''" class="fillAccent" :class="getIconHeightClass()"
+                :style="{ filter: getCSSFilterFromHexColor(accentColor) }" />
+
+              <img v-else :src="convertFileSrc(result.icon!!)" class=" object-contain h-full aspect-square icon"
+                :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+
               <div class="text-lg ml-2 flex-grow min-w-0 oneLineText">{{ result.text }}</div>
             </div>
 
@@ -282,14 +288,17 @@ function getIconHeightClass(): string {
               <div class="font-bold min-w-0 oneLineText">{{ result.title }}
               </div>
               <div class="subtext text-xs min-w-0 oneLineText">{{
-                  result.description
-                }}
+                result.description
+              }}
               </div>
             </div>
 
             <div v-if="isIconWithTitleAndDescriptionResult(result)" class="flex items-center">
-              <img :src="convertFileSrc(result.icon!!)" class=" object-contain icon" :class="getIconHeightClass()"
-                   :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
+              <FileSVG v-if="result.icon === ''" class="fillAccent" :class="getIconHeightClass()"
+                :style="{ filter: getCSSFilterFromHexColor(accentColor) }" />
+
+              <img v-else :src="convertFileSrc(result.icon!!)" class=" object-contain h-full aspect-square icon"
+                :class="getIconHeightClass()" :style="{ filter: getCSSFilterFromHexColor(result.icon_color) }">
               <div class="flex-grow flex flex-col ml-2 justify-center">
                 <div class="font-medium min-w-0 oneLineText">
                   {{ result.title }}
@@ -336,7 +345,7 @@ function getIconHeightClass(): string {
   border-radius: v-bind(roundnessLevel);
 }
 
-.result:hover{
+.result:hover {
   background-color: v-bind(secondaryBackgroundColor);
   border-radius: v-bind(roundnessLevel);
   cursor: pointer;
@@ -431,5 +440,9 @@ function getIconHeightClass(): string {
   fill: none;
   stroke: v-bind(accentColor);
   stroke-width: 2;
+}
+
+.fillAccent{
+  fill: v-bind(accentColor);
 }
 </style>
