@@ -132,7 +132,7 @@ async fn main() {
                         if cfg!(target_os = "linux"){
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher")
+                                .arg("simple-keyboard-launcher")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -158,7 +158,7 @@ async fn main() {
                         if cfg!(target_os = "linux"){
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher --settings")
+                                .arg("simple-keyboard-launcher --settings")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -241,7 +241,7 @@ async fn main() {
                             if cfg!(target_os = "linux"){
                                 Command::new("sh")
                                     .arg("-c")
-                                    .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 simple-keyboard-launcher")
+                                    .arg("simple-keyboard-launcher")
                                     .output()
                                     .expect("Error opening app");
                             }

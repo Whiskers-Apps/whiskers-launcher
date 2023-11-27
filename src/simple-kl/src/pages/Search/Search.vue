@@ -38,8 +38,6 @@ const resultsCount = ref(0)
 const resultsBoxHeight = ref("");
 const selectedIndex = ref(0);
 const resultsRef = ref([]);
-const appHeight = ref(120);
-
 
 onMounted(async () => {
 
@@ -63,11 +61,11 @@ onMounted(async () => {
   accentColor.value = theme.accent;
   textColor.value = theme.text;
   secondaryTextColor.value = theme.secondary_text;
-
-  appWindow.setSize(new LogicalSize(800, 100));
 })
 
-function openSettings() {
+function openSettings(event: Event) {
+
+  event.stopPropagation();
 
   appWindow.hide();
 
@@ -114,7 +112,7 @@ document.addEventListener('keydown', function (event) {
 
   if (event.key === "ArrowUp") {
 
-    event.preventDefault(); //Prevents cursor from changing position
+    event.preventDefault();
 
     if (selectedIndex.value > 0) {
       selectedIndex.value = selectedIndex.value - 1;
@@ -126,7 +124,7 @@ document.addEventListener('keydown', function (event) {
   }
 
   if (event.ctrlKey && event.key === 's') {
-    openSettings();
+    openSettings(event);
   }
 
   if (event.ctrlKey && event.key === 'r') {
@@ -164,8 +162,6 @@ watch(searchText, async (_newText, _oldText) => {
 
     results.value = [];
     resultsBoxHeight.value = `0px`
-
-    appWindow.setSize(new LogicalSize(800, 120));
   } else {
 
     results.value = await invoke("get_results", { search_text: searchText.value });
@@ -182,19 +178,6 @@ watch(searchText, async (_newText, _oldText) => {
     newResultsHeight += 20;
 
     resultsBoxHeight.value = `${newResultsHeight}px`;
-
-    let newAppHeight = newResultsHeight;
-
-    if (splitUI) {
-      newAppHeight += 10; //Add 10 pixels height if it has split ui
-    }
-
-    newAppHeight += getResultHeight();
-    newAppHeight += 40;
-
-    appWindow.setSize(new LogicalSize(800, newAppHeight));
-
-    appHeight.value = newAppHeight;
   }
 
   selectedIndex.value = 0;
@@ -246,8 +229,8 @@ function getIconHeightClass(): string {
 </script>
 
 <template>
-  <div class="overflow-x-hidden p-2 flex mt-2 flex-col text">
-    <div :class="splitUI ? '' : 'mainBox'">
+  <div class=" p-2 flex flex-col text w-full h-screen items-center" @click="appWindow.close()">
+    <div :class="splitUI ? '' : 'mainBox'" class="mt-[100px]">
       <div class="flex items-center " :class="`${getResultHeightClass()} ${splitUI ? 'splitSearchBox' : 'searchBox'}`">
         <div v-if="showSearchIcon" class="mr-2">
           <SearchSVG class="w-5 h-5 stroke" />
@@ -256,7 +239,7 @@ function getIconHeightClass(): string {
           <input ref="searchRef" class="w-full background outline-none placeholder"
             :placeholder="showPlaceholder ? 'Search' : ''" v-model="searchText" />
         </div>
-        <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings">
+        <button v-if="showSettingsIcon" class="ml-2 secondaryHover rounded-full" @click="openSettings($event)">
           <SettingsSVG class="w-5 h-5 stroke" />
         </button>
       </div>
@@ -352,7 +335,6 @@ function getIconHeightClass(): string {
 }
 
 .mainBox {
-  width: 780px;
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
@@ -363,25 +345,26 @@ function getIconHeightClass(): string {
 .searchBox {
   padding-left: 16px;
   padding-right: 16px;
-  width: 780px;
   overflow-y: auto;
   background-color: v-bind(backgroundColor);
+  width: 800px;
 }
 
 .splitSearchBox {
   padding-left: 16px;
   padding-right: 16px;
-  width: 780px;
   overflow-y: auto;
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
+  width: 800px;
 }
 
 .resultsBox {
   overflow-y: auto;
   overflow-x: hidden;
   padding: 8px;
+  width: 800px;
 }
 
 .splitResultsBox {
@@ -391,6 +374,7 @@ function getIconHeightClass(): string {
   background-color: v-bind(backgroundColor);
   border: solid v-bind(borderWidth) v-bind(accentColor);
   border-radius: v-bind(roundnessLevel);
+  width: 800px;
 }
 
 .smallResult {
