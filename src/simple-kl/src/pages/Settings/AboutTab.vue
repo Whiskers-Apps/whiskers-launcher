@@ -45,7 +45,7 @@ async function loadTheme() {
             <div class="p-4 items flex mt-2 ">
                 <b>Version</b>
                 <div class="flex-grow"></div>
-                <div class="ml-4 oneLineText">0.2.0-alpha</div>
+                <div class="ml-4 oneLineText">0.2.1-alpha</div>
             </div>
 
             <SectionDivider />
