@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use std::{fs, string};
+use std::fs;
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};

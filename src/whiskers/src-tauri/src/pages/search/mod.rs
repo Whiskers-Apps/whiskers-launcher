@@ -1,4 +1,4 @@
-use std::{fs, path::Path, process::Command, string, vec};
+use std::{fs, path::Path, process::Command};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tauri::{api::shell::open, AppHandle, Manager, Window, WindowBuilder, WindowUrl};
@@ -8,7 +8,7 @@ use whiskers_launcher_rs::{
         self, get_extension_dir, get_extension_results, send_extension_context,
         send_extension_dialog_action, send_extension_dialog_results, Context, DialogResult,
     },
-    dialog::{self, DialogField},
+    dialog::DialogField,
     indexing::get_indexed_apps,
     paths::{get_app_resources_icons_dir, get_temp_dir},
     results::{self, WhiskersResult},

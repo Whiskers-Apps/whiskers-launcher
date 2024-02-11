@@ -146,12 +146,7 @@ async fn main() {
                     .global_shortcut_manager()
                     .register(&shortcut, move || {
                         thread::spawn(move || {
-                            Command::new("sh")
-                                    .arg("-c")
-                                    .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 /home/lighttigerxiv/Coding/Rust/Target/release/whiskers-launcher")
-                                    .output()
-                                    .expect("Error opening app");
-                            /* 
+                            
                             if cfg!(target_os = "linux") {
                                 Command::new("sh")
                                     .arg("-c")
@@ -170,7 +165,6 @@ async fn main() {
                                     .spawn()
                                     .expect("Error opening app");
                             }
-                            */
                         });
                     })
                     .unwrap();
