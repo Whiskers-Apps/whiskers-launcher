@@ -1,0 +1,38 @@
+[package]
+name = "whiskers-launcher-companion"
+version = "0.0.0"
+description = "Whiskers Launcher Companion"
+authors = ["lighttigerxiv"]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1.4", features = [] }
+
+[dependencies]
+#simple_kl_rs = { git="https://github.com/lighttigerXIV/whiskers-rs", branch = "stable"}
+whiskers-launcher-rs= {path = "/home/lighttigerxiv/Coding/Rust/Projects/whiskers-launcher-rs"}
+
+tauri = { version = "1.4", features = ["system-tray", "shell-open"] }
+serde = { version = "1.0.164", features = ["derive"] }
+serde_json = "1.0.99"
+tauri-plugin-positioner = "1.0.4"
+
+tokio = { version = "1.32.0", features = ["full"] }
+tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+walkdir = "2.4.0"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+freedesktop-desktop-entry = "0.5.0"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+lnk = "0.5.1"
+powershell_script = "1.1.0"
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
