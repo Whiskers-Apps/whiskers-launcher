@@ -5,8 +5,7 @@ use tauri::{api::shell::open, AppHandle, Manager, Window, WindowBuilder, WindowU
 use whiskers_launcher_rs::{
     actions,
     api::extensions::{
-        self, get_extension_dir, get_extension_results, send_extension_context,
-        send_extension_dialog_action, send_extension_dialog_results, Context, DialogResult,
+        self, get_extension_dir, get_extension_results, send_extension_context, send_extension_dialog_action, send_extension_dialog_response, Context, DialogResponse, DialogResult
     },
     dialog::DialogField,
     indexing::get_indexed_apps,
@@ -280,14 +279,30 @@ pub fn get_extension_dialog_action() -> actions::Dialog {
 
 #[tauri::command(rename_all = "snake_case")]
 pub fn close_extension_dialog(
+    extension_id: String,
     extension_action: String,
+    args: Option<Vec<String>>,
     results: Vec<DialogResult>,
     window: Window,
 ) {
-    send_extension_dialog_results(results);
+
+    let response = DialogResponse::new(results, args);
+    send_extension_dialog_response(response);
 
     let context = Context::new(extensions::Action::RunAction).extension_action(extension_action);
     send_extension_context(context).expect("Error writing extension context");
 
+    let extension_dir = get_extension_dir(extension_id).expect("Could not find extension dir");
+
+    if cfg!(target_os = "linux") {
+        Command::new("sh")
+            .arg("-c")
+            .arg("./extension")
+            .current_dir(&extension_dir)
+            .output()
+            .expect("Error running extension");
+    }
+
+    if cfg!(target_os = "windows") {}
     window.close().unwrap();
 }

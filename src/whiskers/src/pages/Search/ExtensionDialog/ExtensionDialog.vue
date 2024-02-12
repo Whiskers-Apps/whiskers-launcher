@@ -57,7 +57,7 @@ onMounted(async () => {
           <SwitchSetting
             :title="field.title!!"
             :description="field.description ?? ''"
-            :checked="Boolean(vm.getFieldValue(field.id))"
+            :checked="vm.getFieldValue(field.id) === 'true'"
             :theme="vm.uiState.settings!!.theme"
             @update-checked="vm.updateFieldValue(field.id, $event)"
           />

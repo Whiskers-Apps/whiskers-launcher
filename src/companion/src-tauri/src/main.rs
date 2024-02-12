@@ -2,8 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    process::{exit, Command},
-    thread,
+    process::{exit, Command}, thread
 };
 
 // Imports only used in windows
@@ -19,11 +18,12 @@ use tauri::{
     CustomMenuItem, GlobalShortcutManager, Manager, RunEvent, SystemTray, SystemTrayEvent,
     SystemTrayMenu,
 };
-use whiskers_launcher_rs::{
-    extensions::index_extensions, paths::get_local_dir, settings::{get_settings, index_settings}
-};
-
 use tokio::time::sleep;
+use whiskers_launcher_rs::{
+    extensions::index_extensions,
+    paths::get_local_dir,
+    settings::{get_settings, index_settings},
+};
 
 pub mod functions;
 
@@ -105,16 +105,17 @@ async fn main() {
             index_settings().unwrap();
             index_extensions().unwrap();
 
-            //Re-indexes the apps every 2 minutes
+            //Re-indexes the apps every minute
             tokio::spawn(async move {
                 loop {
                     {
                         index_apps();
                     }
-                    sleep(tokio::time::Duration::from_secs(120)).await;
+                    sleep(tokio::time::Duration::from_secs(60)).await;
                 }
             });
 
+            
             Ok(())
         })
         .plugin(tauri_plugin_positioner::init())
@@ -146,7 +147,6 @@ async fn main() {
                     .global_shortcut_manager()
                     .register(&shortcut, move || {
                         thread::spawn(move || {
-                            
                             if cfg!(target_os = "linux") {
                                 Command::new("sh")
                                     .arg("-c")

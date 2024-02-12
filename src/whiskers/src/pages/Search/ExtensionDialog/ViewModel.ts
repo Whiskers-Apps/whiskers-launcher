@@ -128,14 +128,15 @@ export class ViewModel {
     const path = await open(options);
 
     if (!Array.isArray(path) && path !== null) {
-      console.log(path);
       this.updateFieldValue(field.id, path);
     }
   }
 
   closeDialog() {
     invoke("close_extension_dialog", {
+      extension_id: this.uiState.action?.extension_id,
       extension_action: this.uiState.action?.extension_action,
+      args: this.uiState.action?.args,
       results: this.uiState.values,
     });
   }
