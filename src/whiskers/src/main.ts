@@ -6,6 +6,7 @@ import Search from "@pages/Search/Search.vue";
 import Settings from "@pages/Settings/SettingsPage.vue";
 import AddToBlacklistDialog from "@pages/Settings/Dialogs/AddToBlacklist/AddToBlacklist.vue";
 import ConfirmDeleteSearchEngineDialog from "@pages/Settings/Dialogs/ConfirmDeleteSearchEngine/ConfirmDeleteSearchEngine.vue";
+import ConfirmDeleteExtensionDialog from "@pages/Settings/Dialogs/ConfirmUninstallExtension/ConfirmUninstallExtension.vue";
 import AddSearchEngineDialog from "@pages/Settings/Dialogs/AddSearchEngine/AddSearchEngine.vue";
 import EditSearchEngineDialog from "@pages/Settings/Dialogs/EditSearchEngine/EditSearchEngine.vue";
 import CloneRepoDialog from "@pages/Settings/Dialogs/CloneRepo/CloneRepo.vue";
@@ -23,6 +24,7 @@ const routes = [
   { path: "/edit-search-engine", component: EditSearchEngineDialog },
   { path: "/extension-dialog", component: ExtensionDialog },
   { path: "/clone-repo", component: CloneRepoDialog },
+  { path: "/confirm-uninstall-extension", component: ConfirmDeleteExtensionDialog },
 ];
 
 const router = createRouter({

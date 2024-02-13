@@ -15,7 +15,7 @@ export class ViewModel {
   settings: Settings | undefined = undefined;
   userExtensions: ExtensionManifest[] = [];
   userExtensionsDefaultValues: ExtensionDefaultValues[] = [];
-  selectedTab: SettingsTab = SettingsTab.Extensions;
+  selectedTab: SettingsTab = SettingsTab.General;
   showNavbar = true;
 
   //General Tab

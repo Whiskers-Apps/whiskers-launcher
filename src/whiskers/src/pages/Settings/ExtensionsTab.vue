@@ -46,10 +46,7 @@ function getExtensionKeyword(extensionId: string): string {
   return keyword;
 }
 
-function getSelectOptions(
-  extensionId: string,
-  settingId: string
-): SelectOption[] {
+function getSelectOptions(extensionId: string, settingId: string): SelectOption[] {
   let selectOptions: SelectOption[] = [];
 
   props.vm.userExtensions.forEach((extension) => {
@@ -70,11 +67,7 @@ function getSelectOptions(
   return selectOptions;
 }
 
-async function updateExtensionSetting(
-  extensionId: string,
-  settingId: string,
-  value: string
-) {
+async function updateExtensionSetting(extensionId: string, settingId: string, value: string) {
   let newExtensions: Extension[] = [];
 
   props.vm.settings!!.extensions.forEach((extension) => {
@@ -129,10 +122,7 @@ async function updateExtensionKeyword(extensionId: string, value: string) {
   props.vm.loadUserExtensions();
 }
 
-function canShowSetting(
-  extensionId: string,
-  setting: ExtensionSetting
-): boolean {
+function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean {
   if (setting.show_conditions === null) {
     return true;
   }
@@ -143,10 +133,7 @@ function canShowSetting(
     props.vm.settings!!.extensions.forEach((extension) => {
       if (extension.id === extensionId) {
         extension.settings?.forEach((setting) => {
-          if (
-            condition.setting_id === setting.id &&
-            condition.setting_value === setting.value
-          ) {
+          if (condition.setting_id === setting.id && condition.setting_value === setting.value) {
             canShowSetting = true;
           }
         });
@@ -167,26 +154,40 @@ async function cloneExtension() {
     title: "Clone Extension",
   });
 
-  const unlisten = await listen<CloneExtensionPayload>(
-    "clone-repo",
-    async (event) => {
-      await invoke("clone_extension", { url: event.payload.url });
-      unlisten();
+  const unlisten = await listen<CloneExtensionPayload>("clone-repo", async (event) => {
+    await invoke("clone_extension", { url: event.payload.url });
+    unlisten();
 
-      props.vm.loadUserExtensions();
-    }
-  );
+    props.vm.loadUserExtensions();
+  });
+}
+
+async function uninstallExtension(extensionId: string) {
+  new WebviewWindow("confirm-uninstall-extension", {
+    url: "confirm-uninstall-extension",
+    title: "Uninstall Extension",
+    width: 1000,
+    height: 200,
+    resizable: false,
+    center: true,
+  });
+
+  const unlisten = await listen("confirm-uninstall-extension", async (_event) => {
+    await invoke("uninstall_extension", {
+      extension_id: extensionId,
+    });
+
+    props.vm.loadUserExtensions();
+
+    unlisten();
+  });
 }
 </script>
 
 <template>
   <div>
     <div class="flex">
-      <PrimaryButton
-        text="Reload"
-        :theme="vm.settings!!.theme"
-        @click="vm.loadUserExtensions()"
-      />
+      <PrimaryButton text="Reload" :theme="vm.settings!!.theme" @click="vm.loadUserExtensions()" />
 
       <PrimaryButton
         class="ml-2"
@@ -195,23 +196,21 @@ async function cloneExtension() {
         @click="cloneExtension()"
       />
 
-      <PrimaryButton
-        class="ml-2"
-        text="Extensions Store"
-        :theme="vm.settings!!.theme"
-      />
+      <PrimaryButton class="ml-2" text="Extensions Store" :theme="vm.settings!!.theme" />
     </div>
     <div class="mt-4">
-      <div
-        v-for="extension in vm.userExtensions"
-        class="p-4 background-secondary rounded-2xl mb-2"
-      >
+      <div v-for="extension in vm.userExtensions" class="p-4 background-secondary rounded-2xl mb-2">
         <div class="title">{{ extension.name }}</div>
         <div class="flex mb-4">
           <div class="version-card p-2 pr-3 pl-3">
             {{ extension.version_name }}
           </div>
-          <button class="uninstall-button ml-2 p-2 pr-3 pl-3">Uninstall</button>
+          <button
+            class="uninstall-button ml-2 p-2 pr-3 pl-3"
+            @click="uninstallExtension(extension.id)"
+          >
+            Uninstall
+          </button>
         </div>
         <div>
           <div class="text-primary font-medium text-xl">Keyword</div>
@@ -237,9 +236,7 @@ async function cloneExtension() {
               <div class="mt-2" v-if="setting.setting_type === 'text'">
                 <InputField
                   :value="getSettingValue(extension.id, setting.id)"
-                  @on-change="
-                    updateExtensionSetting(extension.id, setting.id, $event)
-                  "
+                  @on-change="updateExtensionSetting(extension.id, setting.id, $event)"
                   :theme="vm.settings!!.theme"
                   :use-background-tertiary="true"
                 />
@@ -249,9 +246,7 @@ async function cloneExtension() {
                   :value="getSettingValue(extension.id, setting.id)"
                   :options="getSelectOptions(extension.id, setting.id)"
                   :theme="vm.settings!!.theme"
-                  @update-value="
-                    updateExtensionSetting(extension.id, setting.id, $event)
-                  "
+                  @update-value="updateExtensionSetting(extension.id, setting.id, $event)"
                 />
               </div>
             </div>
@@ -267,16 +262,10 @@ async function cloneExtension() {
               <div>
                 <Switch
                   class="mt-2"
-                  :checked="
-                    getSettingValue(extension.id, setting.id) === 'true'
-                  "
+                  :checked="getSettingValue(extension.id, setting.id) === 'true'"
                   :theme="vm.settings!!.theme"
                   @update:checked="
-                    updateExtensionSetting(
-                      extension.id,
-                      setting.id,
-                      $event.toString()
-                    )
+                    updateExtensionSetting(extension.id, setting.id, $event.toString())
                   "
                 />
               </div>

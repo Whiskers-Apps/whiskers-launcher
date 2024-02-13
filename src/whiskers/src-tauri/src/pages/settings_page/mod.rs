@@ -3,7 +3,9 @@ use std::fs;
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
+use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
+use whiskers_launcher_rs::extensions::index_extensions;
 use whiskers_launcher_rs::indexing::{self, get_indexed_apps, AppIndex};
 use whiskers_launcher_rs::paths::get_user_extensions_dir;
 use whiskers_launcher_rs::settings::{self, Settings, Theme};
@@ -38,7 +40,7 @@ use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt
 
 #[tauri::command]
 pub fn get_settings() -> Settings {
-    return settings::get_settings().unwrap();
+    settings::get_settings().unwrap()
 }
 
 #[tauri::command]
@@ -65,7 +67,7 @@ pub fn get_whitelisted_apps() -> Vec<WhiteListApp> {
 
     whitelisted_apps.sort_by(|a, b| a.name.cmp(&b.name));
 
-    return whitelisted_apps;
+    whitelisted_apps
 }
 
 #[tauri::command]
@@ -96,7 +98,7 @@ pub fn get_blacklisted_apps() -> Vec<AppIndex> {
 
     blacklisted_apps.sort_by(|a, b| a.name.cmp(&b.name));
 
-    return blacklisted_apps;
+    blacklisted_apps
 }
 
 #[tauri::command]
@@ -119,7 +121,8 @@ pub fn import_theme(path: PathBuf) {
 
 #[tauri::command]
 pub fn get_user_extensions() -> Vec<Manifest> {
-    return indexing::get_user_extensions().expect("Error getting user extensions");
+    index_extensions().unwrap();
+    indexing::get_user_extensions().expect("Error getting user extensions")
 }
 
 #[tauri::command]
@@ -145,7 +148,7 @@ pub fn get_extensions_default_values() -> Vec<ExtensionDefaultValues> {
         });
     }
 
-    return extensions_default_values;
+    extensions_default_values
 }
 
 #[tauri::command]
@@ -153,7 +156,7 @@ pub async fn clone_extension(url: String) {
     let url_split: Vec<&str> = url.split("/").collect();
     let mut repo_name = url_split[url_split.len() - 1].to_owned();
 
-    if repo_name.ends_with(".git"){
+    if repo_name.ends_with(".git") {
         repo_name = repo_name.trim_end_matches(".git").to_owned();
     }
 
@@ -161,4 +164,27 @@ pub async fn clone_extension(url: String) {
     path.push(repo_name);
 
     Repository::clone(&url, path).expect("Error cloning repo");
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn uninstall_extension(extension_id: String) -> Result<(),()>{
+    
+    let mut settings = get_settings();
+    let new_extensions: Vec<settings::Extension> = settings
+        .extensions
+        .iter()
+        .map(|e| e.to_owned())
+        .filter(|e| e.id != extension_id)
+        .collect();
+
+
+    settings.extensions = new_extensions;
+
+    if let Some(extension_dir) = get_extension_dir(extension_id){
+        fs::remove_dir_all(extension_dir).unwrap();
+    }
+
+    update_settings(settings);
+
+    Ok(())
 }
