@@ -9,8 +9,11 @@ import SelectField from "@/components/SelectField.vue";
 import { SelectOption } from "@/components/ComponentClasses";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import { emit } from "@tauri-apps/api/event";
+import SecondaryButton from "@/components/SecondaryButton.vue";
+import { open } from "@tauri-apps/api/shell";
 
 interface StoreTheme {
+  id: string;
   name: string;
   repo: string;
   preview: string;
@@ -24,7 +27,7 @@ interface StoreThemeVariant {
 }
 
 interface StoreThemeSelectValue {
-  themeIndex: number;
+  themeId: string;
   value: string;
 }
 
@@ -64,32 +67,30 @@ onMounted(async () => {
   pageThemes.value = filteredThemes.value.slice(0, 12);
 
   await initSelectValues();
-  /*
-  if (await invoke("has_internet")) {
-    axios
-      .get(
-        "https://raw.githubusercontent.com/lighttigerXIV/whiskers-launcher-themes/master/themes.json"
-      )
-      .then(async (response) => {
-        themes.value = response.data;
-        currentThemes.value = themes.value;
-        
-        await initSelectValues();
-        invoke("cache_themes", { themes: themes.value });
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-  }
-  */
+
+  axios
+    .get(
+      "https://raw.githubusercontent.com/lighttigerXIV/whiskers-launcher-themes/master/themes.json"
+    )
+    .then(async (response) => {
+      themes.value = response.data;
+      filteredThemes.value = themes.value;
+      pageThemes.value = themes.value.slice(0, 12);
+
+      await initSelectValues();
+      invoke("cache_themes", { themes: themes.value });
+    })
+    .catch((e) => {
+      console.error(e);
+    });
 });
 
 async function initSelectValues() {
   selectValues.value = [];
 
-  filteredThemes.value.forEach((theme, index) => {
+  filteredThemes.value.forEach((theme) => {
     selectValues.value.push({
-      themeIndex: index,
+      themeId: theme.id,
       value: theme.file ? theme.file : theme.variants[0].file,
     });
   });
@@ -108,9 +109,9 @@ function getThemeVariants(variants: StoreThemeVariant[]): SelectOption[] {
   return options;
 }
 
-function getStoreThemeSelectValue(theme: StoreTheme, index: number): string {
+function getStoreThemeSelectValue(theme: StoreTheme, id: string): string {
   selectValues.value.forEach((selectValue) => {
-    if (selectValue.themeIndex === index) {
+    if (selectValue.themeId === id) {
       return selectValue.value;
     }
   });
@@ -118,16 +119,16 @@ function getStoreThemeSelectValue(theme: StoreTheme, index: number): string {
   return theme.variants[0].file;
 }
 
-function updateStoreThemeSelectValue(theme: StoreTheme, index: number, value: string) {
+function updateStoreThemeSelectValue(theme: StoreTheme, id: string, value: string) {
   let newValues: StoreThemeSelectValue[] = [];
   let found = false;
 
   selectValues.value.forEach((selectValue) => {
-    if (selectValue.themeIndex === index) {
+    if (selectValue.themeId === id) {
       found = true;
 
       newValues.push({
-        themeIndex: index,
+        themeId: id,
         value: value,
       });
     } else {
@@ -137,7 +138,7 @@ function updateStoreThemeSelectValue(theme: StoreTheme, index: number, value: st
 
   if (!found) {
     newValues.push({
-      themeIndex: index,
+      themeId: id,
       value: theme.variants[0].file,
     });
   }
@@ -145,8 +146,8 @@ function updateStoreThemeSelectValue(theme: StoreTheme, index: number, value: st
   selectValues.value = newValues;
 }
 
-async function applyTheme(index: number) {
-  let file = selectValues.value[index].value;
+async function applyTheme(id: string) {
+  let file = selectValues.value.find((sv) => sv.themeId === id)!!.value;
 
   applyingTheme.value = true;
 
@@ -227,14 +228,14 @@ function refreshPage() {
       ref="themesGrid"
     >
       <div
-        v-for="(theme, index) in pageThemes"
+        v-for="theme in pageThemes"
         class="p-4 theme-card rounded-2xl h-fit"
-        :key="theme.repo"
-        :id="theme.repo"
+        :key="theme.id"
+        :id="theme.id"
       >
         <div class="background-tertiary rounded-2xl w-full aspect-square">
           <img
-            :id="`preview-${theme.name}-${theme.preview}`"
+            :id="`preview-${theme.id}`"
             :src="theme.preview"
             class="rounded-lg aspect-square object-contain"
           />
@@ -244,18 +245,25 @@ function refreshPage() {
           <SelectField
             class="mt-2"
             v-if="theme.variants.length > 0"
-            :value="getStoreThemeSelectValue(theme, index)"
+            :value="getStoreThemeSelectValue(theme, theme.id)"
             :options="getThemeVariants(theme.variants)"
             :theme="appTheme!!"
-            @update-value="updateStoreThemeSelectValue(theme, index, $event)"
+            @update-value="updateStoreThemeSelectValue(theme, theme.id, $event)"
           />
           <div class="flex-grow"></div>
           <div class="flex justify-end w-full mt-2">
+            <SecondaryButton
+              class="w-full mr-2"
+              text="Source"
+              :theme="appTheme!!"
+              @click="open(theme.repo)"
+              :disabled="applyingTheme"
+            />
             <PrimaryButton
               class="w-full"
               text="Apply"
               :theme="appTheme!!"
-              @click="applyTheme(index)"
+              @click="applyTheme(theme.id)"
               :disabled="applyingTheme"
             />
           </div>
@@ -303,6 +311,21 @@ function refreshPage() {
 </template>
 
 <style scoped>
+
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: v-bind(accentPrimary);
+  border-radius: 48px;
+}
 .main {
   background-color: v-bind(backgroundMain);
   color: v-bind(textOnBackground);

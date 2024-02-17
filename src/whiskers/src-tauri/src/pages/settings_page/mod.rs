@@ -36,6 +36,7 @@ pub struct WhiteListApp {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StoreTheme {
+    pub id: String,
     pub name: String,
     pub repo: String,
     pub preview: String,

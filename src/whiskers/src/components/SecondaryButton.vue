@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Theme } from "@pages/Settings/ViewModel";
-import { PropType, ref } from "vue";
+import { listen } from "@tauri-apps/api/event";
+import { PropType, onMounted, ref } from "vue";
 
 const emit = defineEmits(["click"]);
 
@@ -13,7 +14,13 @@ const props = defineProps<{
 
 const backgroundTertiary = ref(props.theme.background_tertiary);
 const accentPrimary = ref(props.theme.accent_primary);
-const textOnBackground = ref(props.theme.text_on_background);
+
+onMounted( async ()=>{
+  await listen("load-theme", (_event)=>{
+    backgroundTertiary.value = props.theme.background_tertiary;
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 </script>
 
 <template>
@@ -29,8 +36,8 @@ const textOnBackground = ref(props.theme.text_on_background);
 
 <style scoped>
 .secondary-button {
-  background-color: v-bind(backgroundTertiary);
-  color: v-bind(textOnBackground);
+  background-color: transparent;
+  color: v-bind(accentPrimary);
   border: 1px solid v-bind(accentPrimary);
 }
 

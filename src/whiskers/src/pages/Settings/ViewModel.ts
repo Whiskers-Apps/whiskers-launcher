@@ -349,7 +349,7 @@ export class ViewModel {
     if (path) {
       await invoke("import_theme", { path: path });
       this.settings = await invoke("get_settings");
-      emit("refresh-theme");
+      emit("load-theme");
     }
   }
 
@@ -372,7 +372,7 @@ export class ViewModel {
 
     this.updateSettings(newSettings);
 
-    emit("refresh-theme");
+    emit("load-theme");
   }
 
   updateBackgroundMain(hex: string) {
