@@ -5,36 +5,15 @@ import { Theme } from "@/pages/Settings/ViewModel";
 
 const emit = defineEmits(["updateValue"]);
 
-const props = defineProps({
-    title: {
-        required: true,
-        type: String,
-    },
-    description: {
-        required: true,
-        type: String,
-    },
-    value: {
-        required: true,
-        type: Number,
-    },
-    min: {
-        required: true,
-        type: Number,
-    },
-    max: {
-        required: true,
-        type: Number,
-    },
-    step: {
-        required: true,
-        type: Number,
-    },
-    theme: {
-        required: true,
-        type: Object as PropType<Theme>,
-    },
-});
+const props = defineProps<{
+    title: string,
+    description: string,
+    value: number,
+    min: number,
+    max: number,
+    step: number,
+    theme: Theme
+}>();
 </script>
 
 <template>

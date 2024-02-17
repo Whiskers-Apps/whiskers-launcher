@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { Extension, ExtensionSetting, ViewModel } from "./ViewModel";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import { SelectOption } from "@/components/ComponentClasses";
@@ -17,6 +17,13 @@ const props = defineProps<{
 
 const accentPrimary = ref(props.vm.settings!!.theme.accent_primary);
 const accentDanger = ref(props.vm.settings!!.theme.accent_danger);
+
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.vm.settings!!.theme.accent_primary;
+    accentDanger.value = props.vm.settings!!.theme.accent_danger;
+  });
+});
 
 function getSettingValue(extensionId: string, settingId: string): string {
   let value = "";
@@ -182,6 +189,8 @@ async function uninstallExtension(extensionId: string) {
     unlisten();
   });
 }
+
+async function openExtensionsStore() {}
 </script>
 
 <template>
@@ -196,7 +205,12 @@ async function uninstallExtension(extensionId: string) {
         @click="cloneExtension()"
       />
 
-      <PrimaryButton class="ml-2" text="Extensions Store" :theme="vm.settings!!.theme" />
+      <PrimaryButton
+        class="ml-2"
+        text="Extensions Store"
+        :theme="vm.settings!!.theme"
+        @click="openExtensionsStore()"
+      />
     </div>
     <div class="mt-4">
       <div v-for="extension in vm.userExtensions" class="p-4 background-secondary rounded-2xl mb-2">

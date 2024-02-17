@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use std::fs;
+use std::path::PathBuf;
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
@@ -7,7 +7,10 @@ use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
 use whiskers_launcher_rs::extensions::index_extensions;
 use whiskers_launcher_rs::indexing::{self, get_indexed_apps, AppIndex};
-use whiskers_launcher_rs::paths::get_user_extensions_dir;
+use whiskers_launcher_rs::paths::{
+    get_cached_extensions_store_path, get_cached_themes_store_path, get_store_cache_dir,
+    get_user_extensions_dir,
+};
 use whiskers_launcher_rs::settings::{self, Settings, Theme};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -31,8 +34,23 @@ pub struct WhiteListApp {
     pub checked: bool,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct StoreTheme {
+    pub name: String,
+    pub repo: String,
+    pub preview: String,
+    pub variants: Vec<StoreThemeVariant>,
+    pub file: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct StoreThemeVariant {
+    pub name: String,
+    pub file: String,
+}
+
 fn default_checked() -> bool {
-    return false;
+    false
 }
 
 #[cfg(target_os = "windows")]
@@ -167,8 +185,7 @@ pub async fn clone_extension(url: String) {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub async fn uninstall_extension(extension_id: String) -> Result<(),()>{
-    
+pub async fn uninstall_extension(extension_id: String) -> Result<(), ()> {
     let mut settings = get_settings();
     let new_extensions: Vec<settings::Extension> = settings
         .extensions
@@ -177,14 +194,81 @@ pub async fn uninstall_extension(extension_id: String) -> Result<(),()>{
         .filter(|e| e.id != extension_id)
         .collect();
 
-
     settings.extensions = new_extensions;
 
-    if let Some(extension_dir) = get_extension_dir(extension_id){
+    if let Some(extension_dir) = get_extension_dir(extension_id) {
         fs::remove_dir_all(extension_dir).unwrap();
     }
 
     update_settings(settings);
 
     Ok(())
+}
+
+#[tauri::command]
+pub fn get_cached_themes_store() -> Vec<StoreTheme> {
+    let store_cache_dir = get_store_cache_dir().unwrap();
+
+    if !store_cache_dir.exists() {
+        fs::create_dir_all(&store_cache_dir).unwrap();
+    }
+
+    let cached_themes_store_path = get_cached_themes_store_path().unwrap();
+
+    if !cached_themes_store_path.exists() {
+        return vec![];
+    }
+
+    let file_content = fs::read_to_string(&cached_themes_store_path).unwrap();
+
+    if let Ok(themes) = serde_json::from_str::<Vec<StoreTheme>>(&file_content) {
+        return themes;
+    }
+
+    vec![]
+}
+
+#[tauri::command]
+pub fn cache_themes(themes: Vec<StoreTheme>){
+    let themes_json = serde_json::to_string(&themes).unwrap();
+    fs::write(&get_cached_themes_store_path().unwrap(), &themes_json).unwrap();
+}
+
+#[tauri::command]
+pub fn get_cached_extensions_store() -> Vec<StoreTheme> {
+    let store_cache_dir = get_store_cache_dir().unwrap();
+
+    if !store_cache_dir.exists() {
+        fs::create_dir_all(&store_cache_dir).unwrap();
+    }
+
+    let cached_extensions_store_path = get_cached_extensions_store_path().unwrap();
+
+    if !cached_extensions_store_path.exists() {
+        return vec![];
+    }
+
+    let file_content = fs::read_to_string(&cached_extensions_store_path).unwrap();
+
+    if let Ok(extensions) = serde_json::from_str::<Vec<StoreTheme>>(&file_content) {
+        return extensions;
+    }
+
+    vec![]
+}
+
+#[tauri::command]
+pub async fn has_internet() -> bool {
+    online::check(Some(5)).is_ok()
+}
+
+#[tauri::command]
+pub async fn apply_store_theme(file: String) {
+    let theme_json = reqwest::get(file).await.unwrap().text().await.unwrap();
+    let theme = serde_json::from_str::<Theme>(&theme_json).unwrap();
+
+    let mut new_settings = get_settings();
+    new_settings.set_theme(theme);
+
+    settings::update_settings(new_settings).unwrap();
 }

@@ -1,39 +1,49 @@
 <script setup lang="ts">
 import InputField from "./InputField.vue";
 import { Theme } from "@/pages/Settings/ViewModel";
-import { ref } from "vue";
+import { listen } from "@tauri-apps/api/event";
+import { onMounted, ref } from "vue";
 
 const emit = defineEmits(["updateValue"]);
 
 const props = defineProps<{
-    title: string;
-    description: string;
-    value: string;
-    placeholder?: string | null;
-    theme: Theme;
+  title: string;
+  description: string;
+  value: string;
+  placeholder?: string | null;
+  theme: Theme;
 }>();
 
 const accentPrimary = ref(props.theme.accent_primary);
 
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 </script>
 
 <template>
-    <div class="mr-2">
-        <div class="flex flex-col flex-grow ml-2">
-            <div class="title">{{ props.title }}</div>
-            <div>{{ props.description }}</div>
-        </div>
-        <div class="ml-2 mt-2 flex items-start">
-            <InputField :value="value" :theme="props.theme" :placeholder="placeholder"
-                @on-change="emit('updateValue', $event)" />
-        </div>
+  <div class="mr-2">
+    <div class="flex flex-col flex-grow ml-2">
+      <div class="title">{{ props.title }}</div>
+      <div>{{ props.description }}</div>
     </div>
+    <div class="ml-2 mt-2 flex items-start">
+      <InputField
+        :value="value"
+        :theme="props.theme"
+        :placeholder="placeholder"
+        @on-change="emit('updateValue', $event)"
+      />
+    </div>
+  </div>
 </template>
 
 <style scoped>
 .title {
-    color: v-bind(accentPrimary);
-    font-size: 24px;
-    font-weight: 700;
+  color: v-bind(accentPrimary);
+  font-size: 24px;
+  font-weight: 700;
 }
 </style>

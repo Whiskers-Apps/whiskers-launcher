@@ -34,7 +34,12 @@ async fn main() {
             get_extension_dialog_action,
             close_extension_dialog,
             clone_extension,
-            uninstall_extension
+            uninstall_extension,
+            get_cached_themes_store,
+            get_cached_extensions_store,
+            has_internet,
+            cache_themes,
+            apply_store_theme
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();

@@ -26,7 +26,7 @@ onMounted(async () => {
   await vm.value.load();
   loadTheme();
 
-  await listen("refresh-theme", (_event) => {
+  await listen("load-theme", (_event) => {
     loadTheme();
   });
 });

@@ -1,27 +1,34 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { Theme } from '@/pages/Settings/ViewModel';
+import { onMounted, ref } from "vue";
+import { Theme } from "@/pages/Settings/ViewModel";
+import { listen } from "@tauri-apps/api/event";
 
 const props = defineProps<{
-  checked: boolean,
-  theme: Theme,
-  id?: string
+  checked: boolean;
+  theme: Theme;
+  id?: string;
 }>();
 
-const backgroundTertiary = ref(props.theme.background_tertiary)
+const backgroundTertiary = ref(props.theme.background_tertiary);
 const accentPrimary = ref(props.theme.accent_primary);
 
+const emit = defineEmits(["update:checked"]);
 
-const emit = defineEmits([
-  "update:checked"
-])
-
-
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    backgroundTertiary.value = props.theme.background_tertiary;
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 </script>
 <template>
   <label class="switch ml-2">
-    <input :id="id" type="checkbox" :checked="checked"
-      @input="emit('update:checked', ($event.target as HTMLInputElement).checked)">
+    <input
+      :id="id"
+      type="checkbox"
+      :checked="checked"
+      @input="emit('update:checked', ($event.target as HTMLInputElement).checked)"
+    />
     <span class="slider round"></span>
   </label>
 </template>
@@ -61,15 +68,15 @@ const emit = defineEmits([
   border: 2px solid v-bind(accentPrimary);
 }
 
-input:checked+.slider {
+input:checked + .slider {
   background-color: v-bind(accentPrimary);
 }
 
-input:focus+.slider {
+input:focus + .slider {
   box-shadow: 0 0 1px v-bind(accentPrimary);
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
   -webkit-transform: translateX(26px);
   -ms-transform: translateX(26px);
   transform: translateX(26px);

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import Switch from "./Switch.vue";
 import { Theme } from "@/pages/Settings/ViewModel";
-import { ref } from "vue";
+import { listen } from "@tauri-apps/api/event";
+import { onMounted, ref } from "vue";
 
 const emit = defineEmits(["updateChecked"]);
 
@@ -13,6 +14,12 @@ const props = defineProps<{
 }>();
 
 const accentPrimary = ref(props.theme.accent_primary);
+
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 
 </script>
 

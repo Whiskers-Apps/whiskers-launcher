@@ -1,21 +1,25 @@
 <script setup lang="ts">
-import { PropType, ref } from "vue";
+import { PropType, onMounted, ref } from "vue";
 import { SearchEngine, ViewModel } from "./ViewModel";
 import PrimaryButton from "@components/PrimaryButton.vue";
 import { getIconUrl } from "@/utils";
 import { getHexCssFilter } from "@/utils";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
+import { listen } from "@tauri-apps/api/event";
 
-const props = defineProps({
-  vm: {
-    required: true,
-    type: Object as PropType<ViewModel>,
-  },
-});
+const props = defineProps<{ vm: ViewModel }>();
 
 const accentPrimary = ref(props.vm.settings!!.theme.accent_primary);
 const backgroundSecondary = ref(props.vm.settings!!.theme.background_secondary);
 const backgroundTertiary = ref(props.vm.settings!!.theme.background_tertiary);
+
+onMounted(async()=>{
+  await listen("load-theme", (_event)=>{
+    accentPrimary.value = props.vm.settings!!.theme.accent_primary;
+    backgroundSecondary.value = props.vm.settings!!.theme.background_secondary;
+    backgroundTertiary.value = props.vm.settings!!.theme.background_tertiary;
+  });
+});
 
 function canTintIcon(searchEngine: SearchEngine): boolean {
   return searchEngine.tint_icon || searchEngine.icon_path === null;
@@ -25,11 +29,7 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
 <template>
   <div>
     <div class="flex justify-end items-center">
-      <PrimaryButton
-        text="Add"
-        :theme="vm.settings!!.theme"
-        @click="vm.addSearchEngine()"
-      />
+      <PrimaryButton text="Add" :theme="vm.settings!!.theme" @click="vm.addSearchEngine()" />
     </div>
     <div class="mt-2">
       <div
@@ -44,9 +44,7 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
               : getIconUrl('search.svg')
           "
           :style="{
-            filter: canTintIcon(searchEngine)
-              ? getHexCssFilter(accentPrimary)
-              : 'none',
+            filter: canTintIcon(searchEngine) ? getHexCssFilter(accentPrimary) : 'none',
           }"
           width="40"
         />

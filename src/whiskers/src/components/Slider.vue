@@ -1,30 +1,15 @@
 <script setup lang="ts">
 import { Theme } from '@/pages/Settings/ViewModel';
-import { PropType, ref } from 'vue';
+import { listen } from '@tauri-apps/api/event';
+import { PropType, onMounted, ref } from 'vue';
 
-
-const props = defineProps({
-    min: {
-        required: true,
-        type: Number
-    },
-    max: {
-        required: true,
-        type: Number
-    },
-    step: {
-        required: true,
-        type: Number
-    },
-    value: {
-        required: true,
-        type: Number
-    },
-    theme:{
-        required: true,
-        type: Object as PropType<Theme>
-    }
-})
+const props = defineProps<{
+    min: number,
+    max: number,
+    step: number,
+    value: number,
+    theme: Theme
+}>();
 
 const backgroundTertiary = ref(props.theme.background_tertiary);
 const accentPrimary = ref(props.theme.accent_primary);
@@ -32,10 +17,17 @@ const accentPrimary = ref(props.theme.accent_primary);
 const emit = defineEmits([
     "update:value"
 ])
+
+onMounted(async ()=>{
+    await listen("load-theme", (_event)=>{
+        backgroundTertiary.value = props.theme.background_tertiary;
+        accentPrimary.value = props.theme.accent_primary;
+    });
+});
 </script>
 
 <template>
-    <div class=" flex-grow flex overflow-hidden rounded-[999px]">
+    <div class=" flex-grow flex overflow-hidden rounded-full">
         <input type="range" class="flex-grow p-1" :step="step" :min="min" :max="max" :value="value"
             @input="emit('update:value', +($event.target as HTMLInputElement).value)">
     </div>

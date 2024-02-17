@@ -8,6 +8,7 @@ const props = defineProps<{
   text: string;
   theme: Theme;
   disabled?: boolean;
+  fill?: boolean
 }>();
 
 const backgroundTertiary = ref(props.theme.background_tertiary);
@@ -18,6 +19,7 @@ const textOnBackground = ref(props.theme.text_on_background);
 <template>
   <button
     class="secondary-button rounded-full h-fit w-fit pt-2 pb-2 pl-3 pr-3"
+    :class="fill ? 'w-full' : ''"
     :disabled="disabled"
     @click="emit('click')"
   >

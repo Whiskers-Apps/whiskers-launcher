@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { getHexCssFilter, getIconUrl } from "@/utils";
 import { Theme } from "@pages/Settings/ViewModel";
-import { ref } from "vue";
+import { listen } from "@tauri-apps/api/event";
+import { onMounted, ref } from "vue";
 
 const emit = defineEmits(["onClick"]);
 
@@ -17,6 +18,14 @@ const props = defineProps<{
 const accentPrimary = ref(props.theme.accent_primary);
 const accentPrimaryFilter = ref(getHexCssFilter(props.theme.accent_primary));
 const backgroundSecondary = ref(props.theme.background_secondary);
+
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.theme.accent_primary;
+    accentPrimaryFilter.value = getHexCssFilter(props.theme.accent_primary);
+    backgroundSecondary.value = props.theme.background_secondary;
+  });
+});
 </script>
 
 <template>
@@ -31,9 +40,7 @@ const backgroundSecondary = ref(props.theme.background_secondary);
     >
       <img class="icon" :src="getIconUrl('directory.svg')" />
       <div class="ml-2 one-line-text">
-        {{
-          value === "" ? `Select ${selectDir ? "directory" : "file"}` : value
-        }}
+        {{ value === "" ? `Select ${selectDir ? "directory" : "file"}` : value }}
       </div>
     </button>
   </div>

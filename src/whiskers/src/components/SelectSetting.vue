@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { PropType, ref } from "vue";
+import { PropType, onMounted, ref } from "vue";
 import { SelectOption } from "@components/ComponentClasses";
 import SelectField from "./SelectField.vue";
 import { Theme } from "@/pages/Settings/ViewModel";
+import { listen } from "@tauri-apps/api/event";
 
 const emit = defineEmits(["updateValue"]);
 
@@ -17,6 +18,12 @@ const props = defineProps<{
 }>();
 
 const accentPrimary = ref(props.theme.accent_primary);
+
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 
 </script>
 

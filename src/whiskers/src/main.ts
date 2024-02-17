@@ -11,6 +11,9 @@ import AddSearchEngineDialog from "@pages/Settings/Dialogs/AddSearchEngine/AddSe
 import EditSearchEngineDialog from "@pages/Settings/Dialogs/EditSearchEngine/EditSearchEngine.vue";
 import CloneRepoDialog from "@pages/Settings/Dialogs/CloneRepo/CloneRepo.vue";
 import ExtensionDialog from "@pages/Search/ExtensionDialog/ExtensionDialog.vue";
+import ThemesStore from "@pages/Settings/Dialogs/ThemesStore/ThemesStore.vue";
+import ExtensionsStore from "@pages/Settings/Dialogs/ExtensionsStore/ExtensionsStore.vue";
+import ThemeVariants from "./pages/Settings/Dialogs/ThemesStore/ThemeVariants.vue";
 
 const routes = [
   { path: "/", component: Search },
@@ -25,6 +28,7 @@ const routes = [
   { path: "/extension-dialog", component: ExtensionDialog },
   { path: "/clone-repo", component: CloneRepoDialog },
   { path: "/confirm-uninstall-extension", component: ConfirmDeleteExtensionDialog },
+  { path: "/themes-store", component: ThemesStore },
 ];
 
 const router = createRouter({

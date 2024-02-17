@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Theme } from "@pages/Settings/ViewModel";
 import { getHexCssFilter, getIconUrl } from "@/utils";
-import { PropType, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { SelectOption } from "./ComponentClasses";
+import { listen } from "@tauri-apps/api/event";
 
 const props = defineProps<{
   value: string;
@@ -14,29 +15,36 @@ const props = defineProps<{
 
 const emit = defineEmits(["updateValue"]);
 
-const backgroundSecondary = ref(props.theme.background_secondary);
-const backgroundTertiary = ref(props.theme.background_tertiary);
-const textOnBackground = ref(props.theme.text_on_background);
-const accentPrimary = ref(props.theme.accent_primary);
-
-const background = ref(
-  props.useSecondaryBackground ? backgroundSecondary : backgroundTertiary
-);
-
-const highlightBackground = ref(
-  props.useSecondaryBackground ? backgroundTertiary : backgroundSecondary
-);
-
-const input = ref(
-  props.options.find((option) => option.id === props.value)?.text ?? ""
-);
+const input = ref(props.options.find((option) => option.id === props.value)?.text ?? "");
 const showOptions = ref(false);
-const selectedIndex = ref(
-  props.options.findIndex((it) => it.id === props.value) ?? 0
-);
+const selectedIndex = ref(props.options.findIndex((it) => it.id === props.value) ?? 0);
 const currentOptions = ref<SelectOption[]>(props.options);
 
 const randomSelectId = Math.random() * 1000000;
+
+const backgroundSecondary = ref(props.theme.background_secondary);
+const backgroundTertiary = ref(props.theme.background_tertiary);
+const textOnBackground = ref(props.theme.text_on_background);
+const accentPrimary = ref(props.useSecondaryBackground ? backgroundSecondary.value : backgroundTertiary.value);
+const background = ref(props.useSecondaryBackground ? backgroundSecondary.value : backgroundTertiary.value);
+const highlightBackground = ref(props.useSecondaryBackground ? backgroundTertiary.value : backgroundSecondary.value);
+
+onMounted(async () => {
+  loadTheme();
+
+  listen("load-theme", (_event) => {
+    loadTheme();
+  });
+});
+
+function loadTheme() {
+  backgroundSecondary.value = props.theme.background_secondary;
+  backgroundTertiary.value = props.theme.background_tertiary;
+  textOnBackground.value = props.theme.text_on_background;
+  accentPrimary.value = props.theme.accent_primary;
+  background.value = props.useSecondaryBackground ? backgroundSecondary.value : backgroundTertiary.value;
+  highlightBackground.value = props.useSecondaryBackground ? backgroundTertiary.value : backgroundSecondary.value;
+}
 
 document.addEventListener("keydown", function (event) {
   if (event.key === "ArrowDown") {
@@ -45,9 +53,9 @@ document.addEventListener("keydown", function (event) {
     if (selectedIndex.value < currentOptions.value.length - 1) {
       selectedIndex.value += 1;
 
-      const divElement = this.getElementById(
-        randomSelectId.toString()
-      )?.getElementsByClassName("option")[selectedIndex.value];
+      const divElement = this.getElementById(randomSelectId.toString())?.getElementsByClassName(
+        "option"
+      )[selectedIndex.value];
       divElement?.scrollIntoView();
     }
   }
@@ -58,9 +66,9 @@ document.addEventListener("keydown", function (event) {
     if (selectedIndex.value > 0) {
       selectedIndex.value -= 1;
 
-      const divElement = this.getElementById(
-        randomSelectId.toString()
-      )?.getElementsByClassName("option")[selectedIndex.value];
+      const divElement = this.getElementById(randomSelectId.toString())?.getElementsByClassName(
+        "option"
+      )[selectedIndex.value];
       divElement?.scrollIntoView();
     }
   }
@@ -71,8 +79,7 @@ function updateValue(option: SelectOption) {
     emit("updateValue", option.id);
     showOptions.value = false;
 
-    selectedIndex.value =
-      currentOptions.value.findIndex((it) => it.id === option.id) ?? 0;
+    selectedIndex.value = currentOptions.value.findIndex((it) => it.id === option.id) ?? 0;
 
     currentOptions.value = props.options;
     input.value = option.text;
@@ -106,13 +113,9 @@ function filter() {
     @keydown.enter="updateValue(currentOptions[selectedIndex])"
   >
     <div class="w-full flex select-box" @click="showOptions = !showOptions">
-      <input
-        v-model="input"
-        class="flex-grow dropdown relative"
-        v-on:input="filter()"
-      />
+      <input v-model="input" class="flex-grow dropdown relative" v-on:input="filter()" />
 
-      <div class="flex items-center justify-center chevron">
+      <div class="flex items-center justify-center chevron ml-2">
         <img
           :src="getIconUrl('chevron-down.svg')"
           :style="{ filter: getHexCssFilter(accentPrimary) }"

@@ -12,27 +12,26 @@ const props = defineProps<{
   danger?: boolean;
 }>();
 
-const backgroundTertiary = ref(props.theme.background_tertiary);
-const accent = ref(
-  props.danger ? props.theme.accent_danger : props.theme.accent_primary,
-);
-const textColor = ref(
-  props.danger ? props.theme.text_on_danger : props.theme.text_on_primary,
-);
+const backgroundTertiary = ref("");
+const accent = ref("");
+const textColor = ref("");
 
 const textOnBackground = ref(props.theme.text_on_background);
 
+onMounted(async () => {
+  loadTheme();
 
-onMounted(async () =>{
-    await listen("refresh-theme", (_event) => {
-        backgroundTertiary.value = props.theme.background_tertiary;
-        textOnBackground.value = props.theme.text_on_background;
-        accent.value = props.danger ? props.theme.accent_danger : props.theme.accent_primary;
-        textColor.value = props.danger ? props.theme.text_on_danger : props.theme.text_on_primary
-
-    });
+  await listen("load-theme", (_event) => {
+    loadTheme();
+  });
 });
 
+function loadTheme() {
+  backgroundTertiary.value = props.theme.background_tertiary;
+  textOnBackground.value = props.theme.text_on_background;
+  accent.value = props.danger ? props.theme.accent_danger : props.theme.accent_primary;
+  textColor.value = props.danger ? props.theme.text_on_danger : props.theme.text_on_primary;
+}
 </script>
 
 <template>
@@ -62,7 +61,7 @@ i .primary-button,
   color: v-bind(textOnBackground);
 }
 
-.primary-button:focus{
+.primary-button:focus {
   outline: 1px solid v-bind(accent);
 }
 </style>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Theme } from "@/pages/Settings/ViewModel";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import TextArea from "./TextArea.vue";
+import { listen } from "@tauri-apps/api/event";
 
 const emit = defineEmits(["updateValue"]);
 
@@ -14,6 +15,12 @@ const props = defineProps<{
 }>();
 
 const accentPrimary = ref(props.theme.accent_primary);
+
+onMounted(async () => {
+  await listen("load-theme", (_event) => {
+    accentPrimary.value = props.theme.accent_primary;
+  });
+});
 
 </script>
 

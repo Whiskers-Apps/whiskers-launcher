@@ -2,12 +2,23 @@
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import { ref } from "vue";
 import { ViewModel } from "./ViewModel";
+import { WebviewWindow } from "@tauri-apps/api/window";
 
 const props = defineProps<{
   vm: ViewModel;
 }>();
 
 const textOnBackground = ref(props.vm.settings?.theme.text_on_background ?? "ERROR!!");
+
+async function openThemeStore() {
+  new WebviewWindow("themes-store", {
+    url: "themes-store",
+    title: "Themes Store",
+    width: 1000,
+    height: 800,
+    center: true,
+  });
+}
 </script>
 
 <template>
@@ -20,7 +31,7 @@ const textOnBackground = ref(props.vm.settings?.theme.text_on_background ?? "ERR
         :theme="vm.settings!!.theme"
         @click="vm.exportTheme()"
       />
-      <PrimaryButton class="ml-2" text="Themes Store" :theme="vm.settings!!.theme" />
+      <PrimaryButton class="ml-2" text="Themes Store" :theme="vm.settings!!.theme" @click="openThemeStore()" />
     </div>
     <div class="title mt-2">Background Colors</div>
     <div class="background-secondary rounded-2xl p-4">
