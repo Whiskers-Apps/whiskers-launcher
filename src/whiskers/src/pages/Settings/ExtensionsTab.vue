@@ -23,6 +23,11 @@ onMounted(async () => {
     accentPrimary.value = props.vm.settings!!.theme.accent_primary;
     accentDanger.value = props.vm.settings!!.theme.accent_danger;
   });
+
+  await listen("load-extensions", async (_event) => {
+    await invoke("index_extensions");
+    props.vm.loadUserExtensions();
+  });
 });
 
 function getSettingValue(extensionId: string, settingId: string): string {
@@ -190,7 +195,15 @@ async function uninstallExtension(extensionId: string) {
   });
 }
 
-async function openExtensionsStore() {}
+async function openExtensionsStore() {
+  new WebviewWindow("extensions-store", {
+    url: "extensions-store",
+    title: "Extensions Store",
+    width: 1000,
+    height: 800,
+    center: true,
+  });
+}
 </script>
 
 <template>

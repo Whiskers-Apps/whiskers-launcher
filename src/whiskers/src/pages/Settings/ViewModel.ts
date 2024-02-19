@@ -2,13 +2,11 @@ import { invoke } from "@tauri-apps/api";
 import { platform } from "@tauri-apps/api/os";
 import { SelectOption } from "@components/ComponentClasses";
 import { emit, listen } from "@tauri-apps/api/event";
-import {
-  SearchEnginePayload,
-  DeleteSearchEnginePayload,
-} from "@/DialogPayloads";
+import { SearchEnginePayload, DeleteSearchEnginePayload } from "@/DialogPayloads";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import { save, open } from "@tauri-apps/api/dialog";
 import { downloadDir } from "@tauri-apps/api/path";
+import { getSettings } from "@/utils";
 
 export class ViewModel {
   hasLoaded = false;
@@ -41,22 +39,20 @@ export class ViewModel {
     await listen("load-settings", async (_event) => {
       this.settings = await invoke("get_settings");
       emit("load-theme");
-      console.log("chegou aqui")
+      console.log("chegou aqui");
     });
   }
 
   async loadUserExtensions() {
+    await invoke("index_extensions");
+    this.settings = await getSettings();
     this.userExtensions = await invoke("get_user_extensions");
-    this.userExtensionsDefaultValues = await invoke(
-      "get_extensions_default_values"
-    );
+    this.userExtensionsDefaultValues = await invoke("get_extensions_default_values");
   }
 
   getTabClasses(tab: SettingsTab): string {
     return `tab ${
-      tab === this.selectedTab
-        ? "tab-selected background-primary text-on-primary"
-        : ""
+      tab === this.selectedTab ? "tab-selected background-primary text-on-primary" : ""
     }`;
   }
 
@@ -267,29 +263,26 @@ export class ViewModel {
       center: true,
     });
 
-    const unlisten = await listen<SearchEnginePayload>(
-      "add-search-engine",
-      (event) => {
-        const newSearchEngine: SearchEngine = {
-          icon_path: event.payload.icon_path,
-          tint_icon: event.payload.tint_icon,
-          name: event.payload.name,
-          query: event.payload.query,
-          keyword: event.payload.keyword,
-          default: this.settings!!.search_engines.length === 0,
-        };
+    const unlisten = await listen<SearchEnginePayload>("add-search-engine", (event) => {
+      const newSearchEngine: SearchEngine = {
+        icon_path: event.payload.icon_path,
+        tint_icon: event.payload.tint_icon,
+        name: event.payload.name,
+        query: event.payload.query,
+        keyword: event.payload.keyword,
+        default: this.settings!!.search_engines.length === 0,
+      };
 
-        const newSearchEngines = this.settings!!.search_engines;
-        newSearchEngines.push(newSearchEngine);
+      const newSearchEngines = this.settings!!.search_engines;
+      newSearchEngines.push(newSearchEngine);
 
-        const newSettings = this.settings!!;
-        newSettings.search_engines = newSearchEngines;
+      const newSettings = this.settings!!;
+      newSettings.search_engines = newSearchEngines;
 
-        this.updateSettings(newSettings);
+      this.updateSettings(newSettings);
 
-        unlisten();
-      }
-    );
+      unlisten();
+    });
   }
 
   async editSearchEngine(index: number) {
@@ -301,34 +294,31 @@ export class ViewModel {
       center: true,
     });
 
-    const unlisten = await listen<SearchEnginePayload>(
-      "edit-search-engine",
-      (event) => {
-        const newSearchEngines: SearchEngine[] = [];
+    const unlisten = await listen<SearchEnginePayload>("edit-search-engine", (event) => {
+      const newSearchEngines: SearchEngine[] = [];
 
-        this.settings!!.search_engines.forEach((se, seindex) => {
-          if (seindex === index) {
-            newSearchEngines.push({
-              icon_path: event.payload.icon_path,
-              tint_icon: event.payload.tint_icon,
-              name: event.payload.name,
-              query: event.payload.query,
-              keyword: event.payload.keyword,
-              default: event.payload.default,
-            });
-          } else {
-            newSearchEngines.push(se);
-          }
-        });
+      this.settings!!.search_engines.forEach((se, seindex) => {
+        if (seindex === index) {
+          newSearchEngines.push({
+            icon_path: event.payload.icon_path,
+            tint_icon: event.payload.tint_icon,
+            name: event.payload.name,
+            query: event.payload.query,
+            keyword: event.payload.keyword,
+            default: event.payload.default,
+          });
+        } else {
+          newSearchEngines.push(se);
+        }
+      });
 
-        const newSettings = this.settings!!;
-        newSettings.search_engines = newSearchEngines;
+      const newSettings = this.settings!!;
+      newSettings.search_engines = newSearchEngines;
 
-        this.updateSettings(newSettings);
+      this.updateSettings(newSettings);
 
-        unlisten();
-      }
-    );
+      unlisten();
+    });
   }
 
   closeSearchEngineMenu(index: number) {
@@ -466,7 +456,7 @@ export interface Theme {
 
 export interface Extension {
   id: string;
-  keyword: string,
+  keyword: string;
   settings: ExtensionSetting[];
 }
 

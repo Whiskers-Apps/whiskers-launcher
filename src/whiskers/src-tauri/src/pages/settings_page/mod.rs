@@ -5,7 +5,7 @@ use git2::Repository;
 use serde::{Deserialize, Serialize};
 use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
-use whiskers_launcher_rs::extensions::index_extensions;
+use whiskers_launcher_rs::extensions::{self};
 use whiskers_launcher_rs::indexing::{self, get_indexed_apps, AppIndex};
 use whiskers_launcher_rs::paths::{
     get_cached_extensions_store_path, get_cached_themes_store_path, get_store_cache_dir,
@@ -48,6 +48,15 @@ pub struct StoreTheme {
 pub struct StoreThemeVariant {
     pub name: String,
     pub file: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct StoreExtension{
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub repo: String,
+    pub os: Vec<String>
 }
 
 fn default_checked() -> bool {
@@ -140,7 +149,7 @@ pub fn import_theme(path: PathBuf) {
 
 #[tauri::command]
 pub fn get_user_extensions() -> Vec<Manifest> {
-    index_extensions().unwrap();
+    extensions::index_extensions().unwrap();
     indexing::get_user_extensions().expect("Error getting user extensions")
 }
 
@@ -236,7 +245,7 @@ pub fn cache_themes(themes: Vec<StoreTheme>){
 }
 
 #[tauri::command]
-pub fn get_cached_extensions_store() -> Vec<StoreTheme> {
+pub fn get_cached_extensions_store() -> Vec<StoreExtension> {
     let store_cache_dir = get_store_cache_dir().unwrap();
 
     if !store_cache_dir.exists() {
@@ -251,16 +260,11 @@ pub fn get_cached_extensions_store() -> Vec<StoreTheme> {
 
     let file_content = fs::read_to_string(&cached_extensions_store_path).unwrap();
 
-    if let Ok(extensions) = serde_json::from_str::<Vec<StoreTheme>>(&file_content) {
+    if let Ok(extensions) = serde_json::from_str::<Vec<StoreExtension>>(&file_content) {
         return extensions;
     }
 
     vec![]
-}
-
-#[tauri::command]
-pub async fn has_internet() -> bool {
-    online::check(Some(5)).is_ok()
 }
 
 #[tauri::command]
@@ -272,4 +276,15 @@ pub async fn apply_store_theme(file: String) {
     new_settings.set_theme(theme);
 
     settings::update_settings(new_settings).unwrap();
+}
+
+#[tauri::command]
+pub fn cache_extensions(extensions: Vec<StoreExtension>){
+    let extensions_json = serde_json::to_string(&extensions).unwrap();
+    fs::write(&get_cached_extensions_store_path().unwrap(), &extensions_json).unwrap();
+}
+
+#[tauri::command]
+pub fn index_extensions(){
+    extensions::index_extensions().unwrap();
 }
