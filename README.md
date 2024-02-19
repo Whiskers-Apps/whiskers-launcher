@@ -1,6 +1,6 @@
 <div align="center">
   <img src="src/resources/logos/whiskers-launcher.png" height="100">
-  <h1>Simple Keyboard Launcher</h1>
+  <h1>Whiskers Launcher</h1>
 </div>
 
 # About
