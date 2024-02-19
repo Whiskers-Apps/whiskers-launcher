@@ -1,5 +1,7 @@
 use std::{env, process::exit};
 
+use whiskers_launcher_rs::paths::get_app_resources_dir;
+
 //Imports only used in windows
 #[cfg(target_os = "windows")]
 use {is_elevated::is_elevated, std::io::stdin};
@@ -8,7 +10,6 @@ use {is_elevated::is_elevated, std::io::stdin};
 #[cfg(target_os = "linux")]
 use {
     fs_extra::dir::CopyOptions,
-    simple_kl_rs::paths::get_resources_directory,
     std::{fs, process::Command},
 };
 
@@ -28,7 +29,7 @@ fn main() {
     installation_files.push("installation-files");
 
     let mut logo = installation_files.to_owned();
-    logo.push("simple-kl.png");
+    logo.push("whiskers-launcher.png");
 
     let mut icons_dir = installation_files.to_owned();
     icons_dir.push("resources");
@@ -36,21 +37,21 @@ fn main() {
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
-        let resources_dir = get_resources_directory().unwrap();
+        let resources_dir = get_app_resources_dir().unwrap();
 
         let mut launcher_bin = installation_files.to_owned();
-        launcher_bin.push("simple-keyboard-launcher");
+        launcher_bin.push("whiskers-launcher");
 
-        let mut service_bin = installation_files.to_owned();
-        service_bin.push("simple-kl-service");
+        let mut companion_bin = installation_files.to_owned();
+        companion_bin.push("whiskers-launcher-companion");
 
         let mut desktop_file = installation_files.to_owned();
-        desktop_file.push("simple-kl.desktop");
+        desktop_file.push("whiskers-launcher.desktop");
 
         let copy_binaries_cmd = format!(
             "sudo cp '{}' '{}' /usr/bin",
             launcher_bin.into_os_string().into_string().unwrap(),
-            service_bin.into_os_string().into_string().unwrap()
+            companion_bin.into_os_string().into_string().unwrap()
         );
 
         println!("Copying files ...");
