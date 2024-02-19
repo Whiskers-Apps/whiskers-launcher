@@ -38,7 +38,8 @@ async fn main() {
             cache_themes,
             apply_store_theme,
             cache_extensions,
-            index_extensions
+            index_extensions,
+            close_search_window
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();

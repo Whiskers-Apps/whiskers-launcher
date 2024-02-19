@@ -188,10 +188,6 @@ export class ViewModel {
       width: 1200,
       height: 800,
     });
-
-    setTimeout(() => {
-      appWindow.close();
-    }, 500);
   }
 }
 

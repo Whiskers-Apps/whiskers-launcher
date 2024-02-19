@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
+use tauri::{AppHandle, Manager};
 use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
 use whiskers_launcher_rs::extensions::{self};
@@ -51,12 +52,12 @@ pub struct StoreThemeVariant {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct StoreExtension{
+pub struct StoreExtension {
     pub id: String,
     pub name: String,
     pub description: String,
     pub repo: String,
-    pub os: Vec<String>
+    pub os: Vec<String>,
 }
 
 fn default_checked() -> bool {
@@ -65,6 +66,13 @@ fn default_checked() -> bool {
 
 #[cfg(target_os = "windows")]
 use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt};
+
+#[tauri::command]
+pub fn close_search_window(app: AppHandle) {
+    if let Some(window) = app.get_window("main"){
+        window.close().unwrap();
+    }
+}
 
 #[tauri::command]
 pub fn get_settings() -> Settings {
@@ -239,7 +247,7 @@ pub fn get_cached_themes_store() -> Vec<StoreTheme> {
 }
 
 #[tauri::command]
-pub fn cache_themes(themes: Vec<StoreTheme>){
+pub fn cache_themes(themes: Vec<StoreTheme>) {
     let themes_json = serde_json::to_string(&themes).unwrap();
     fs::write(&get_cached_themes_store_path().unwrap(), &themes_json).unwrap();
 }
@@ -279,12 +287,16 @@ pub async fn apply_store_theme(file: String) {
 }
 
 #[tauri::command]
-pub fn cache_extensions(extensions: Vec<StoreExtension>){
+pub fn cache_extensions(extensions: Vec<StoreExtension>) {
     let extensions_json = serde_json::to_string(&extensions).unwrap();
-    fs::write(&get_cached_extensions_store_path().unwrap(), &extensions_json).unwrap();
+    fs::write(
+        &get_cached_extensions_store_path().unwrap(),
+        &extensions_json,
+    )
+    .unwrap();
 }
 
 #[tauri::command]
-pub fn index_extensions(){
+pub fn index_extensions() {
     extensions::index_extensions().unwrap();
 }

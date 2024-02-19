@@ -71,7 +71,7 @@ async fn main() {
                         if cfg!(target_os = "linux") {
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("whiskers --settings")
+                                .arg("whiskers-launcher --settings")
                                 .output()
                                 .expect("Error opening app");
                         }

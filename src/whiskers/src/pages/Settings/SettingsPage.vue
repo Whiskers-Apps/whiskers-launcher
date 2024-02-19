@@ -10,6 +10,7 @@ import ThemingTab from "./ThemingTab.vue";
 import ExtensionsTab from "./ExtensionsTab.vue";
 import AboutTab from "./AboutTab.vue";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api";
 
 let vm = ref<ViewModel>(new ViewModel());
 
@@ -23,6 +24,9 @@ const textOnPrimary = ref("");
 const textOnDanger = ref("");
 
 onMounted(async () => {
+
+  //await invoke("close_search_window");
+
   await vm.value.load();
   loadTheme();
 
