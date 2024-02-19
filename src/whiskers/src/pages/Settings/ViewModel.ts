@@ -99,6 +99,13 @@ export class ViewModel {
     this.updateSettings(newSettings);
   }
 
+  updateHideOnBlur(value: boolean) {
+    let newSettings = this.settings!!;
+    newSettings.hide_on_blur = value;
+
+    this.updateSettings(newSettings);
+  }
+
   updateFractionalScaling(value: number) {
     let newSettings = this.settings!!;
     newSettings.fractional_scaling = value;
@@ -418,6 +425,7 @@ export interface Settings {
   launch_first_key: string;
   launch_second_key: string | null;
   launch_third_key: string;
+  hide_on_blur: boolean;
   auto_start: boolean;
   fractional_scaling: number;
   show_search_icon: boolean;

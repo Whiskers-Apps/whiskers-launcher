@@ -75,5 +75,15 @@ onMounted(async () => {
       :theme="vm.settings!!.theme"
       @update-value="vm.updateFractionalScaling($event)"
     />
+
+    <div class="divider mt-2 mb-2"></div>
+
+    <SwitchSetting
+      title="Hide On Blur"
+      description="If enabled, it closes the search when the user clicks outside or the window loses focus"
+      :checked="vm.settings!!.hide_on_blur"
+      :theme="vm.settings!!.theme"
+      @update-checked="vm.updateHideOnBlur($event)"
+     />
   </div>
 </template>

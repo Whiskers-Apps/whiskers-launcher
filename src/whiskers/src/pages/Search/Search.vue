@@ -115,16 +115,17 @@ document.addEventListener("keydown", (event) => {
 <template>
   <div
     v-if="vm.hasLoaded"
-    class="flex justify-center main"
-    @click="appWindow.close()"
+    class="flex justify-center main h-screen"
+    @click="
+      if (vm.settings!!.hide_on_blur) {
+        appWindow.close();
+      }
+    "
   >
     <div class="p-overall mt-[140px]">
       <div :class="!vm.isSplitLayout() ? 'search-box p-overall' : ''">
         <div :class="vm.isSplitLayout() ? 'search-box p-overall' : ''">
-          <div
-            class="search-div"
-            :style="{ backgroundColor: vm.getSearchInputBackground() }"
-          >
+          <div class="search-div" :style="{ backgroundColor: vm.getSearchInputBackground() }">
             <div class="flex p-overall items-center">
               <div class="p-1" v-if="vm.settings!!.show_search_icon">
                 <img class="icon" :src="getIconUrl('search.svg')" />
@@ -189,9 +190,7 @@ document.addEventListener("keydown", (event) => {
                   <img
                     v-else-if="result.icon !== null"
                     :src="
-                      result.icon
-                        ? convertFileSrc(result.icon)
-                        : getIconUrl('default-app-icon')
+                      result.icon ? convertFileSrc(result.icon) : getIconUrl('default-app-icon')
                     "
                     class="app-icon"
                     :style="{
@@ -210,11 +209,7 @@ document.addEventListener("keydown", (event) => {
                     <div class="normal-text">
                       {{ result.title }}
                     </div>
-                    <div
-                      :class="
-                        result.type === 'Text' ? 'normal-text' : 'small-text'
-                      "
-                    >
+                    <div :class="result.type === 'Text' ? 'normal-text' : 'small-text'">
                       {{ result.text }}
                     </div>
                   </div>

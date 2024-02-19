@@ -101,9 +101,7 @@ export class ViewModel {
     } else if (this.selectedIndex == this.results.length - 1) {
       this.selectedIndex = 0;
 
-      document
-        .getElementById(`result-0`)!!
-        .scrollIntoView({ behavior: "smooth" });
+      document.getElementById(`result-0`)!!.scrollIntoView({ behavior: "smooth" });
     }
   }
 
@@ -190,6 +188,10 @@ export class ViewModel {
       width: 1200,
       height: 800,
     });
+
+    setTimeout(() => {
+      appWindow.close();
+    }, 500);
   }
 }
 
@@ -237,7 +239,7 @@ export interface DialogSelectField {
   text: string;
 }
 
-export interface FileFilter{
-  name: string,
-  file_extensions: string[]
+export interface FileFilter {
+  name: string;
+  file_extensions: string[];
 }

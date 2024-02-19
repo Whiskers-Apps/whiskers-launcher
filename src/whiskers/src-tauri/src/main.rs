@@ -3,15 +3,13 @@
 
 mod pages;
 
-use pages::settings_page::*;
 use pages::search::*;
+use pages::settings_page::*;
 
 use enigo::MouseControllable;
 use std::env;
-use tauri::{
-    Manager, PhysicalPosition, RunEvent, WindowBuilder, WindowEvent, WindowUrl,
-};
-
+use tauri::{Manager, PhysicalPosition, RunEvent, WindowBuilder, WindowEvent, WindowUrl};
+use whiskers_launcher_rs::settings;
 
 #[tokio::main]
 async fn main() {
@@ -83,10 +81,12 @@ async fn main() {
                 if label == "main" {
                     match event {
                         WindowEvent::Focused(focused) => {
-                            //Hides the window when user clicks outside
                             if !focused {
-                                let window = app.get_window("main").unwrap();
-                                window.close().unwrap();
+                                let settings = settings::get_settings().unwrap();
+                                if settings.hide_on_blur {
+                                    let window = app.get_window("main").unwrap();
+                                    window.close().unwrap();
+                                }
                             }
                         }
                         _ => {}
