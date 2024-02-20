@@ -28,6 +28,8 @@ onMounted(async () => {
     await invoke("index_extensions");
     props.vm.loadUserExtensions();
   });
+
+  console.log(props.vm.settings);
 });
 
 function getSettingValue(extensionId: string, settingId: string): string {
@@ -131,7 +133,6 @@ async function updateExtensionKeyword(extensionId: string, value: string) {
   newSettings.extensions = newExtensions;
 
   props.vm.updateSettings(newSettings);
-  props.vm.loadUserExtensions();
 }
 
 function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean {

@@ -1,10 +1,10 @@
 $installationFilesDir = "%installation_files_dir%"
-$localDir = $env:APPDATA + "\simple-kl"
+$localDir = $env:APPDATA + "\whiskers-launcher"
 $appsDir = $env:ALLUSERSPROFILE + "\Microsoft\Windows\Start Menu\Programs"
 
-$launcherExe = $installationFilesDir + "\simple-keyboard-launcher.exe"
-$serviceExe = $installationFilesDir + "\simple-kl-service.exe"
-$shortcut = $installationFilesDir + "\Simple Keyboard Launcher.lnk"
+$launcherExe = $installationFilesDir + "\whiskers-launcher.exe"
+$companionExe = $installationFilesDir + "\whiskers-launcher-companion.exe"
+$shortcut = $installationFilesDir + "\Whiskers Launcher.lnk"
 $resourcesDir = $installationFilesDir + "\resources"
 
 if(!(Test-Path -Path $localDir)){
@@ -12,6 +12,6 @@ if(!(Test-Path -Path $localDir)){
 }
 
 Copy-Item $launcherExe -Destination $localDir -Force
-Copy-Item $serviceExe -Destination $localDir -Force
+Copy-Item $companionExe -Destination $localDir -Force
 Copy-Item $shortcut -Destination $appsDir -Force
 Copy-Item $resourcesDir -Destination $localDir -Force -Recurse

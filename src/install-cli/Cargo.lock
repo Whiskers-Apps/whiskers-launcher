@@ -600,7 +600,7 @@ dependencies = [
 
 [[package]]
 name = "install"
-version = "0.1.0-alpha"
+version = "1.0.0-alpha1"
 dependencies = [
  "fs_extra",
  "is_elevated",

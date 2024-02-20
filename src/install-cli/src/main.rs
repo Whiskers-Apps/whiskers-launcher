@@ -33,7 +33,7 @@ fn main() {
 
     let mut icons_dir = installation_files.to_owned();
     icons_dir.push("resources");
-    icons_dir.push("icons");
+    icons_dir.push("Icons");
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {

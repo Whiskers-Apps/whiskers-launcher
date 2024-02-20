@@ -39,7 +39,6 @@ export class ViewModel {
     await listen("load-settings", async (_event) => {
       this.settings = await invoke("get_settings");
       emit("load-theme");
-      console.log("chegou aqui");
     });
   }
 

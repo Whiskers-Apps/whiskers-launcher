@@ -3,7 +3,6 @@ use std::path::PathBuf;
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
 use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
 use whiskers_launcher_rs::extensions::{self};
@@ -67,12 +66,6 @@ fn default_checked() -> bool {
 #[cfg(target_os = "windows")]
 use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt};
 
-#[tauri::command]
-pub fn close_search_window(app: AppHandle) {
-    if let Some(window) = app.get_window("main"){
-        window.close().unwrap();
-    }
-}
 
 #[tauri::command]
 pub fn get_settings() -> Settings {
