@@ -1,9 +1,16 @@
 use std::fs;
 
-use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
-use whiskers_launcher_rs::{indexing::AppIndex, paths::{get_indexing_apps_path, get_indexing_dir}};
+use whiskers_launcher_rs::paths::get_app_resources_dir;
 
-use crate::functions::get_app_icon;
+#[cfg(target_os = "linux")]
+use {
+    crate::functions::get_app_icon,
+    freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter},
+    whiskers_launcher_rs::{
+        indexing::AppIndex,
+        paths::{get_indexing_apps_path, get_indexing_dir},
+    },
+};
 
 /// Searches for all apps and saves them in a apps json file.
 /// It reduces the time the app needs to get all the apps over and over again
@@ -26,11 +33,11 @@ pub fn index_apps() {
 
                         if entry.type_().unwrap() == "Application" && !entry.no_display() {
                             let icon = entry.icon().unwrap().to_string();
-                            let icon_path = match get_app_icon(icon){
-                                Some(path)=> path.into_os_string().into_string().unwrap(),
-                                None => "".into()
+                            let icon_path = match get_app_icon(icon) {
+                                Some(path) => path.into_os_string().into_string().unwrap(),
+                                None => "".into(),
                             };
-                            
+
                             let exec_path = path.clone().into_os_string().into_string().unwrap();
                             let name = entry.name(None).unwrap().to_string();
 
@@ -43,7 +50,7 @@ pub fn index_apps() {
 
         let indexig_dir = get_indexing_dir().unwrap();
 
-        if !indexig_dir.exists(){
+        if !indexig_dir.exists() {
             fs::create_dir_all(&indexig_dir).unwrap();
         }
 
@@ -54,8 +61,8 @@ pub fn index_apps() {
 
     #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
-        let mut script_path = get_local_dir().unwrap();
-        script_path.push("resources\\ps-scripts\\index-apps.ps1");
+        let mut script_path = get_app_resources_dir().unwrap();
+        script_path.push("Scripts/index-apps.ps1");
 
         let script_content = fs::read_to_string(&script_path).unwrap();
         powershell_script::run(&script_content).unwrap();

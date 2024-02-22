@@ -14,8 +14,8 @@ async function openThemeStore() {
   new WebviewWindow("themes-store", {
     url: "themes-store",
     title: "Themes Store",
-    width: 1000,
-    height: 800,
+    width: 900,
+    height: 700,
     center: true,
   });
 }

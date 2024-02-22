@@ -14,6 +14,7 @@ const accentPrimary = ref("");
 const textOnBackground = ref("");
 
 onMounted(async () => {
+  
   await vm.value.load();
 
   const theme = vm.value.uiState.settings!!.theme;
@@ -23,6 +24,7 @@ onMounted(async () => {
   textOnBackground.value = theme.text_on_background;
 
   vm.value.uiState.hasLoaded = true;
+  
 });
 </script>
 

@@ -10,7 +10,6 @@ import ThemingTab from "./ThemingTab.vue";
 import ExtensionsTab from "./ExtensionsTab.vue";
 import AboutTab from "./AboutTab.vue";
 import { listen } from "@tauri-apps/api/event";
-import { invoke } from "@tauri-apps/api";
 
 let vm = ref<ViewModel>(new ViewModel());
 
@@ -24,11 +23,10 @@ const textOnPrimary = ref("");
 const textOnDanger = ref("");
 
 onMounted(async () => {
-
-  //await invoke("close_search_window");
-
   await vm.value.load();
   loadTheme();
+
+  vm.value.hasLoaded = true;
 
   await listen("load-theme", (_event) => {
     loadTheme();
@@ -59,8 +57,14 @@ function loadTheme() {
       <div class="flex-grow overflow-auto p-2 pl-4 pr-4">
         <GeneralTab v-if="vm.selectedTab == SettingsTab.General" :vm="(vm as ViewModel)" />
         <SearchBoxTab v-if="vm.selectedTab == SettingsTab.SearchBox" :vm="(vm as ViewModel)" />
-        <SearchResultsTab v-if="vm.selectedTab == SettingsTab.SearchResults" :vm="(vm as ViewModel)" />
-        <SearchEnginesTab v-if="vm.selectedTab == SettingsTab.SearchEngines" :vm="(vm as ViewModel)" />
+        <SearchResultsTab
+          v-if="vm.selectedTab == SettingsTab.SearchResults"
+          :vm="(vm as ViewModel)"
+        />
+        <SearchEnginesTab
+          v-if="vm.selectedTab == SettingsTab.SearchEngines"
+          :vm="(vm as ViewModel)"
+        />
         <ThemingTab v-if="vm.selectedTab == SettingsTab.Theming" :vm="(vm as ViewModel)" />
         <ExtensionsTab v-if="vm.selectedTab == SettingsTab.Extensions" :vm="(vm as ViewModel)" />
         <AboutTab v-if="vm.selectedTab == SettingsTab.About" :vm="(vm as ViewModel)" />

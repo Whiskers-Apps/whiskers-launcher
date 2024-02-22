@@ -36,7 +36,7 @@ function loadTheme() {
 
 <template>
   <button
-    class="primary-button rounded-full h-fit w-fit pt-2 pb-2 pl-3 pr-3"
+    class="primary-button rounded-full h-fit w-fit pt-2 pb-2 pl-3 pr-3 one-line-text"
     :disabled="disabled"
     @click="emit('click')"
   >

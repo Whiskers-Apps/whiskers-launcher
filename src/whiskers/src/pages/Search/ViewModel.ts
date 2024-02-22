@@ -11,10 +11,6 @@ export interface UiState {
 }
 
 export class ViewModel {
-  // ========================================
-  // UiState
-  // ========================================
-
   hasLoaded = false;
   settings: Settings | null = null;
 
@@ -28,10 +24,6 @@ export class ViewModel {
   async load() {
     this.settings = await invoke("get_settings");
     this.resultHeight = this.getResultHeight();
-
-    watch(this.typedText, (newValue, _oldValue) => {
-      console.log(newValue);
-    });
   }
 
   getSearchInputBackground(): string {
@@ -146,7 +138,7 @@ export class ViewModel {
     }
 
     if (action.type === "Dialog") {
-      invoke("open_extension_dialog", {
+      await invoke("open_extension_dialog", {
         extension_id: action.extension_id,
         extension_action: action.extension_action,
         title: action.title,
@@ -154,9 +146,19 @@ export class ViewModel {
         fields: action.fields,
         args: action.args,
       });
-    }
 
-    appWindow.close();
+      new WebviewWindow("extension-dialog", {
+        url: "extension-dialog",
+        title: action.title!!,
+        width: 700,
+        height: 700,
+        center: true
+      });
+
+      setTimeout(() => {
+        appWindow.close();
+      }, 500);
+    }
   }
 
   getResultHeight(): number {
@@ -185,8 +187,8 @@ export class ViewModel {
     new WebviewWindow("settings", {
       url: "settings",
       title: "Settings",
-      width: 1200,
-      height: 800,
+      width: 1100,
+      height: 700,
     });
 
     setTimeout(() => {

@@ -1,8 +1,9 @@
-use std::fs;
 use std::path::PathBuf;
+use std::{env, fs};
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
+use tokio::spawn;
 use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
 use whiskers_launcher_rs::extensions::{self};
@@ -63,18 +64,16 @@ fn default_checked() -> bool {
     false
 }
 
-#[cfg(target_os = "windows")]
-use {simple_kl_rs::others::FLAG_NO_WINDOW, std::os::windows::process::CommandExt};
-
-
 #[tauri::command]
 pub fn get_settings() -> Settings {
     settings::get_settings().unwrap()
 }
 
 #[tauri::command]
-pub fn update_settings(settings: settings::Settings) {
-    settings::update_settings(settings).unwrap();
+pub async fn update_settings(settings: settings::Settings) {
+    spawn(async move{
+        settings::update_settings(settings).unwrap();
+    });
 }
 
 #[tauri::command]
@@ -211,7 +210,10 @@ pub async fn uninstall_extension(extension_id: String) -> Result<(), ()> {
         fs::remove_dir_all(extension_dir).unwrap();
     }
 
-    update_settings(settings);
+    spawn(async move{
+        settings::update_settings(settings).unwrap();
+    });
+
 
     Ok(())
 }
@@ -292,4 +294,9 @@ pub fn cache_extensions(extensions: Vec<StoreExtension>) {
 #[tauri::command]
 pub fn index_extensions() {
     extensions::index_extensions().unwrap();
+}
+
+#[tauri::command]
+pub fn get_os() -> String {
+    env::consts::OS.to_owned()
 }

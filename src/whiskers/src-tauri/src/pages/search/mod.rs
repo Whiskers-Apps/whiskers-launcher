@@ -1,11 +1,13 @@
 use std::{fs, path::Path, process::Command};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use tauri::{api::shell::open, AppHandle, Manager, Window, WindowBuilder, WindowUrl};
+use tauri::Window;
 use whiskers_launcher_rs::{
     actions,
     api::extensions::{
-        self, get_extension_dir, get_extension_results, send_extension_context, send_extension_dialog_action, send_extension_dialog_response, Context, DialogResponse, DialogResult
+        self, get_extension_dir, get_extension_results, send_extension_context,
+        send_extension_dialog_action, send_extension_dialog_response, Context, DialogResponse,
+        DialogResult,
     },
     dialog::DialogField,
     indexing::get_indexed_apps,
@@ -13,6 +15,9 @@ use whiskers_launcher_rs::{
     results::{self, WhiskersResult},
     settings::get_settings,
 };
+
+#[cfg(target_os = "windows")]
+use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW};
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
@@ -67,15 +72,23 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
                         if extension_run.status.success() {
                             return get_extension_results()
                                 .expect("Error getting extension results");
-                        } else {
-                            println!(
-                                "Error running extension: {}",
-                                String::from_utf8_lossy(&extension_run.stderr)
-                            )
                         }
                     }
 
-                    if cfg!(target_os = "windows") {}
+                    if cfg!(target_os = "windows") {
+                        let extension_run = Command::new("cmd")
+                            .arg("/C")
+                            .arg("start /min extension")
+                            .current_dir(&path)
+                            .creation_flags(FLAG_NO_WINDOW)
+                            .output()
+                            .unwrap();
+
+                        if extension_run.status.success() {
+                            return get_extension_results()
+                                .expect("Error getting extension results");
+                        }
+                    }
                 }
             }
 
@@ -190,7 +203,15 @@ pub fn run_extension_action(
             .expect("Error running extension");
     }
 
-    if cfg!(target_os = "windows") {}
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .arg("/C")
+            .arg("start /min extension")
+            .current_dir(&path)
+            .creation_flags(FLAG_NO_WINDOW)
+            .output()
+            .expect("Error running extension");
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -231,11 +252,14 @@ pub async fn open_app(exec_path: String, window: Window) {
             powershell_script::run(&script).expect("Error opening app");
         });
     }
+
+    window.close().unwrap();
 }
 
 #[tauri::command]
-pub async fn open_url(url: String, app: AppHandle) {
-    open(&app.shell_scope(), url, None).expect("Error opening url");
+pub async fn open_url(url: String, window: Window) {
+    open::that(&url).expect("Error opening url");
+    window.close().unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -245,21 +269,10 @@ pub fn open_extension_dialog(
     title: String,
     primary_button_text: Option<String>,
     fields: Vec<DialogField>,
-    args: Option<Vec<String>>,
-    app: AppHandle,
-) {
-    WindowBuilder::new(
-        &app,
-        "extension-dialog",
-        WindowUrl::App("extension-dialog".into()),
-    )
-    .title(&title)
-    .inner_size(800.0, 800.0)
-    .resizable(false)
-    .build()
-    .expect("Error opening settings window");
-
-    let mut action = actions::Dialog::new(extension_id, title, extension_action, fields);
+    args: Option<Vec<String>>
+) -> Result<(), ()>{
+    
+    let mut action = actions::Dialog::new(&extension_id, &title, &extension_action, fields);
 
     if primary_button_text.is_some() {
         action.primary_button_text(primary_button_text.unwrap());
@@ -270,11 +283,13 @@ pub fn open_extension_dialog(
     }
 
     send_extension_dialog_action(action);
+
+    Ok(())
 }
 
 #[tauri::command]
 pub fn get_extension_dialog_action() -> actions::Dialog {
-    return extensions::get_extension_dialog_action().expect("Error getting dialog action");
+    extensions::get_extension_dialog_action().expect("Error getting dialog action")
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -285,7 +300,6 @@ pub fn close_extension_dialog(
     results: Vec<DialogResult>,
     window: Window,
 ) {
-
     let response = DialogResponse::new(results, args);
     send_extension_dialog_response(response);
 
@@ -303,6 +317,14 @@ pub fn close_extension_dialog(
             .expect("Error running extension");
     }
 
-    if cfg!(target_os = "windows") {}
+    if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .arg("/C")
+            .arg("start /min extension")
+            .current_dir(&extension_dir)
+            .creation_flags(FLAG_NO_WINDOW)
+            .output()
+            .expect("Error running extension");
+    }
     window.close().unwrap();
 }

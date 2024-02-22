@@ -34,8 +34,6 @@ export class ViewModel {
 
     this.loadUserExtensions();
 
-    this.hasLoaded = true;
-
     await listen("load-settings", async (_event) => {
       this.settings = await invoke("get_settings");
       emit("load-theme");
@@ -59,7 +57,7 @@ export class ViewModel {
     this.selectedTab = tab;
   }
 
-  updateSettings(newSettings: Settings) {
+  async updateSettings(newSettings: Settings) {
     invoke("update_settings", { settings: newSettings });
     this.settings = newSettings;
   }
@@ -359,8 +357,6 @@ export class ViewModel {
       invoke("export_theme", { path: path });
     }
   }
-
-  openThemesStore() {}
 
   private updateTheme(newTheme: Theme) {
     const newSettings = this.settings!!;

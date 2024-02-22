@@ -15,10 +15,14 @@ const props = defineProps<{
   vm: ViewModel;
 }>();
 
+const os = ref("");
+const hasLoaded = ref(false);
 const accentPrimary = ref(props.vm.settings!!.theme.accent_primary);
 const accentDanger = ref(props.vm.settings!!.theme.accent_danger);
 
 onMounted(async () => {
+  os.value = await invoke("get_os");
+
   await listen("load-theme", (_event) => {
     accentPrimary.value = props.vm.settings!!.theme.accent_primary;
     accentDanger.value = props.vm.settings!!.theme.accent_danger;
@@ -29,7 +33,7 @@ onMounted(async () => {
     props.vm.loadUserExtensions();
   });
 
-  console.log(props.vm.settings);
+  hasLoaded.value = true;
 });
 
 function getSettingValue(extensionId: string, settingId: string): string {
@@ -136,13 +140,17 @@ async function updateExtensionKeyword(extensionId: string, value: string) {
 }
 
 function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean {
+  let canShowSetting = false;
+
+  if (!setting.os.includes("*") && !setting.os.includes(os.value)) {
+      return false;
+  }
+
   if (setting.show_conditions === null) {
     return true;
   }
 
-  let canShowSetting = false;
-
-  setting.show_conditions.forEach((condition) => {
+  setting.show_conditions?.forEach((condition) => {
     props.vm.settings!!.extensions.forEach((extension) => {
       if (extension.id === extensionId) {
         extension.settings?.forEach((setting) => {
@@ -200,15 +208,15 @@ async function openExtensionsStore() {
   new WebviewWindow("extensions-store", {
     url: "extensions-store",
     title: "Extensions Store",
-    width: 1000,
-    height: 800,
+    width: 900,
+    height: 700,
     center: true,
   });
 }
 </script>
 
 <template>
-  <div>
+  <div v-if="hasLoaded">
     <div class="flex">
       <PrimaryButton text="Reload" :theme="vm.settings!!.theme" @click="vm.loadUserExtensions()" />
 
