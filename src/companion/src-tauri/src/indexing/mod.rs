@@ -1,5 +1,5 @@
 use std::fs;
-
+#[cfg(target_os="windows")]
 use whiskers_launcher_rs::paths::get_app_resources_dir;
 
 #[cfg(target_os = "linux")]
