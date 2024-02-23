@@ -1,3 +1,4 @@
+#[cfg(target_os="linux")]
 use whiskers_launcher_rs::paths::{get_autostart_path, get_local_dir};
 
 //Imports only used in windows
