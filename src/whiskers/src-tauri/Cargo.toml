@@ -11,8 +11,8 @@ edition = "2021"
 tauri-build = { version = "1.5.1", features = [] }
 
 [dependencies]
-#whiskers-launcher-rs = {path = "/home/lighttigerxiv/Coding/Rust/Projects/whiskers-launcher-rs"}
-whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Documents\\Coding\\Rust\\Projects\\whiskers-launcher-rs" }
+whiskers-launcher-rs = {path = "/home/lighttigerxiv/Coding/Rust/Projects/whiskers-launcher-rs"}
+#whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Documents\\Coding\\Rust\\Projects\\whiskers-launcher-rs" }
 
 tauri = { version = "1.5.1", features = [ "os-all", "protocol-all", "fs-all", "global-shortcut-all", "system-tray", "macos-private-api", "window-all", "shell-open"] }
 serde = { version = "1.0.193", features = ["derive"] }

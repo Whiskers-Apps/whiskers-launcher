@@ -127,6 +127,7 @@ export class ViewModel {
 
     if (action.type === "CopyToClipboard") {
       await writeText(action.text!!);
+      closeWindow(true);
     }
 
     if (action.type === "Extension") {
@@ -152,12 +153,10 @@ export class ViewModel {
         title: action.title!!,
         width: 700,
         height: 700,
-        center: true
+        center: true,
       });
 
-      setTimeout(() => {
-        appWindow.close();
-      }, 500);
+      closeWindow();
     }
   }
 
@@ -191,6 +190,14 @@ export class ViewModel {
       height: 700,
     });
 
+    closeWindow();
+  }
+}
+
+function closeWindow(instant: boolean = false) {
+  if (instant) {
+    appWindow.close();
+  } else {
     setTimeout(() => {
       appWindow.close();
     }, 500);

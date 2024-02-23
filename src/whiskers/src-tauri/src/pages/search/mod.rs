@@ -75,6 +75,7 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
                         }
                     }
 
+                    #[cfg(target_os = "windows")]
                     if cfg!(target_os = "windows") {
                         let extension_run = Command::new("cmd")
                             .arg("/C")
@@ -182,6 +183,7 @@ pub fn run_extension_action(
     extension_id: String,
     extension_action: String,
     args: Option<Vec<String>>,
+    window: Window,
 ) {
     let path = get_extension_dir(extension_id).expect("Could not find extension dir");
 
@@ -203,6 +205,7 @@ pub fn run_extension_action(
             .expect("Error running extension");
     }
 
+    #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
         Command::new("cmd")
             .arg("/C")
@@ -212,6 +215,8 @@ pub fn run_extension_action(
             .output()
             .expect("Error running extension");
     }
+
+    window.close().unwrap();
 }
 
 #[tauri::command(rename_all = "snake_case")]
@@ -269,9 +274,8 @@ pub fn open_extension_dialog(
     title: String,
     primary_button_text: Option<String>,
     fields: Vec<DialogField>,
-    args: Option<Vec<String>>
-) -> Result<(), ()>{
-    
+    args: Option<Vec<String>>,
+) -> Result<(), ()> {
     let mut action = actions::Dialog::new(&extension_id, &title, &extension_action, fields);
 
     if primary_button_text.is_some() {
@@ -317,6 +321,7 @@ pub fn close_extension_dialog(
             .expect("Error running extension");
     }
 
+    #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
         Command::new("cmd")
             .arg("/C")
