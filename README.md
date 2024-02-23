@@ -7,6 +7,7 @@
 Whiskers Launcher is very clean, customizable launcher for Linux and Windows. It supports extensions and multiple themes. 
 
 The launcher is still in **beta**, so bug reports and suggestions are welcome as long they are respectful :)
+
 Ps: if you want to make a logo feel free to do it 🤣
 
 # Screenshots
