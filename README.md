@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="src/resources/logos/whiskers-launcher.png" height="100">
+  <img src="src/resources/logos/whiskers-launchers-logo.png" height="140">
   <h1>Whiskers Launcher</h1>
 </div>
 
