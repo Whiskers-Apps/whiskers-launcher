@@ -179,7 +179,7 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-pub fn run_extension_action(
+pub async fn run_extension_action(
     extension_id: String,
     extension_action: String,
     args: Option<Vec<String>>,
@@ -196,25 +196,27 @@ pub fn run_extension_action(
 
     send_extension_context(context).expect("Error writing context");
 
-    if cfg!(target_os = "linux") {
-        Command::new("sh")
-            .arg("-c")
-            .arg("./extension")
-            .current_dir(&path)
-            .output()
-            .expect("Error running extension");
-    }
+    tokio::spawn(async move {
+        if cfg!(target_os = "linux") {
+            Command::new("sh")
+                .arg("-c")
+                .arg("./extension")
+                .current_dir(&path)
+                .output()
+                .expect("Error running extension");
+        }
 
-    #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .arg("/C")
-            .arg("start /min extension")
-            .current_dir(&path)
-            .creation_flags(FLAG_NO_WINDOW)
-            .output()
-            .expect("Error running extension");
-    }
+        #[cfg(target_os = "windows")]
+        if cfg!(target_os = "windows") {
+            Command::new("cmd")
+                .arg("/C")
+                .arg("start /min extension")
+                .current_dir(&path)
+                .creation_flags(FLAG_NO_WINDOW)
+                .output()
+                .expect("Error running extension");
+        }
+    });
 
     window.close().unwrap();
 }

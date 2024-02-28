@@ -1,14 +1,15 @@
 import { hexToCSSFilter } from "hex-to-css-filter";
 import { Settings, Theme } from "@pages/Settings/ViewModel";
 import { invoke } from "@tauri-apps/api";
-import axios from "axios";
 
 export function getIconUrl(path: string): string {
   return new URL(`./assets/icons/${path}`, import.meta.url).href;
 }
 
 export function getHexCssFilter(hexColor: string): string {
-  const filter = hexToCSSFilter(hexColor);
+  const filter = hexToCSSFilter(hexColor, {
+    acceptanceLossPercentage: 0,
+  });
   return filter.filter.replace(";", "");
 }
 
