@@ -66,7 +66,7 @@ foreach ($app in $apps) {
     
     $appsJson += "{`n"
     $appsJson += "`"icon_path`" : `"$iconPath`",`n"
-    $appsJson += "`"exec_path`" : `"$appPath`",`n"
+    $appsJson += "`"exec_path`" : `"$execPath`",`n"
     $appsJson += "`"name`" : `"$($app.name)`"`n"
     $appsJson += "},`n"
 }
