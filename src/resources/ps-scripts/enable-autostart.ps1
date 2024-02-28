@@ -1,9 +1,9 @@
 $shell = New-Object -ComObject WScript.Shell
 
 $autoStartDir = $env:APPDATA + "\Microsoft\Windows\Start Menu\Programs\Startup"
-$service_path = $env:APPDATA + "\simple-kl\simple-kl-service.exe"
-$shortcut_path = $autoStartDir + "\Simple-KL-Service.lnk"
+$companionPath = $env:APPDATA + "\com-lighttigerxiv-whiskers-launcher\whiskers-launcher-companion.exe"
+$shortcutPath = $autoStartDir + "\Whiskers-Launcher.lnk"
 
-$shortcut = $shell.CreateShortcut($shortcut_path)
-$shortcut.TargetPath = $service_path
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = $companionPath
 $shortcut.Save()

@@ -65,19 +65,19 @@ fn default_checked() -> bool {
 }
 
 #[tauri::command]
-pub fn get_settings() -> Settings {
+pub async fn get_settings() -> Settings {
     settings::get_settings().unwrap()
 }
 
 #[tauri::command]
 pub async fn update_settings(settings: settings::Settings) {
-    spawn(async move{
+    spawn(async move {
         settings::update_settings(settings).unwrap();
     });
 }
 
 #[tauri::command]
-pub fn get_whitelisted_apps() -> Vec<WhiteListApp> {
+pub async fn get_whitelisted_apps() -> Vec<WhiteListApp> {
     let apps = get_indexed_apps().unwrap();
     let blacklist = settings::get_settings().unwrap().blacklist;
     let mut whitelisted_apps: Vec<WhiteListApp> = vec![];
@@ -99,7 +99,7 @@ pub fn get_whitelisted_apps() -> Vec<WhiteListApp> {
 }
 
 #[tauri::command]
-pub fn add_to_blacklist(paths: Vec<String>) {
+pub async fn add_to_blacklist(paths: Vec<String>) {
     let mut new_settings = settings::get_settings().unwrap();
     let mut new_blacklist = new_settings.blacklist.to_owned();
 
@@ -115,7 +115,7 @@ pub fn add_to_blacklist(paths: Vec<String>) {
 }
 
 #[tauri::command]
-pub fn get_blacklisted_apps() -> Vec<AppIndex> {
+pub async fn get_blacklisted_apps() -> Vec<AppIndex> {
     let blacklist = settings::get_settings().unwrap().blacklist;
     let indexed_apps = get_indexed_apps().unwrap();
     let mut blacklisted_apps: Vec<AppIndex> = indexed_apps
@@ -130,7 +130,7 @@ pub fn get_blacklisted_apps() -> Vec<AppIndex> {
 }
 
 #[tauri::command]
-pub fn export_theme(path: PathBuf) {
+pub async fn export_theme(path: PathBuf) {
     let theme = settings::get_settings().unwrap().theme;
     let theme_json = serde_json::to_string_pretty(&theme).unwrap();
 
@@ -138,25 +138,27 @@ pub fn export_theme(path: PathBuf) {
 }
 
 #[tauri::command]
-pub fn import_theme(path: PathBuf) {
-    let content = fs::read_to_string(&path).unwrap();
-    let theme: Theme = serde_json::from_str(&content).unwrap();
+pub async fn import_theme(path: PathBuf) {
+    tokio::spawn(async move {
+        let content = fs::read_to_string(&path).unwrap();
+        let theme: Theme = serde_json::from_str(&content).unwrap();
 
-    let mut settings = settings::get_settings().unwrap();
-    settings.set_theme(theme);
-    settings::update_settings(settings).unwrap();
+        let mut settings = settings::get_settings().unwrap();
+        settings.set_theme(theme);
+        settings::update_settings(settings).unwrap();
+    });
 }
 
 #[tauri::command]
-pub fn get_user_extensions() -> Vec<Manifest> {
+pub async fn get_user_extensions() -> Vec<Manifest> {
     extensions::index_extensions().unwrap();
     indexing::get_user_extensions().expect("Error getting user extensions")
 }
 
 #[tauri::command]
-pub fn get_extensions_default_values() -> Vec<ExtensionDefaultValues> {
+pub async fn get_extensions_default_values() -> Vec<ExtensionDefaultValues> {
     let mut extensions_default_values: Vec<ExtensionDefaultValues> = vec![];
-    let extensions = get_user_extensions();
+    let extensions = get_user_extensions().await;
 
     for extension in extensions {
         let mut default_values: Vec<DefaultValue> = vec![];
@@ -196,7 +198,7 @@ pub async fn clone_extension(url: String) {
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn uninstall_extension(extension_id: String) -> Result<(), ()> {
-    let mut settings = get_settings();
+    let mut settings = settings::get_settings().unwrap();
     let new_extensions: Vec<settings::Extension> = settings
         .extensions
         .iter()
@@ -209,17 +211,13 @@ pub async fn uninstall_extension(extension_id: String) -> Result<(), ()> {
     if let Some(extension_dir) = get_extension_dir(extension_id) {
         fs::remove_dir_all(extension_dir).unwrap();
     }
-
-    spawn(async move{
-        settings::update_settings(settings).unwrap();
-    });
-
+    settings::update_settings(settings).unwrap();
 
     Ok(())
 }
 
 #[tauri::command]
-pub fn get_cached_themes_store() -> Vec<StoreTheme> {
+pub async fn get_cached_themes_store() -> Vec<StoreTheme> {
     let store_cache_dir = get_store_cache_dir().unwrap();
 
     if !store_cache_dir.exists() {
@@ -242,13 +240,15 @@ pub fn get_cached_themes_store() -> Vec<StoreTheme> {
 }
 
 #[tauri::command]
-pub fn cache_themes(themes: Vec<StoreTheme>) {
-    let themes_json = serde_json::to_string(&themes).unwrap();
-    fs::write(&get_cached_themes_store_path().unwrap(), &themes_json).unwrap();
+pub async fn cache_themes(themes: Vec<StoreTheme>) {
+    tokio::spawn(async move {
+        let themes_json = serde_json::to_string(&themes).unwrap();
+        fs::write(&get_cached_themes_store_path().unwrap(), &themes_json).unwrap();
+    });
 }
 
 #[tauri::command]
-pub fn get_cached_extensions_store() -> Vec<StoreExtension> {
+pub async fn get_cached_extensions_store() -> Vec<StoreExtension> {
     let store_cache_dir = get_store_cache_dir().unwrap();
 
     if !store_cache_dir.exists() {
@@ -272,17 +272,19 @@ pub fn get_cached_extensions_store() -> Vec<StoreExtension> {
 
 #[tauri::command]
 pub async fn apply_store_theme(file: String) {
-    let theme_json = reqwest::get(file).await.unwrap().text().await.unwrap();
-    let theme = serde_json::from_str::<Theme>(&theme_json).unwrap();
+    tokio::spawn(async move {
+        let theme_json = reqwest::get(file).await.unwrap().text().await.unwrap();
+        let theme = serde_json::from_str::<Theme>(&theme_json).unwrap();
 
-    let mut new_settings = get_settings();
-    new_settings.set_theme(theme);
+        let mut new_settings = settings::get_settings().unwrap();
+        new_settings.set_theme(theme);
 
-    settings::update_settings(new_settings).unwrap();
+        settings::update_settings(new_settings).unwrap();
+    });
 }
 
 #[tauri::command]
-pub fn cache_extensions(extensions: Vec<StoreExtension>) {
+pub async fn cache_extensions(extensions: Vec<StoreExtension>) {
     let extensions_json = serde_json::to_string(&extensions).unwrap();
     fs::write(
         &get_cached_extensions_store_path().unwrap(),
@@ -292,11 +294,11 @@ pub fn cache_extensions(extensions: Vec<StoreExtension>) {
 }
 
 #[tauri::command]
-pub fn index_extensions() {
+pub async fn index_extensions() {
     extensions::index_extensions().unwrap();
 }
 
 #[tauri::command]
-pub fn get_os() -> String {
+pub async fn get_os() -> String {
     env::consts::OS.to_owned()
 }
