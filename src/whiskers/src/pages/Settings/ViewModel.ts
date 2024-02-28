@@ -1,5 +1,4 @@
 import { invoke } from "@tauri-apps/api";
-import { platform } from "@tauri-apps/api/os";
 import { SelectOption } from "@components/ComponentClasses";
 import { emit, listen } from "@tauri-apps/api/event";
 import { SearchEnginePayload, DeleteSearchEnginePayload } from "@/DialogPayloads";
@@ -25,11 +24,11 @@ export class ViewModel {
   async load() {
     this.settings = await invoke("get_settings");
 
-    const os = await platform();
+    const os = await invoke("get_os");
 
-    if (os === "win32") {
-      this.launchFirstKeyOptions.filter((key) => key.id !== "super");
-      this.launchSecondKeyOptions.filter((key) => key.id !== "super");
+    if (os === "windows") {
+      this.launchFirstKeyOptions = this.launchFirstKeyOptions.filter((key) => key.id !== "super");
+      this.launchSecondKeyOptions = this.launchSecondKeyOptions.filter((key) => key.id !== "super");
     }
 
     this.loadUserExtensions();
