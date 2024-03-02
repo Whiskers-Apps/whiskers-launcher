@@ -57,33 +57,37 @@ async function openAddToBlacklist() {
 
     <div class="divider mt-2 mb-2"></div>
 
-    <div class="flex">
-      <div class="flex-grow">
-        <div class="title">Blacklist</div>
+    <div class="ml-2 mr-2">
+      <div class="flex">
+        <div class="flex-grow">
+          <div class="title">Blacklist</div>
+        </div>
+        <PrimaryButton text="Add" :theme="vm.settings!!.theme" @click="openAddToBlacklist()" />
       </div>
-      <PrimaryButton text="Add" :theme="vm.settings!!.theme" @click="openAddToBlacklist()" />
-    </div>
-    <div v-if="vm.settings!!.blacklist.length == 0">
-      Blacklist is empty. Click add to add a app to filter it on app results
-    </div>
-    <div v-else class="mt-2">
-      <div v-for="app in vm.blacklistedApps" class="flex mb-2 items-center" :key="app.exec_path">
-        <img
-          v-if="app.icon_path !== undefined"
-          :src="app.icon_path ? convertFileSrc(app.icon_path) : getIconUrl('default-app-icon.svg')"
-          width="40"
-          :style="{
+      <div v-if="vm.settings!!.blacklist.length == 0">
+        Blacklist is empty. Click add to add a app to filter it on app results
+      </div>
+      <div v-else class="mt-2">
+        <div v-for="app in vm.blacklistedApps" class="flex mb-2 items-center" :key="app.exec_path">
+          <img
+            v-if="app.icon_path !== undefined"
+            :src="
+              app.icon_path ? convertFileSrc(app.icon_path) : getIconUrl('default-app-icon.svg')
+            "
+            width="40"
+            :style="{
         filter: app.icon_path
             ? 'none'
             : getHexCssFilter(props.vm.settings!!.theme.accent_primary),
     }"
-        />
-        <div class="flex-grow ml-2 mr-2">{{ app.name }}</div>
-        <SecondaryButton
-          text="Remove"
-          :theme="vm.settings!!.theme"
-          @click="vm.removeFromBlacklist(app.exec_path)"
-        />
+          />
+          <div class="flex-grow ml-2 mr-2">{{ app.name }}</div>
+          <SecondaryButton
+            text="Remove"
+            :theme="vm.settings!!.theme"
+            @click="vm.removeFromBlacklist(app.exec_path)"
+          />
+        </div>
       </div>
     </div>
   </div>
