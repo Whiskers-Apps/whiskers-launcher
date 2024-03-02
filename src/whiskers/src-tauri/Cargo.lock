@@ -64,9 +64,9 @@ checksum = "5ad32ce52e4161730f7098c077cd2ed6229b5804ccf99e5366be1ab72a98b4e1"
 
 [[package]]
 name = "arboard"
-version = "3.3.1"
+version = "3.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1faa3c733d9a3dd6fbaf85da5d162a2e03b2e0033a90dceb0e2a90fdd1e5380a"
+checksum = "a2041f1943049c7978768d84e6d0fd95de98b76d6c4727b09e78ec253d29fa58"
 dependencies = [
  "clipboard-win",
  "core-graphics 0.23.1",
@@ -2440,9 +2440,9 @@ dependencies = [
 
 [[package]]
 name = "mio"
-version = "0.8.10"
+version = "0.8.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f3d0b296e374a4e6f3c7b0a1f5a51d748a0d34c85e7dc48fc3fa9a87657fe09"
+checksum = "a4a650543ca06a924e8b371db273b2756685faae30f8487da1b56505a8f78b0c"
 dependencies = [
  "libc",
  "wasi 0.11.0+wasi-snapshot-preview1",
@@ -2682,9 +2682,9 @@ dependencies = [
 
 [[package]]
 name = "open"
-version = "5.1.0"
+version = "5.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f2588edf622de56e7a1fed57bf203344f63c03f3d43472ba0434a92373c8f27"
+checksum = "eedff767bc49d336bff300224f73307ae36963c843e38dc9312a22171b012cbc"
 dependencies = [
  "is-wsl",
  "libc",
@@ -5004,7 +5004,7 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 
 [[package]]
 name = "whiskers-launcher"
-version = "0.0.0"
+version = "1.0.0"
 dependencies = [
  "dirs 5.0.1",
  "encoding",
@@ -5014,7 +5014,7 @@ dependencies = [
  "git2",
  "lnk",
  "online",
- "open 5.1.0",
+ "open 5.0.2",
  "powershell_script",
  "rand 0.8.5",
  "reqwest",
@@ -5032,7 +5032,7 @@ dependencies = [
 [[package]]
 name = "whiskers-launcher-rs"
 version = "0.0.0"
-source = "git+https://github.com/lighttigerXIV/whiskers-launcher-rs.git#a0eb93fe445c89c663dbd70f8aebe2b29fb821ca"
+source = "git+https://github.com/lighttigerXIV/whiskers-launcher-rs.git#15126a856ed7952fde0941a8adafa0c46708473f"
 dependencies = [
  "dirs 5.0.1",
  "notify-rust",

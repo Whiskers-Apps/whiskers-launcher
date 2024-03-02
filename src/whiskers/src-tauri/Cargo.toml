@@ -1,10 +1,6 @@
 [package]
 name = "whiskers-launcher"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
-license = "MIT"
-repository = "https://github.com/lighttigerXIV/whiskers-launcher"
+version = "1.0.0"
 edition = "2021"
 
 [build-dependencies]

@@ -1,4 +1,4 @@
-#[cfg(target_os="linux")]
+#[cfg(target_os = "linux")]
 use whiskers_launcher_rs::paths::{get_autostart_path, get_local_dir};
 
 //Imports only used in windows
@@ -15,7 +15,7 @@ use std::{fs, process::Command};
 #[cfg(target_os = "windows")]
 fn press_to_close() {
     let mut s = String::new();
-    println!("Press any key to close ...");
+    println!("\nPress enter to close");
     stdin().read_line(&mut s).unwrap();
     exit(0);
 }
@@ -31,13 +31,13 @@ fn main() {
             .arg("-c")
             .arg(remove_binary_files_command)
             .output()
-            .expect("Error removing file");
+            .expect("❌ Error removing file");
 
         println!("Removing files ...");
 
         if !remove_binary_files_result.status.success() {
             println!(
-                "Error removing files: {}",
+                "❌ Error removing files: {}",
                 String::from_utf8(remove_binary_files_result.stderr).unwrap()
             );
         }
@@ -46,20 +46,20 @@ fn main() {
         auto_start_file.push("whiskers-launcher.desktop");
 
         if auto_start_file.exists() {
-            fs::remove_file(&auto_start_file).expect("Error deleting autostart file");
+            fs::remove_file(&auto_start_file).expect("❌ Error deleting autostart file");
         }
 
         if local_dir.exists() {
-            fs::remove_dir_all(&local_dir).expect("Error removing local folder");
+            fs::remove_dir_all(&local_dir).expect("❌ Error removing local folder");
         }
 
-        println!("Uninstall successfull");
+        println!("✅ Uninstalled");
     }
 
     #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
         if !is_elevated() {
-            eprintln!("Please run the uninstall script as administrator");
+            eprintln!("❌ Please run the script as administrator");
             press_to_close();
         }
 
@@ -67,10 +67,10 @@ fn main() {
 
         match powershell_script::run(&uninstall_script) {
             Ok(_) => {
-                println!("Uninstall successfull");
+                println!("✅ Uninstalled");
             }
-            Err(e) => {
-                eprintln!("Error running uninstall script: {}", e.to_string());
+            Err(error) => {
+                eprintln!("❌ Error: {}", error.to_string());
             }
         };
 

@@ -33,7 +33,7 @@ async fn main() {
         .add_item(CustomMenuItem::new("show", "Show"))
         .add_item(CustomMenuItem::new("sync_apps", "Sync Apps"))
         .add_item(CustomMenuItem::new("settings", "Settings"))
-        .add_item(CustomMenuItem::new("reload", "Reload"))
+        .add_item(CustomMenuItem::new("restart", "Restart"))
         .add_item(CustomMenuItem::new("quit", "Quit"));
 
     tauri::Builder::default()
@@ -56,6 +56,7 @@ async fn main() {
                                 .arg("/C")
                                 .arg("start whiskers-launcher")
                                 .current_dir(get_local_dir().unwrap())
+                                .creation_flags(FLAG_NO_WINDOW)
                                 .spawn()
                                 .expect("Error opening app");
                         }
@@ -88,7 +89,7 @@ async fn main() {
                         }
                     });
                 }
-                "reload" => {
+                "restart" => {
                     let app_clone = app.to_owned();
                     tauri::api::process::restart(&app_clone.env());
                 }

@@ -50,7 +50,7 @@ onMounted(async () => {
 
     <div class="flex mt-2" v-if="vm.launchShortcutChanged">
       <img :src="getIconUrl('warning.svg')" :style="{ filter: accentPrimaryFilter }" width="32" />
-      <div class="ml-2">To apply this setting, please restart the launcher</div>
+      <div class="ml-2">To apply this setting, please restart the companion app.</div>
     </div>
 
     <div class="divider mt-2 mb-2"></div>
@@ -84,6 +84,6 @@ onMounted(async () => {
       :checked="vm.settings!!.hide_on_blur"
       :theme="vm.settings!!.theme"
       @update-checked="vm.updateHideOnBlur($event)"
-     />
+    />
   </div>
 </template>

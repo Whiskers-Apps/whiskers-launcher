@@ -1,6 +1,5 @@
 use std::{env, process::exit};
 
-use whiskers_launcher_rs::paths::get_app_resources_dir;
 
 //Imports only used in windows
 #[cfg(target_os = "windows")]
@@ -11,12 +10,13 @@ use {is_elevated::is_elevated, std::io::stdin};
 use {
     fs_extra::dir::CopyOptions,
     std::{fs, process::Command},
+    paths::get_app_resources_dir
 };
 
 #[cfg(target_os = "windows")]
 fn press_to_close() {
     let mut s = String::new();
-    println!("Press any key to close ...");
+    println!("\nPress enter to close");
     stdin().read_line(&mut s).unwrap();
     exit(0);
 }
@@ -60,11 +60,11 @@ fn main() {
             .arg("-c")
             .arg(copy_binaries_cmd)
             .output()
-            .expect("Error copying binaries");
+            .expect("❌ Error copying binaries");
 
         if !copy_binaries_result.status.success() {
             eprintln!(
-                "Error while copying files: {}",
+                "❌ Error while copying files: {}",
                 String::from_utf8(copy_binaries_result.stderr).unwrap()
             );
 
@@ -80,11 +80,11 @@ fn main() {
             .arg("-c")
             .arg(copy_logo_cmd)
             .output()
-            .expect("Error copying logo");
+            .expect("❌ Error copying logo");
 
         if !copy_logo_result.status.success() {
             eprintln!(
-                "Error copying logo: {}",
+                "❌ Error copying logo: {}",
                 String::from_utf8(copy_logo_result.stderr).unwrap()
             );
 
@@ -100,11 +100,11 @@ fn main() {
             .arg("-c")
             .arg(install_desktop_cmd)
             .output()
-            .expect("Error installing desktop file");
+            .expect("❌ Error installing desktop file");
 
         if !install_desktop_result.status.success() {
             eprintln!(
-                "Error installing desktop file: {}",
+                "❌ Error installing desktop file: {}",
                 String::from_utf8(install_desktop_result.stderr).unwrap()
             );
 
@@ -112,7 +112,7 @@ fn main() {
         }
 
         if !&resources_dir.exists() {
-            fs::create_dir_all(&resources_dir).expect("Error creating resources directory");
+            fs::create_dir_all(&resources_dir).expect("❌ Error creating resources directory");
         }
 
         fs_extra::dir::copy(
@@ -120,15 +120,15 @@ fn main() {
             &resources_dir,
             &CopyOptions::new().overwrite(true).to_owned(),
         )
-        .expect("Error copying app icons");
+        .expect("❌ Error copying app icons");
 
-        println!("Installation completed. Enjoy the launcher :D");
+        println!("✅ Installed");
     }
 
     #[cfg(target_os = "windows")]
     if env::consts::OS == "windows" {
         if !is_elevated() {
-            eprintln!("Please run the install script as administrator");
+            eprintln!("❌ Please run the script as administrator");
             press_to_close();
         }
 
@@ -140,10 +140,10 @@ fn main() {
 
         match powershell_script::run(&install_script) {
             Ok(_) => {
-                println!("Installation completed. Enjoy the launcher :D");
+                println!("✅ Installed");
             }
-            Err(e) => {
-                eprintln!("Error running install script: {}", e.to_string());
+            Err(error) => {
+                eprintln!("❌ Error: {}", error.to_string());
             }
         };
 
