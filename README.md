@@ -74,7 +74,7 @@ You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.ve
 #### Themes Repository
 The app supports ccustom themes. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/whiskers-launcher-themes) where they are all listed.
 #### Making Themes
-You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/themes/themes.html)
+You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/themes/exporting.html)
 
 # Contributing
 You can help the project by reporting bugs, suggesting features, making themes and extensions and maybe translations in the future.
