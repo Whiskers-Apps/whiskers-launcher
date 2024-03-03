@@ -1309,8 +1309,8 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "whiskers-launcher-rs"
-version = "0.0.0"
-source = "git+https://github.com/lighttigerXIV/whiskers-launcher-rs#15126a856ed7952fde0941a8adafa0c46708473f"
+version = "1.0.0"
+source = "git+https://github.com/lighttigerXIV/whiskers-launcher-rs#c981f29183c43b6876ac43f43698a640667d2c0b"
 dependencies = [
  "dirs",
  "notify-rust",

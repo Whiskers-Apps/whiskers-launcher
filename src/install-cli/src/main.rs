@@ -1,6 +1,5 @@
 use std::{env, process::exit};
 
-
 //Imports only used in windows
 #[cfg(target_os = "windows")]
 use {is_elevated::is_elevated, std::io::stdin};
@@ -9,8 +8,8 @@ use {is_elevated::is_elevated, std::io::stdin};
 #[cfg(target_os = "linux")]
 use {
     fs_extra::dir::CopyOptions,
+    whiskers_launcher_rs::paths::get_app_resources_dir,
     std::{fs, process::Command},
-    paths::get_app_resources_dir
 };
 
 #[cfg(target_os = "windows")]
@@ -25,27 +24,27 @@ fn main() {
     let binary_path = env::current_exe().expect("Error getting path");
     let binary_dir = binary_path.parent().unwrap();
 
-    let mut installation_files = binary_dir.to_owned();
-    installation_files.push("installation-files");
+    let mut installation_files_dir = binary_dir.to_owned();
+    installation_files_dir.push("installation-files");
 
-    let mut logo = installation_files.to_owned();
+    let mut logo = installation_files_dir.to_owned();
     logo.push("whiskers-launcher.png");
 
-    let mut icons_dir = installation_files.to_owned();
-    icons_dir.push("resources");
+    let mut icons_dir = installation_files_dir.to_owned();
+    icons_dir.push("AppResources");
     icons_dir.push("Icons");
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
         let resources_dir = get_app_resources_dir().unwrap();
 
-        let mut launcher_bin = installation_files.to_owned();
+        let mut launcher_bin = installation_files_dir.to_owned();
         launcher_bin.push("whiskers-launcher");
 
-        let mut companion_bin = installation_files.to_owned();
+        let mut companion_bin = installation_files_dir.to_owned();
         companion_bin.push("whiskers-launcher-companion");
 
-        let mut desktop_file = installation_files.to_owned();
+        let mut desktop_file = installation_files_dir.to_owned();
         desktop_file.push("whiskers-launcher.desktop");
 
         let copy_binaries_cmd = format!(
@@ -54,17 +53,15 @@ fn main() {
             companion_bin.into_os_string().into_string().unwrap()
         );
 
-        println!("Copying files ...");
-
         let copy_binaries_result = Command::new("sh")
             .arg("-c")
             .arg(copy_binaries_cmd)
             .output()
-            .expect("❌ Error copying binaries");
+            .expect("Error copying binaries");
 
         if !copy_binaries_result.status.success() {
             eprintln!(
-                "❌ Error while copying files: {}",
+                "Error while copying files: {}",
                 String::from_utf8(copy_binaries_result.stderr).unwrap()
             );
 
@@ -80,11 +77,11 @@ fn main() {
             .arg("-c")
             .arg(copy_logo_cmd)
             .output()
-            .expect("❌ Error copying logo");
+            .expect("Error copying logo");
 
         if !copy_logo_result.status.success() {
             eprintln!(
-                "❌ Error copying logo: {}",
+                "Error copying logo: {}",
                 String::from_utf8(copy_logo_result.stderr).unwrap()
             );
 
@@ -100,11 +97,11 @@ fn main() {
             .arg("-c")
             .arg(install_desktop_cmd)
             .output()
-            .expect("❌ Error installing desktop file");
+            .expect("Error installing desktop file");
 
         if !install_desktop_result.status.success() {
             eprintln!(
-                "❌ Error installing desktop file: {}",
+                "Error installing desktop file: {}",
                 String::from_utf8(install_desktop_result.stderr).unwrap()
             );
 
@@ -120,9 +117,9 @@ fn main() {
             &resources_dir,
             &CopyOptions::new().overwrite(true).to_owned(),
         )
-        .expect("❌ Error copying app icons");
+        .expect("Error copying app icons");
 
-        println!("✅ Installed");
+        println!("Installed");
     }
 
     #[cfg(target_os = "windows")]
@@ -135,7 +132,10 @@ fn main() {
         let mut install_script = include_str!("windows-install.ps1").to_owned();
         install_script = install_script.replace(
             "%installation_files_dir%",
-            &installation_files.into_os_string().into_string().unwrap(),
+            &installation_files_dir
+                .into_os_string()
+                .into_string()
+                .unwrap(),
         );
 
         match powershell_script::run(&install_script) {

@@ -31,13 +31,11 @@ fn main() {
             .arg("-c")
             .arg(remove_binary_files_command)
             .output()
-            .expect("❌ Error removing file");
-
-        println!("Removing files ...");
+            .expect("Error removing file");
 
         if !remove_binary_files_result.status.success() {
             println!(
-                "❌ Error removing files: {}",
+                "Error removing files: {}",
                 String::from_utf8(remove_binary_files_result.stderr).unwrap()
             );
         }
@@ -46,14 +44,14 @@ fn main() {
         auto_start_file.push("whiskers-launcher.desktop");
 
         if auto_start_file.exists() {
-            fs::remove_file(&auto_start_file).expect("❌ Error deleting autostart file");
+            fs::remove_file(&auto_start_file).expect("Error deleting autostart file");
         }
 
         if local_dir.exists() {
-            fs::remove_dir_all(&local_dir).expect("❌ Error removing local folder");
+            fs::remove_dir_all(&local_dir).expect("Error removing local folder");
         }
 
-        println!("✅ Uninstalled");
+        println!("Uninstalled");
     }
 
     #[cfg(target_os = "windows")]

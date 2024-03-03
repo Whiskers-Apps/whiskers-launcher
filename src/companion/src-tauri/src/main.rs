@@ -51,6 +51,7 @@ async fn main() {
                                 .expect("Error opening app");
                         }
 
+                        #[cfg(target_os = "windows")]
                         if cfg!(target_os = "windows") {
                             Command::new("cmd")
                                 .arg("/C")

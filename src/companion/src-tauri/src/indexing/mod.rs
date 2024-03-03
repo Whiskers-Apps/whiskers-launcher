@@ -1,5 +1,5 @@
 use std::fs;
-#[cfg(target_os="windows")]
+#[cfg(target_os = "windows")]
 use whiskers_launcher_rs::paths::get_app_resources_dir;
 
 #[cfg(target_os = "linux")]
@@ -32,16 +32,19 @@ pub fn index_apps() {
                         }
 
                         if entry.type_().unwrap() == "Application" && !entry.no_display() {
-                            let icon = entry.icon().unwrap().to_string();
-                            let icon_path = match get_app_icon(icon) {
-                                Some(path) => path.into_os_string().into_string().unwrap(),
-                                None => "".into(),
-                            };
+                            if let Some(icon) = entry.icon() {
+                                let icon = icon.to_string();
+                                let icon_path = match get_app_icon(icon) {
+                                    Some(path) => path.into_os_string().into_string().unwrap(),
+                                    None => "".into(),
+                                };
 
-                            let exec_path = path.clone().into_os_string().into_string().unwrap();
-                            let name = entry.name(None).unwrap().to_string();
+                                let exec_path =
+                                    path.clone().into_os_string().into_string().unwrap();
+                                let name = entry.name(None).unwrap().to_string();
 
-                            apps.push(AppIndex::new(icon_path, exec_path, name))
+                                apps.push(AppIndex::new(icon_path, exec_path, name))
+                            }
                         }
                     }
                 }
