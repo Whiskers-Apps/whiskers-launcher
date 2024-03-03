@@ -68,7 +68,7 @@ To uninstall the app, simply run the uninstall script, the same way as the insta
 #### Extensions Repository
 The app supports extensions. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/whiskers-launcher-extensions) where they are all listed.
 #### Making Extensions
-You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/extensions/extensions.html)
+You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/extensions/how-it-works.html)
 
 ## Themes
 #### Themes Repository
