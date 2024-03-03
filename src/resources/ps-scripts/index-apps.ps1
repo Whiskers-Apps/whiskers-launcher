@@ -6,16 +6,16 @@ class App {
     [string] $name
 }
 
-$TEMP_DIR = $env:TEMP + "\simple-kl"
-$SHORTCUTS_DIR = $TEMP_DIR + "\shortcuts"
-$ICONS_DIR = $TEMP_DIR + "\icons"
-$APPS_YAML_PATH = $TEMP_DIR + "\apps.yml"
+$INDEXING_DIR = $env:APPDATA + "\com-lighttigerxiv-whiskers-launcher\Indexing"
+$SHORTCUTS_DIR = $INDEXING_DIR + "\Shortcuts"
+$ICONS_DIR = $INDEXING_DIR + "\Icons"
+$APPS_JSON_PATH = $INDEXING_DIR + "\apps.json"
 
 $shell = New-Object -ComObject WScript.Shell
 $startApps = Get-StartApps
 $apps = @()
 $appIndex = 0
-$appsYaml = ""
+$appsJson = ""
 
 #############################################
 ## Init Directories
@@ -56,19 +56,26 @@ foreach($startApp in $startApps){
 }
 
 #############################################
-## Writes Apps Yaml
+## Writes Apps Json
 #############################################
 
+$appsJson += "[`n"
 foreach ($app in $apps) {
+    $iconPath = $app.icon_path -replace "\\", "\\"
+    $execPath = $app.exec_path -replace "\\", "\\"
+    
+    $appsJson += "{`n"
+    $appsJson += "`"icon_path`" : `"$iconPath`",`n"
+    $appsJson += "`"exec_path`" : `"$execPath`",`n"
+    $appsJson += "`"name`" : `"$($app.name)`"`n"
+    $appsJson += "},`n"
+}
+$appsJson = $appsJson.Substring(0, $appsJson.Length - 2)
+$appsJson += "`n]"
 
-    $appsYaml += "- icon_path : $($app.icon_path)`n"
-    $appsYaml += "  exec_path : $($app.exec_path)`n"
-    $appsYaml += "  name : $($app.name)`n"
+if (!(Test-Path -Path $APPS_JSON_PATH)) {
+    New-Item -ItemType File -Path $APPS_JSON_PATH
 }
 
-if (!(Test-Path -Path $APPS_YAML_PATH)) {
-    New-Item -ItemType File -Path $APPS_YAML_PATH
-}
-
-[System.IO.File]::WriteAllLines($APPS_YAML_PATH, $appsYaml)
+[System.IO.File]::WriteAllLines($APPS_JSON_PATH, $appsJson)
 #PS: It's very important to save as UTF8 AAAAAAAAAAAAAAAAAAAAAAAAAAAA

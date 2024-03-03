@@ -1,12 +1,14 @@
 <div align="center">
-  <img src="src/resources/logos/simple-kl.png" height="100">
-  <h1>Simple Keyboard Launcher</h1>
+  <img src="src/resources/logos/whiskers-launchers-logo.png" height="140">
+  <h1>Whiskers Launcher</h1>
 </div>
 
 # About
-Simple Keyboard Launcher is very clean, customizable launcher for Linux and Windows. It supports extensions and multiple themes. 
+Whiskers Launcher is very clean, customizable launcher for Linux and Windows. It supports extensions and multiple themes. 
 
-The launcher is still in **alpha**, so bug reports and suggestions are welcome as long they are respectful :)
+The launcher is still in **beta**, so bug reports and suggestions are welcome as long they are respectful :)
+
+Ps: if you want to make a logo feel free to do it 🤣
 
 # Screenshots
 <details>
@@ -51,11 +53,11 @@ The launcher is still in **alpha**, so bug reports and suggestions are welcome a
 
 </details>
 
-1. Download the zip file in [releases](https://github.com/lighttigerXIV/simple-keyboard-launcher/releases) page (Linux-Simple-KL)
+1. Download the zip file in [releases](https://github.com/lighttigerXIV/whiskers-launcher/releases) page (Linux-Whiskers-Launcher)
 2. Extract It
 3. Open the terminal inside the folder and run `./install`
 ### Windows
-1. Download the zip file in [releases](https://github.com/lighttigerXIV/simple-keyboard-launcher/releases) page (Windows-Simple-KL)
+1. Download the zip file in [releases](https://github.com/lighttigerXIV/whiskers-launcher/releases) page (Windows-Whiskers-Launcher)
 2. Extract It
 3. Run the ```install.exe``` as administrator
 
@@ -64,15 +66,15 @@ To uninstall the app, simply run the uninstall script, the same way as the insta
 
 ## Extensions
 #### Extensions Repository
-The app supports extensions. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/simple-kl-extensions) where they are all listed.
+The app supports extensions. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/whiskers-launcher-extensions) where they are all listed.
 #### Making Extensions
-The guide/documentation for making extensions will eventually be made. It's still a **Work In Progress**
+You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/extensions/extensions.html)
 
 ## Themes
 #### Themes Repository
-The app supports ccustom themes. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/simple-kl-themes) where they are all listed.
+The app supports ccustom themes. You can download them through the app or explore the [repository](https://github.com/lighttigerXIV/whiskers-launcher-themes) where they are all listed.
 #### Making Themes
-The guide/documentation for making themes will eventually be made. It's still a **Work In Progress**
+You can follow the documentation [here](https://whiskers-launcher-docs-mdbook.vercel.app/themes/themes.html)
 
 # Contributing
 You can help the project by reporting bugs, suggesting features, making themes and extensions and maybe translations in the future.

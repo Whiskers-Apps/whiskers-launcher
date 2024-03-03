@@ -8,14 +8,14 @@ use {is_elevated::is_elevated, std::io::stdin};
 #[cfg(target_os = "linux")]
 use {
     fs_extra::dir::CopyOptions,
-    simple_kl_rs::paths::get_resources_directory,
+    whiskers_launcher_rs::paths::get_app_resources_dir,
     std::{fs, process::Command},
 };
 
 #[cfg(target_os = "windows")]
 fn press_to_close() {
     let mut s = String::new();
-    println!("Press any key to close ...");
+    println!("\nPress enter to close");
     stdin().read_line(&mut s).unwrap();
     exit(0);
 }
@@ -24,36 +24,34 @@ fn main() {
     let binary_path = env::current_exe().expect("Error getting path");
     let binary_dir = binary_path.parent().unwrap();
 
-    let mut installation_files = binary_dir.to_owned();
-    installation_files.push("installation-files");
+    let mut installation_files_dir = binary_dir.to_owned();
+    installation_files_dir.push("installation-files");
 
-    let mut logo = installation_files.to_owned();
-    logo.push("simple-kl.png");
+    let mut logo = installation_files_dir.to_owned();
+    logo.push("whiskers-launcher.png");
 
-    let mut icons_dir = installation_files.to_owned();
-    icons_dir.push("resources");
-    icons_dir.push("icons");
+    let mut icons_dir = installation_files_dir.to_owned();
+    icons_dir.push("AppResources");
+    icons_dir.push("Icons");
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
-        let resources_dir = get_resources_directory().unwrap();
+        let resources_dir = get_app_resources_dir().unwrap();
 
-        let mut launcher_bin = installation_files.to_owned();
-        launcher_bin.push("simple-keyboard-launcher");
+        let mut launcher_bin = installation_files_dir.to_owned();
+        launcher_bin.push("whiskers-launcher");
 
-        let mut service_bin = installation_files.to_owned();
-        service_bin.push("simple-kl-service");
+        let mut companion_bin = installation_files_dir.to_owned();
+        companion_bin.push("whiskers-launcher-companion");
 
-        let mut desktop_file = installation_files.to_owned();
-        desktop_file.push("simple-kl.desktop");
+        let mut desktop_file = installation_files_dir.to_owned();
+        desktop_file.push("whiskers-launcher.desktop");
 
         let copy_binaries_cmd = format!(
             "sudo cp '{}' '{}' /usr/bin",
             launcher_bin.into_os_string().into_string().unwrap(),
-            service_bin.into_os_string().into_string().unwrap()
+            companion_bin.into_os_string().into_string().unwrap()
         );
-
-        println!("Copying files ...");
 
         let copy_binaries_result = Command::new("sh")
             .arg("-c")
@@ -111,7 +109,7 @@ fn main() {
         }
 
         if !&resources_dir.exists() {
-            fs::create_dir_all(&resources_dir).expect("Error creating resources directory");
+            fs::create_dir_all(&resources_dir).expect("❌ Error creating resources directory");
         }
 
         fs_extra::dir::copy(
@@ -121,28 +119,31 @@ fn main() {
         )
         .expect("Error copying app icons");
 
-        println!("Installation completed. Enjoy the launcher :D");
+        println!("Installed");
     }
 
     #[cfg(target_os = "windows")]
     if env::consts::OS == "windows" {
         if !is_elevated() {
-            eprintln!("Please run the install script as administrator");
+            eprintln!("❌ Please run the script as administrator");
             press_to_close();
         }
 
         let mut install_script = include_str!("windows-install.ps1").to_owned();
         install_script = install_script.replace(
             "%installation_files_dir%",
-            &installation_files.into_os_string().into_string().unwrap(),
+            &installation_files_dir
+                .into_os_string()
+                .into_string()
+                .unwrap(),
         );
 
         match powershell_script::run(&install_script) {
             Ok(_) => {
-                println!("Installation completed. Enjoy the launcher :D");
+                println!("✅ Installed");
             }
-            Err(e) => {
-                eprintln!("Error running install script: {}", e.to_string());
+            Err(error) => {
+                eprintln!("❌ Error: {}", error.to_string());
             }
         };
 

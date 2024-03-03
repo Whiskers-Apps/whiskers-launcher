@@ -1,0 +1,37 @@
+{
+  "name": "whiskers-launcher",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^1.4.0",
+    "axios": "^1.6.7",
+    "fuzzysort": "^2.0.4",
+    "hex-to-css-filter": "^5.4.0",
+    "tauri-plugin-positioner-api": "^0.2.7",
+    "vue": "^3.2.45",
+    "vue-router": "^4.2.2"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.4.0",
+    "@types/node": "^18.7.10",
+    "@typescript-eslint/eslint-plugin": "^6.20.0",
+    "@typescript-eslint/parser": "^6.20.0",
+    "@vitejs/plugin-vue": "^4.0.0",
+    "autoprefixer": "^10.4.14",
+    "eslint": "^8.56.0",
+    "eslint-plugin-vue": "^9.21.0",
+    "postcss": "^8.4.24",
+    "tailwindcss": "^3.3.2",
+    "typescript": "^4.9.5",
+    "vite": "^4.2.1",
+    "vite-svg-loader": "^4.0.0",
+    "vue-tsc": "^1.0.11"
+  }
+}
