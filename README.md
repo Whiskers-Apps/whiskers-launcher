@@ -17,22 +17,19 @@ Ps: if you want to make a logo feel free to do it 🤣
   <div align="center">
     <br>
     <p>Search</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/73f34add-dbe8-4cf9-955f-819a61f8ad1a" width="500">
+    <img src="previews/wl.webp" width="500">
     <br>
     <p>Settings</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/0978f05a-0cb3-443c-bc5c-f1f33eb2fe15" width="500">
-    <br>
-    <p>Search Box Settings</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/2d5f5b2a-b7fd-483a-8a00-4a76ce160203" width="500">
+    <img src="previews/wl-settings.webp" width="500">
     <br>
     <p>Extensions</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/3ed722be-bac9-4f47-b418-d1fb9de19cd7" width="500">
+    <img src="previews/wl-extensions.webp" width="500">
     <br>
     <p>Themes</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/00ab2191-dd99-4549-b338-80ee5efe405d" width="500">
+    <img src="previews/wl-themes.webp" width="500">
     <br>
     <p>Bookmarks Extension</p>
-    <img src="https://github.com/lighttigerXIV/simple-keyboard-launcher/assets/35658492/828cc967-3e21-4936-b4c3-ac268521d6f7" width="500">
+    <img src="previews/wl-bookmarks-extension.webp" width="500">
   </div>
 </details>
 
