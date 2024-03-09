@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from "vue";
 import { ViewModel } from "./ViewModel";
 import { getHexCssFilter, getIconUrl, getScaledPixels } from "@/utils";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
-import { appWindow } from "@tauri-apps/api/window";
+import { PhysicalSize, appWindow, currentMonitor } from "@tauri-apps/api/window";
 
 const vm = ref<ViewModel>(new ViewModel());
 
@@ -37,7 +37,10 @@ const resultHeight = ref("48px");
 const innerResultHeight = ref("40px");
 
 onMounted(async () => {
-  //vm.value.openSettings();
+
+  let monitor = await currentMonitor();
+  appWindow.setSize(monitor!!.size);
+
   await vm.value.load();
 
   const settings = vm.value.settings!!;
