@@ -46,7 +46,7 @@ Ps: if you want to make a logo feel free to do it 🤣
 <details>
   <summary>Debian/Ubuntu Dependencies</summary>
   
-    sudo apt install libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
+    sudo apt install libwebkit2gtk-4.0-dev build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libxdo-dev
 
 </details>
 
