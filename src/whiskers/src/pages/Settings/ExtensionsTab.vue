@@ -143,7 +143,7 @@ function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean
   let canShowSetting = false;
 
   if (!setting.os.includes("*") && !setting.os.includes(os.value)) {
-      return false;
+    return false;
   }
 
   if (setting.show_conditions === null) {
@@ -213,6 +213,10 @@ async function openExtensionsStore() {
     center: true,
   });
 }
+
+async function openExtension(id: String) {
+  invoke("open_extension", { id: id });
+}
 </script>
 
 <template>
@@ -241,6 +245,9 @@ async function openExtensionsStore() {
           <div class="version-card p-2 pr-3 pl-3">
             {{ extension.version_name }}
           </div>
+          <button class="secondary-button ml-2 p-2 pr-3 pl-3" @click="openExtension(extension.id)">
+            Open
+          </button>
           <button
             class="uninstall-button ml-2 p-2 pr-3 pl-3"
             @click="uninstallExtension(extension.id)"
@@ -320,8 +327,14 @@ async function openExtensionsStore() {
   border-radius: 48px;
 }
 
-.update-button:focus {
+.secondary-button:focus {
   outline: 2px solid v-bind(accentPrimary);
+}
+
+.secondary-button {
+  color: v-bind(accentPrimary);
+  border: 2px solid v-bind(accentPrimary);
+  border-radius: 48px;
 }
 
 .uninstall-button:focus {

@@ -303,3 +303,9 @@ pub async fn index_extensions() {
 pub async fn get_os() -> String {
     env::consts::OS.to_owned()
 }
+
+#[tauri::command]
+pub async fn open_extension(id: String){
+    let path = get_extension_dir(id).unwrap();
+    open::that(&path).unwrap();
+}
