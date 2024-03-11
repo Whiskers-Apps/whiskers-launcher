@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import SelectField from "@components/SelectField.vue";
-import { PropType, onMounted, ref } from "vue";
+import { onMounted, ref } from "vue";
 import { ViewModel } from "./ViewModel";
 import { getHexCssFilter, getIconUrl } from "@/utils";
 import SwitchSetting from "@/components/SwitchSetting.vue";
 import SliderSetting from "@/components/SliderSetting.vue";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "@tauri-apps/api";
 
 const props = defineProps<{ vm: ViewModel }>();
+const onWayland = ref(false);
+const hasLoaded = ref(false);
 
 let accentPrimaryFilter = ref(getHexCssFilter(props.vm.settings!!.theme.accent_primary));
 
@@ -15,42 +18,64 @@ onMounted(async () => {
   await listen("load-theme", (_event) => {
     accentPrimaryFilter.value = getHexCssFilter(props.vm.settings!!.theme.accent_primary);
   });
+
+  let os = await invoke("get_os");
+
+  if (os == "linux") {
+    let server: string = await invoke("get_display_server");
+    onWayland.value = server.trim().toLowerCase() === "wayland";
+  }
+
+  hasLoaded.value = true;
 });
 </script>
 
 <template>
-  <div>
+  <div v-if="hasLoaded">
     <div class="title">Key Shortcut</div>
     <div>The shortcut to launch the search box</div>
-    <div class="flex mt-2">
-      <SelectField
-        class="flex-grow"
-        :value="vm.settings!!.launch_first_key"
-        :options="vm.launchFirstKeyOptions"
-        :theme="vm.settings!!.theme"
-        @update-value="vm.updateLaunchFirstKey($event)"
-      />
+    <div v-if="!onWayland">
+      <div class="flex mt-2">
+        <SelectField
+          class="flex-grow"
+          :value="vm.settings!!.launch_first_key"
+          :options="vm.launchFirstKeyOptions"
+          :theme="vm.settings!!.theme"
+          @update-value="vm.updateLaunchFirstKey($event)"
+        />
 
-      <SelectField
-        class="flex-grow ml-4 mr-4"
-        :value="vm.settings!!.launch_second_key ? vm!!.settings!!.launch_second_key : '-'"
-        :options="vm.launchSecondKeyOptions"
-        :theme="vm.settings!!.theme"
-        @update-value="vm.updateLaunchSecondKey($event)"
-      />
+        <SelectField
+          class="flex-grow ml-4 mr-4"
+          :value="vm.settings!!.launch_second_key ? vm!!.settings!!.launch_second_key : '-'"
+          :options="vm.launchSecondKeyOptions"
+          :theme="vm.settings!!.theme"
+          @update-value="vm.updateLaunchSecondKey($event)"
+        />
 
-      <SelectField
-        class="flex-grow"
-        :value="vm.settings!!.launch_third_key"
-        :options="vm.launchThirdKeyOptions"
-        :theme="vm.settings!!.theme"
-        @update-value="vm.updateLaunchThirdKey($event)"
-      />
+        <SelectField
+          class="flex-grow"
+          :value="vm.settings!!.launch_third_key"
+          :options="vm.launchThirdKeyOptions"
+          :theme="vm.settings!!.theme"
+          @update-value="vm.updateLaunchThirdKey($event)"
+        />
+      </div>
+
+      <div class="flex mt-2" v-if="vm.launchShortcutChanged">
+        <img :src="getIconUrl('warning.svg')" :style="{ filter: accentPrimaryFilter }" width="32" />
+        <div class="ml-2">To apply this setting, please restart the companion app.</div>
+      </div>
     </div>
-
-    <div class="flex mt-2" v-if="vm.launchShortcutChanged">
-      <img :src="getIconUrl('warning.svg')" :style="{ filter: accentPrimaryFilter }" width="32" />
-      <div class="ml-2">To apply this setting, please restart the companion app.</div>
+    <div v-else>
+      <div class="flex mt-2">
+        <img :src="getIconUrl('warning.svg')" :style="{ filter: accentPrimaryFilter }" width="32" />
+        <div class="ml-2 ">
+          Wayland was detected! To add a shortcut you must launch
+          <b>whiskers-launcher</b>
+          binary using a shortcut. The way to add the shortcut will depend on the desktop
+          environment/window manager
+        </div>
+      </div>
     </div>
 
     <div class="divider mt-2 mb-2"></div>

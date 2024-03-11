@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-    process::{exit, Command}, thread
+    env, process::{exit, Command}, thread
 };
 
 // Imports only used in windows
@@ -145,7 +145,10 @@ async fn main() {
                     None => format!("{}+{}", &first_key, &third_key),
                 };
 
-                app.clone()
+                let server = env::var("XDG_SESSION_TYPE").unwrap_or("".to_string());
+
+                if server != "wayland"{
+                    app.clone()
                     .global_shortcut_manager()
                     .register(&shortcut, move || {
                         thread::spawn(move || {
@@ -170,6 +173,7 @@ async fn main() {
                         });
                     })
                     .unwrap();
+                }
             }
             _ => {}
         })

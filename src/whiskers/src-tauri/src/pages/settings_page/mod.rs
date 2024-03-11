@@ -304,7 +304,15 @@ pub async fn get_os() -> String {
 }
 
 #[tauri::command]
-pub async fn open_extension(id: String){
+pub async fn open_extension(id: String) {
     let path = get_extension_dir(id).unwrap();
     open::that(&path).unwrap();
+}
+
+#[tauri::command]
+pub fn get_display_server() -> Option<String> {
+    if let Ok(display_server) = env::var("XDG_SESSION_TYPE") {
+        return Some(display_server);
+    }
+    None
 }
