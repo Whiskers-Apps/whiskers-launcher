@@ -3,7 +3,6 @@ use std::{env, fs};
 
 use git2::Repository;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Manager};
 use tokio::spawn;
 use whiskers_launcher_rs::api::extensions::get_extension_dir;
 use whiskers_launcher_rs::api::extensions::manifest::Manifest;
