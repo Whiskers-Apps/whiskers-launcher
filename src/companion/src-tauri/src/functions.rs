@@ -8,7 +8,7 @@ use walkdir::WalkDir;
 use whiskers_launcher_rs::paths::get_home_dir;
 
 pub fn get_app_icon(icon: String) -> Option<PathBuf> {
-    let data_dirs_string = env::var("XDG_DATA_DIRS").unwrap();
+    let data_dirs_string = env::var("XDG_DATA_DIRS").unwrap_or("/usr/local/share:/usr/share".to_string());
 
     let mut xdg_data_dirs: Vec<&str> = data_dirs_string.split(":").collect();
 
