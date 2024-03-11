@@ -165,7 +165,7 @@ document.addEventListener("keydown", (event) => {
               v-for="(result, index) in vm.results"
               :key="`result-${index}`"
               :id="`result-${index}`"
-              class="p-overall"
+              class="p-overall one-line-text"
               :class="
                 vm.isHighlightLayoutType() && vm.selectedIndex === index
                   ? 'highlight-background'
@@ -173,7 +173,7 @@ document.addEventListener("keydown", (event) => {
               "
             >
               <div
-                class="result cursor-pointer p-overall flex items-center"
+                class="result cursor-pointer p-overall flex items-center one-line-text"
                 @click="
                   $event.stopPropagation();
                   vm.runAction();
@@ -182,7 +182,7 @@ document.addEventListener("keydown", (event) => {
               >
                 <div
                   v-if="['Text', 'TitleAndText'].includes(result.type)"
-                  class="flex items-center"
+                  class="flex items-center one-line-text"
                 >
                   <img
                     v-if="result.icon === ''"
@@ -206,13 +206,13 @@ document.addEventListener("keydown", (event) => {
                   />
 
                   <div
-                    class="flex flex-col justify-center ml-medium"
+                    class="flex flex-col justify-center ml-medium one-line-text"
                     :class="vm.selectedIndex === index ? 'highlight-text' : ''"
                   >
-                    <div class="normal-text">
+                    <div class="normal-text one-line-text">
                       {{ result.title }}
                     </div>
-                    <div :class="result.type === 'Text' ? 'normal-text' : 'small-text'">
+                    <div class="one-line-text" :class="result.type === 'Text' ? 'normal-text' : 'small-text'">
                       {{ result.text }}
                     </div>
                   </div>
