@@ -38,6 +38,8 @@ const innerResultHeight = ref("40px");
 
 onMounted(async () => {
 
+  appWindow.center();
+
   let monitor = await currentMonitor();
   appWindow.setSize(monitor!!.size);
 
