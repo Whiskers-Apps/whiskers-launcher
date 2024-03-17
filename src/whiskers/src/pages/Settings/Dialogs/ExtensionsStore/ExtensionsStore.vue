@@ -56,7 +56,13 @@ onMounted(async () => {
   hasLoaded.value = true;
 
   userExtensions.value = await invoke("get_user_extensions");
-  extensions.value = await invoke("get_cached_extensions_store");
+
+  let cachedExtensions: StoreExtension[] = await invoke("get_cached_extensions_store");
+  cachedExtensions = cachedExtensions.filter(
+    (extension) => extension.os.includes(os.value) || extension.os.includes("*")
+  );
+
+  extensions.value = cachedExtensions;
   filteredExtensions.value = extensions.value;
   pageExtensions.value = filteredExtensions.value.slice(0, 12);
 
@@ -65,7 +71,12 @@ onMounted(async () => {
       "https://raw.githubusercontent.com/lighttigerXIV/whiskers-launcher-extensions/main/extensions.json"
     )
     .then((response) => {
-      extensions.value = response.data;
+      let storeExtensions: StoreExtension[] = response.data;
+      storeExtensions = storeExtensions.filter(
+        (extension) => extension.os.includes(os.value) || extension.os.includes("*")
+      );
+
+      extensions.value = storeExtensions;
       filteredExtensions.value = extensions.value;
       pageExtensions.value = extensions.value.slice(0, 12);
 
@@ -75,10 +86,6 @@ onMounted(async () => {
       console.error(e);
     });
 });
-
-function canShowExtension(extensionOS: string[]): boolean {
-  return extensionOS.includes("*") || extensionOS.includes(os.value);
-}
 
 function isInstalled(extensionId: string): boolean {
   return userExtensions.value.some((ue) => ue.id === extensionId);
@@ -179,12 +186,12 @@ function refreshPage() {
       ref="themesGrid"
     >
       <div v-for="extension in pageExtensions" :key="extension.id" :id="extension.id">
-        <div v-if="canShowExtension(extension.os)" class="p-4 extension-card rounded-2xl h-fit">
+        <div class="p-4 extension-card rounded-2xl h-fit">
           <div class="background-tertiary rounded-2xl">
             <img
               :id="`preview-${extension.id}`"
               :src="extension.preview"
-              class="rounded-lg aspect-square w-full object-contain"
+              class="rounded-lg aspect-square w-full h-full object-contain"
             />
           </div>
           <div class="flex flex-col items-center justify-center p-2">
