@@ -272,15 +272,13 @@ pub async fn get_cached_extensions_store() -> Vec<StoreExtension> {
 
 #[tauri::command]
 pub async fn apply_store_theme(file: String) {
-    tokio::spawn(async move {
-        let theme_json = reqwest::get(file).await.unwrap().text().await.unwrap();
-        let theme = serde_json::from_str::<Theme>(&theme_json).unwrap();
+    let theme_json = reqwest::get(file).await.unwrap().text().await.unwrap();
+    let theme = serde_json::from_str::<Theme>(&theme_json).unwrap();
 
-        let mut new_settings = settings::get_settings().unwrap();
-        new_settings.set_theme(theme);
+    let mut new_settings = settings::get_settings().unwrap();
+    new_settings.set_theme(theme);
 
-        settings::update_settings(new_settings).unwrap();
-    });
+    settings::update_settings(new_settings).unwrap();
 }
 
 #[tauri::command]
