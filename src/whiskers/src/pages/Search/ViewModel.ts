@@ -126,7 +126,7 @@ export class ViewModel {
     }
 
     if (action.type === "CopyToClipboard") {
-      await writeText(action.text!!);
+      writeText(action.text!!);
       closeWindow(true);
     }
 
