@@ -31,7 +31,7 @@ onMounted(async () => {
             <div>{{ props.description }}</div>
         </div>
         <div class="ml-2 mt-2 flex items-start">
-            <TextArea :value="value" :theme="props.theme" :placeholder="placeholder"
+            <TextArea :value="value" rows="5" :theme="props.theme" :placeholder="placeholder"
                 @on-change="emit('updateValue', $event)" />
         </div>
     </div>
