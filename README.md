@@ -1,14 +1,13 @@
 <div align="center">
   <img src="src/resources/logos/whiskers-launchers-logo.png" height="140">
-  <h1>Whiskers Launcher</h1>
+
+  # Whiskers Launcher
 </div>
 
 # About
 Whiskers Launcher is very clean, customizable launcher for Linux and Windows. It supports extensions and multiple themes. 
-
-The launcher is still in **beta**, so bug reports and suggestions are welcome as long they are respectful :)
-
-Ps: if you want to make a logo feel free to do it 🤣
+The launcher is still a work in progress and will slowly get better with time. Right now the launcher is probably not wayland ready since
+i can't have a proper experience to daily drive it.
 
 # Screenshots
 <details>
