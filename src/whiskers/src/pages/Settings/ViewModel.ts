@@ -163,6 +163,13 @@ export class ViewModel {
     this.updateSettings(newSettings);
   }
 
+  updateShowAltHint(value: boolean) {
+    let newSettings = this.settings!!;
+    newSettings.show_alt_hint = value;
+
+    this.updateSettings(newSettings);
+  }
+
   updateDensity(value: string) {
     let newSettings = this.settings!!;
     newSettings.density = value;
@@ -429,6 +436,7 @@ export interface Settings {
   border_radius: number;
   border_width: number;
   results_count: number;
+  show_alt_hint: boolean;
   density: string;
   blacklist: string[];
   search_engines: SearchEngine[];

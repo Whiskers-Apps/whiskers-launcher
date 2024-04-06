@@ -46,7 +46,7 @@ async fn main() {
                         if cfg!(target_os = "linux") {
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("whiskers-launcher")
+                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 whiskers-launcher")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -73,7 +73,7 @@ async fn main() {
                         if cfg!(target_os = "linux") {
                             Command::new("sh")
                                 .arg("-c")
-                                .arg("whiskers-launcher --settings")
+                                .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 whiskers-launcher --settings")
                                 .output()
                                 .expect("Error opening app");
                         }
@@ -155,7 +155,7 @@ async fn main() {
                             if cfg!(target_os = "linux") {
                                 Command::new("sh")
                                     .arg("-c")
-                                    .arg("whiskers-launcher")
+                                    .arg("WEBKIT_DISABLE_COMPOSITING_MODE=1 whiskers-launcher")
                                     .output()
                                     .expect("Error opening app");
                             }

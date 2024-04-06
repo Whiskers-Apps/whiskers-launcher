@@ -13,6 +13,12 @@
   "tauri": {
     "allowlist": {
       "all": false,
+      "dialog": {
+        "all": true
+      },
+      "path": {
+        "all": true
+      },
       "clipboard": {
         "all": true
       },

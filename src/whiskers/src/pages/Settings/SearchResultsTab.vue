@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import SelectSetting from "@/components/SelectSetting.vue";
+import SwitchSetting from "@components/SwitchSetting.vue";
 import { WebviewWindow } from "@tauri-apps/api/window";
 import { onMounted, PropType } from "vue";
 import { ViewModel, DENSITY_OPTIONS } from "./ViewModel";
@@ -42,6 +43,16 @@ async function openAddToBlacklist() {
       :value="vm.settings!!.results_count"
       :theme="vm.settings!!.theme"
       @update-value="vm.updateResultsCount($event)"
+    />
+
+    <div class="divider mt-2 mb-2"></div>
+
+    <SwitchSetting
+      title="Show Alt Hint"
+      description="If enabled, it shows the 'alt + key' hint in the results"
+      :checked="vm.settings!!.show_alt_hint"
+      :theme="vm.settings!!.theme"
+      @update-checked="vm.updateShowAltHint($event)"
     />
 
     <div class="divider mt-2 mb-2"></div>

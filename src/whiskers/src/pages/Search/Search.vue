@@ -37,7 +37,6 @@ const resultHeight = ref("48px");
 const innerResultHeight = ref("40px");
 
 onMounted(async () => {
-
   appWindow.center();
 
   let monitor = await currentMonitor();
@@ -93,26 +92,36 @@ onMounted(async () => {
 });
 
 document.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowDown") {
-    event.preventDefault();
-    vm.value.onArrowDownPress();
-  }
+  switch (event.key) {
+    case "ArrowDown": {
+      event.preventDefault();
+      vm.value.onArrowDownPress();
+      break;
+    }
 
-  if (event.key === "ArrowUp") {
-    event.preventDefault();
-    vm.value.onArrowUpPress();
-  }
+    case "ArrowUp": {
+      event.preventDefault();
+      vm.value.onArrowUpPress();
+      break;
+    }
 
-  if (event.key === "Escape") {
-    appWindow.close();
-  }
+    case "Escape": {
+      appWindow.close();
+      break;
+    }
 
-  if (event.key === "Enter") {
-    vm.value.runAction();
+    case "Enter": {
+      vm.value.runAction();
+      break;
+    }
   }
 
   if (event.ctrlKey && event.key === "s") {
     vm.value.openSettings();
+  }
+
+  if (event.altKey && ["1", "2", "3", "4", "5", "6", "7", "8"].includes(event.key)) {
+    vm.value.selectAltResult(event.key)
   }
 });
 </script>
@@ -164,7 +173,7 @@ document.addEventListener("keydown", (event) => {
         >
           <div :style="{ height: vm.resultsHeight }">
             <div
-              v-for="(result, index) in vm.results"
+              v-for="(result, index) in vm.displayedResults"
               :key="`result-${index}`"
               :id="`result-${index}`"
               class="p-overall one-line-text"
@@ -184,7 +193,7 @@ document.addEventListener("keydown", (event) => {
               >
                 <div
                   v-if="['Text', 'TitleAndText'].includes(result.type)"
-                  class="flex items-center one-line-text"
+                  class="flex items-center one-line-text w-full"
                 >
                   <img
                     v-if="result.icon === ''"
@@ -208,16 +217,21 @@ document.addEventListener("keydown", (event) => {
                   />
 
                   <div
-                    class="flex flex-col justify-center ml-medium one-line-text"
+                    class="flex flex-col justify-center ml-medium one-line-text flex-grow"
                     :class="vm.selectedIndex === index ? 'highlight-text' : ''"
                   >
                     <div class="normal-text one-line-text">
                       {{ result.title }}
                     </div>
-                    <div class="one-line-text" :class="result.type === 'Text' ? 'normal-text' : 'small-text'">
+                    <div
+                      class="one-line-text"
+                      :class="result.type === 'Text' ? 'normal-text' : 'small-text'"
+                    >
                       {{ result.text }}
                     </div>
                   </div>
+
+                  <div v-if="vm.settings!!.show_alt_hint" class="ml-4 primary-text">Alt + {{ index + 1 }}</div>
                 </div>
 
                 <div v-if="result.type === 'Divider'" class="w-full">
@@ -329,5 +343,9 @@ document.addEventListener("keydown", (event) => {
   width: 100%;
   background-color: v-bind(accentPrimary);
   border-radius: 48px;
+}
+
+.primary-text {
+  color: v-bind(accentPrimary);
 }
 </style>

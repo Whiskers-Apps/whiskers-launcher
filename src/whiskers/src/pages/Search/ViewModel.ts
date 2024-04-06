@@ -2,13 +2,9 @@ import { invoke } from "@tauri-apps/api";
 import { Settings } from "@pages/Settings/ViewModel";
 import { WebviewWindow, appWindow } from "@tauri-apps/api/window";
 import { getIconUrl, getScaledSize } from "@/utils";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { convertFileSrc } from "@tauri-apps/api/tauri";
 import { writeText } from "@tauri-apps/api/clipboard";
-
-export interface UiState {
-  typedText: string;
-}
 
 export class ViewModel {
   hasLoaded = false;
@@ -16,10 +12,13 @@ export class ViewModel {
 
   typedText = ref("");
   results: WhiskersResult[] = [];
-  resultHeight = 0;
-  resultsHeight = "0px";
+  displayedResults: WhiskersResult[] = [];
+  displayedResultsOffset = 0;
 
   selectedIndex = 0;
+
+  resultHeight = 0;
+  resultsHeight = "0px";
 
   async load() {
     this.settings = await invoke("get_settings");
@@ -70,52 +69,91 @@ export class ViewModel {
 
   async search() {
     this.selectedIndex = 0;
+
     document.getElementById("results-div")?.scrollTo({ top: 0 });
     this.results = await invoke("get_search_results", {
       typed_text: this.typedText,
     });
 
+    this.displayedResultsOffset = 0;
+    this.displayedResults = this.results.slice(0, this.settings!!.results_count);
+
     let totalHeight =
-      (this.results.length < this.settings!!.results_count
+      (this.displayedResults.length < this.settings!!.results_count
         ? this.results.length
         : this.settings!!.results_count) * this.getResultHeight();
 
     this.resultsHeight = `${totalHeight}px`;
   }
 
-  onArrowDownPress() {
-    if (this.selectedIndex < this.results.length - 1) {
-      this.selectedIndex += 1;
-
-      document
-        .getElementById(`result-${this.selectedIndex - 1}`)!!
-        .scrollIntoView({ behavior: "smooth" });
-    } else if (this.selectedIndex == this.results.length - 1) {
-      this.selectedIndex = 0;
-
-      document.getElementById(`result-0`)!!.scrollIntoView({ behavior: "smooth" });
-    }
-  }
-
   onArrowUpPress() {
     if (this.selectedIndex > 0) {
       this.selectedIndex -= 1;
-
-      document
-        .getElementById(`result-${this.selectedIndex - 1}`)!!
-        .scrollIntoView({ behavior: "smooth" });
-    } else if (this.selectedIndex == 0) {
-      this.selectedIndex = this.results.length - 1;
-
-      document
-        .getElementById(`result-${this.selectedIndex - 1}`)!!
-        .scrollIntoView({ behavior: "smooth" });
+      return;
     }
+
+    if (this.displayedResultsOffset - 1 > 0) {
+      this.displayedResultsOffset -= 1;
+      this.sliceResults();
+      return;
+    }
+
+    if (this.displayedResultsOffset === 0) {
+      if (this.results.length < this.settings!!.results_count) {
+        this.selectedIndex = this.results.length - 1;
+        return;
+      }
+    }
+
+    this.displayedResultsOffset = this.results.length - this.settings!!.results_count;
+    this.selectedIndex = this.settings!!.results_count - 1;
+    this.sliceResults();
+  }
+
+  onArrowDownPress() {
+    if (this.selectedIndex < this.displayedResults.length - 1) {
+      this.selectedIndex += 1;
+      return;
+    }
+
+    if (this.displayedResultsOffset + this.selectedIndex < this.results.length - 1) {
+      this.displayedResultsOffset += 1;
+      this.sliceResults();
+
+      return;
+    }
+
+    if (this.results.length < this.settings!!.results_count) {
+      if (this.selectedIndex + 1 === this.results.length) {
+        this.selectedIndex = 0;
+        return;
+      }
+    }
+
+    this.selectedIndex = 0;
+    this.displayedResultsOffset = 0;
+    this.sliceResults();
+  }
+
+  sliceResults() {
+    this.displayedResults = this.results.slice(
+      this.displayedResultsOffset,
+      this.displayedResultsOffset + this.settings!!.results_count
+    );
+  }
+
+  selectAltResult(index: string) {
+    if (+index - 1 > this.displayedResults.length) {
+      return;
+    }
+
+    this.selectedIndex = +index - 1;
+    this.runAction();
   }
 
   async runAction() {
-    const result = this.results[this.selectedIndex];
-    const action = result.action!!;
+    let result = this.displayedResults[this.selectedIndex];
+    let action = result.action!!;
 
     if (action.type === "OpenApp") {
       invoke("open_app", { exec_path: action.path ?? "" });
