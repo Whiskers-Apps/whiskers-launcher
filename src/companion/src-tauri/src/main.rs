@@ -7,7 +7,7 @@ use std::{
 
 // Imports only used in windows
 #[cfg(target_os = "windows")]
-use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW};
+use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW, paths::get_local_dir};
 
 pub mod indexing;
 pub mod init;
@@ -21,7 +21,6 @@ use tauri::{
 use tokio::time::sleep;
 use whiskers_launcher_rs::{
     extensions::index_extensions,
-    paths::get_local_dir,
     settings::{get_settings, index_settings},
 };
 

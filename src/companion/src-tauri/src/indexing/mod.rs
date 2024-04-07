@@ -57,6 +57,8 @@ pub fn index_apps() {
             fs::create_dir_all(&indexig_dir).unwrap();
         }
 
+        apps.sort_by_key(|a|a.to_owned().name);
+
         //Saves the apps in a json file
         let json_apps = serde_json::to_string(&apps).unwrap();
         fs::write(&get_indexing_apps_path().unwrap(), &json_apps).unwrap();
