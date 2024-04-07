@@ -1,6 +1,6 @@
 [package]
 name = "whiskers-launcher-companion"
-version = "1.1.2"
+version = "1.2.0"
 description = "Whiskers Launcher Companion"
 authors = ["lighttigerxiv"]
 license = "MIT"

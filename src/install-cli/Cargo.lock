@@ -597,7 +597,7 @@ dependencies = [
 
 [[package]]
 name = "install"
-version = "1.1.2"
+version = "1.2.0"
 dependencies = [
  "fs_extra",
  "is_elevated",
