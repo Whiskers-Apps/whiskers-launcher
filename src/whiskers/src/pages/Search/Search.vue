@@ -121,7 +121,7 @@ document.addEventListener("keydown", (event) => {
   }
 
   if (event.altKey && ["1", "2", "3", "4", "5", "6", "7", "8"].includes(event.key)) {
-    vm.value.selectAltResult(event.key)
+    vm.value.selectAltResult(event.key);
   }
 });
 </script>
@@ -142,7 +142,7 @@ document.addEventListener("keydown", (event) => {
           <div class="search-div" :style="{ backgroundColor: vm.getSearchInputBackground() }">
             <div class="flex p-overall items-center">
               <div class="p-1" v-if="vm.settings!!.show_search_icon">
-                <img class="icon" :src="getIconUrl('search.svg')"/>
+                <img class="icon" :src="getIconUrl('search.svg')" />
               </div>
 
               <input
@@ -151,7 +151,7 @@ document.addEventListener("keydown", (event) => {
                 :placeholder="vm.getInputPlaceholder()"
                 :style="{ backgroundColor: vm.getSearchInputBackground() }"
                 v-model="vm.typedText"
-                @input="vm.search()"
+                @input="vm.search(vm.settings!!.show_recent_apps && vm.typedText.length === 0)"
                 @click="$event.stopPropagation()"
               />
 
@@ -231,7 +231,9 @@ document.addEventListener("keydown", (event) => {
                     </div>
                   </div>
 
-                  <div v-if="vm.settings!!.show_alt_hint" class="ml-4 primary-text">Alt + {{ index + 1 }}</div>
+                  <div v-if="vm.settings!!.show_alt_hint" class="ml-4 primary-text">
+                    Alt + {{ index + 1 }}
+                  </div>
                 </div>
 
                 <div v-if="result.type === 'Divider'" class="w-full">

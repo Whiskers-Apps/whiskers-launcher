@@ -17,7 +17,7 @@ export function getHexCssFilter(hexColor: string): string {
     filter = result.color ?? "";
     attempts += 1;
   } while (loss > 0.1 || attempts > 100);
-
+  
   return filter;
 }
 

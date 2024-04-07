@@ -110,5 +110,13 @@ onMounted(async () => {
       :theme="vm.settings!!.theme"
       @update-checked="vm.updateHideOnBlur($event)"
     />
+
+    <SwitchSetting
+      title="Show Recent Apps"
+      description="If enabled, it shows the most recent apps when the search is empty"
+      :checked="vm.settings!!.show_recent_apps"
+      :theme="vm.settings!!.theme"
+      @update-checked="vm.updateShowRecentApps($event)"
+    />
   </div>
 </template>

@@ -23,6 +23,7 @@ export class ViewModel {
   async load() {
     this.settings = await invoke("get_settings");
     this.resultHeight = this.getResultHeight();
+    this.search(this.settings!!.show_recent_apps);
   }
 
   getSearchInputBackground(): string {
@@ -67,13 +68,16 @@ export class ViewModel {
     return src;
   }
 
-  async search() {
+  async search(searchRecentApps: boolean = false) {
     this.selectedIndex = 0;
 
-    document.getElementById("results-div")?.scrollTo({ top: 0 });
-    this.results = await invoke("get_search_results", {
-      typed_text: this.typedText,
-    });
+    if(searchRecentApps){
+      this.results = await invoke("get_recent_apps_results");
+    }else{
+      this.results = await invoke("get_search_results", {
+        typed_text: this.typedText,
+      });
+    }
 
     this.displayedResultsOffset = 0;
     this.displayedResults = this.results.slice(0, this.settings!!.results_count);

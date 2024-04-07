@@ -1,23 +1,63 @@
-use std::{fs, path::Path, process::Command};
+use std::{
+    fs::{self, read_to_string},
+    path::Path,
+    process::Command,
+    time::SystemTime,
+};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+use serde::{Deserialize, Serialize};
 use tauri::Window;
 use whiskers_launcher_rs::{
-    actions,
+    actions::{self, Action, OpenApp},
     api::extensions::{
         self, get_extension_dir, get_extension_results, send_extension_context,
         send_extension_dialog_action, send_extension_dialog_response, Context, DialogResponse,
         DialogResult,
     },
     dialog::DialogField,
-    indexing::get_indexed_apps,
-    paths::{get_app_resources_icons_dir, get_temp_dir},
-    results::{self, WhiskersResult},
+    indexing::{get_indexed_apps, AppIndex},
+    paths::{get_app_resources_icons_dir, get_recent_apps_path, get_temp_dir},
+    results::{self, Text, WhiskersResult},
     settings::get_settings,
 };
 
 #[cfg(target_os = "windows")]
 use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW};
+
+#[derive(Serialize, Deserialize)]
+pub struct RecentApp {
+    pub app: AppIndex,
+    pub timestamp: SystemTime,
+}
+
+#[tauri::command()]
+pub async fn get_recent_apps_results() -> Vec<WhiskersResult> {
+    let recent_apps_path = get_recent_apps_path().unwrap();
+    let recent_apps_json = fs::read_to_string(&recent_apps_path).unwrap_or("[]".to_owned());
+    let recent_apps =
+        serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap_or(Vec::new());
+    let mut results = Vec::<WhiskersResult>::new();
+
+    for app in recent_apps {
+        if app.app.icon_path.is_some() {
+            results.push(WhiskersResult::Text(
+                Text::new(
+                    &app.app.name,
+                    Action::OpenApp(OpenApp::new(&app.app.exec_path)),
+                )
+                .icon(&app.app.icon_path.unwrap()),
+            ));
+        } else {
+            results.push(WhiskersResult::Text(Text::new(
+                &app.app.name,
+                Action::OpenApp(OpenApp::new(&app.app.exec_path)),
+            )));
+        }
+    }
+
+    results
+}
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
@@ -259,6 +299,30 @@ pub async fn open_app(exec_path: String, window: Window) {
             powershell_script::run(&script).expect("Error opening app");
         });
     }
+
+    let recent_apps_path = get_recent_apps_path().unwrap();
+    let recent_apps_json = read_to_string(&recent_apps_path).unwrap_or("[]".to_owned());
+    let mut recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap();
+    let apps = get_indexed_apps().unwrap();
+
+    for app in apps {
+        if app.exec_path == exec_path {
+            recent_apps.push(RecentApp {
+                app,
+                timestamp: SystemTime::UNIX_EPOCH,
+            })
+        }
+    }
+
+    if recent_apps.len() > 8 {
+        recent_apps.remove(0);
+    }
+
+    recent_apps.sort_by_key(|a| a.timestamp);
+    recent_apps.reverse();
+
+    let json = serde_json::to_string(&recent_apps).unwrap();
+    fs::write(&recent_apps_path, &json).unwrap();
 
     window.close().unwrap();
 }

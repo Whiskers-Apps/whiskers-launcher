@@ -41,7 +41,8 @@ async fn main() {
             index_extensions,
             get_os,
             open_extension,
-            get_display_server
+            get_display_server,
+            get_recent_apps_results
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
