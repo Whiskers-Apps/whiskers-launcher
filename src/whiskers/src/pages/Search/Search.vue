@@ -142,7 +142,7 @@ document.addEventListener("keydown", (event) => {
           <div class="search-div" :style="{ backgroundColor: vm.getSearchInputBackground() }">
             <div class="flex p-overall items-center">
               <div class="p-1" v-if="vm.settings!!.show_search_icon">
-                <img class="icon" :src="getIconUrl('search.svg')" />
+                <img class="icon" :src="getIconUrl('search.svg')"/>
               </div>
 
               <input

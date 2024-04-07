@@ -18,7 +18,7 @@ tauri-build = { version = "1.5.0", features = [] }
 whiskers-launcher-rs = { git = "https://github.com/lighttigerXIV/whiskers-launcher-rs.git" }
 
 notify = "6.1.1"
-tauri = { version = "1.5.0", features = ["system-tray", "shell-open"] }
+tauri = { version = "1.5.0", features = [ "global-shortcut-all", "system-tray", "shell-open"] }
 serde = { version = "1.0.164", features = ["derive"] }
 serde_json = "1.0.99"
 tauri-plugin-positioner = "1.0.4"
