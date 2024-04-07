@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^1.4.0",
+    "@tauri-apps/cli-win32-x64-msvc": "^1.5.11",
     "axios": "^1.6.7",
     "css-filter-converter": "^1.0.109",
     "fuzzysort": "^2.0.4",

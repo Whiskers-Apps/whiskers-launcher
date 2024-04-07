@@ -25,7 +25,7 @@ use whiskers_launcher_rs::{
 #[cfg(target_os = "windows")]
 use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW};
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct RecentApp {
     pub app: AppIndex,
     pub timestamp: SystemTime,
@@ -302,26 +302,28 @@ pub async fn open_app(exec_path: String, window: Window) {
 
     let recent_apps_path = get_recent_apps_path().unwrap();
     let recent_apps_json = read_to_string(&recent_apps_path).unwrap_or("[]".to_owned());
-    let mut recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap();
+    let recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap();
     let apps = get_indexed_apps().unwrap();
+
+    let mut new_recent_apps: Vec<RecentApp> = recent_apps.iter().cloned().filter(|a|a.app.exec_path != exec_path).collect();
 
     for app in apps {
         if app.exec_path == exec_path {
-            recent_apps.push(RecentApp {
+            new_recent_apps.push(RecentApp {
                 app,
                 timestamp: SystemTime::UNIX_EPOCH,
             })
         }
     }
 
-    if recent_apps.len() > 8 {
-        recent_apps.remove(0);
+    if new_recent_apps.len() > 8 {
+        new_recent_apps.remove(0);
     }
 
-    recent_apps.sort_by_key(|a| a.timestamp);
-    recent_apps.reverse();
+    new_recent_apps.sort_by_key(|a| a.timestamp);
+    new_recent_apps.reverse();
 
-    let json = serde_json::to_string(&recent_apps).unwrap();
+    let json = serde_json::to_string(&new_recent_apps).unwrap();
     fs::write(&recent_apps_path, &json).unwrap();
 
     window.close().unwrap();
