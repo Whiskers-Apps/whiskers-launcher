@@ -7,7 +7,7 @@ use std::{
 
 // Imports only used in windows
 #[cfg(target_os = "windows")]
-use {std::os::windows::process::CommandExt, whiskers_launcher_rs::others::FLAG_NO_WINDOW, paths::get_local_dir};
+use {std::os::windows::process::CommandExt, whiskers_launcher_rs::{paths::get_local_dir, others::FLAG_NO_WINDOW}};
 
 pub mod indexing;
 pub mod init;
