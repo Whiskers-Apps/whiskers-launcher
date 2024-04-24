@@ -12,30 +12,7 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
-      "dialog": {
-        "all": true
-      },
-      "path": {
-        "all": true
-      },
-      "clipboard": {
-        "all": true
-      },
-      "os": {
-        "all": true
-      },
-      "shell": {
-        "all": false,
-        "open": true
-      },
-      "window": {
-        "all": true,
-        "setFocus": true
-      },
-      "globalShortcut": {
-        "all": true
-      },
+      "all": true,
       "fs": {
         "all": true,
         "scope": ["**"]

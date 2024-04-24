@@ -12,13 +12,15 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
-      "shell": {
-        "all": false,
-        "open": true
+      "all": true,
+      "fs": {
+        "all": true,
+        "scope": ["**"]
       },
-      "globalShortcut": {
-        "all": true
+      "protocol": {
+        "asset": true,
+        "all": true,
+        "assetScope": ["**", "$HOME/.local/**"]
       }
     },
     "bundle": {
