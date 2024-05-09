@@ -13,7 +13,8 @@ import { emit } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
 import { useRoute } from "vue-router";
 
-const index = +(useRoute().query.index ?? -1);
+const id = +(useRoute().query.id ?? -1);
+const route = useRoute();
 
 class UiState {
     hasLoaded = false;
@@ -41,7 +42,10 @@ onMounted(async () => {
     backgroundTertiary.value = uiState.value.settings.theme.background_tertiary;
     textOnBackground.value = uiState.value.settings.theme.text_on_background;
 
-    const searchEngine = uiState.value.settings.search_engines[index];
+ 
+    const searchEngine = uiState.value.settings.search_engines.filter(se => se.id === id)[0];
+    
+    
     uiState.value.tintIcon = searchEngine.tint_icon;
     uiState.value.realIconPath = searchEngine.icon_path;
     uiState.value.iconPath = searchEngine.icon_path !== null ? convertFileSrc(searchEngine.icon_path) : null;
@@ -50,10 +54,8 @@ onMounted(async () => {
     uiState.value.query = searchEngine.query;
     uiState.value.default = searchEngine.default;
 
-    console.log(searchEngine)
-    console.log(index)
-
     uiState.value.hasLoaded = true;
+    
 });
 
 function isSaveButtonDisabled(): boolean {
@@ -90,6 +92,7 @@ async function selectIcon() {
 
 function saveSearchEngine() {
     let payload: SearchEnginePayload = {
+        id: id,
         icon_path: uiState.value.realIconPath,
         tint_icon: uiState.value.tintIcon,
         keyword: uiState.value.keyword,

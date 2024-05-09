@@ -215,8 +215,8 @@ export class ViewModel {
   // Search Engines Page
   // =========================================
 
-  toggleSearchEngineMenu(index: number) {
-    let element = document.getElementById(`search-engine-menu-${index}`)!!;
+  toggleSearchEngineMenu(id: number) {
+    let element = document.getElementById(`search-engine-menu-${id}`)!!;
 
     if (element.style.display == "block") {
       element.style.display = "none";
@@ -225,15 +225,15 @@ export class ViewModel {
     }
   }
 
-  makeDefaultSearchEngine(index: number) {
-    this.closeSearchEngineMenu(index);
+  makeDefaultSearchEngine(id: number) {
+    this.closeSearchEngineMenu(id);
 
     const newSearchEngines: SearchEngine[] = [];
 
-    this.settings!!.search_engines.forEach((se, seindex) => {
-      const nse = se;
-      nse.default = index === seindex;
-      newSearchEngines.push(nse);
+    this.settings!!.search_engines.forEach((se) => {
+      let engine = se;
+      engine.default = se.id === id ? true : false;
+      newSearchEngines.push(engine);
     });
 
     const newSettings = this.settings!!;
@@ -242,11 +242,11 @@ export class ViewModel {
     this.updateSettings(newSettings);
   }
 
-  async deleteSearchEngine(index: number) {
-    this.closeSearchEngineMenu(index);
+  async deleteSearchEngine(id: number) {
+    this.closeSearchEngineMenu(id);
 
     new WebviewWindow("confirm-delete-search-engine", {
-      url: `confirm-delete-search-engine?index=${index}`,
+      url: `confirm-delete-search-engine?id=${id}`,
       title: "Delete Search Engine",
       resizable: false,
       width: 800,
@@ -257,12 +257,10 @@ export class ViewModel {
     const unlisten = await listen<DeleteSearchEnginePayload>(
       "delete-search-engine",
       async (event) => {
-        this.closeSearchEngineMenu(event.payload.index);
+        this.closeSearchEngineMenu(event.payload.id);
 
         const newSettings = this.settings!!;
-        newSettings.search_engines = newSettings.search_engines.filter(
-          (_, seindex) => seindex !== event.payload.index
-        );
+        newSettings.search_engines = newSettings.search_engines.filter((se) => se.id !== id);
 
         this.updateSettings(newSettings);
 
@@ -282,6 +280,7 @@ export class ViewModel {
 
     const unlisten = await listen<SearchEnginePayload>("add-search-engine", (event) => {
       const newSearchEngine: SearchEngine = {
+        id: event.payload.id,
         icon_path: event.payload.icon_path,
         tint_icon: event.payload.tint_icon,
         name: event.payload.name,
@@ -302,9 +301,9 @@ export class ViewModel {
     });
   }
 
-  async editSearchEngine(index: number) {
+  async editSearchEngine(id: number) {
     new WebviewWindow("edit-search-engine", {
-      url: `edit-search-engine?index=${index}`,
+      url: `edit-search-engine?id=${id}`,
       title: "Edit Search Engine",
       height: 800,
       width: 800,
@@ -314,9 +313,10 @@ export class ViewModel {
     const unlisten = await listen<SearchEnginePayload>("edit-search-engine", (event) => {
       const newSearchEngines: SearchEngine[] = [];
 
-      this.settings!!.search_engines.forEach((se, seindex) => {
-        if (seindex === index) {
+      this.settings!!.search_engines.forEach(se => {
+        if (se.id === id) {
           newSearchEngines.push({
+            id: event.payload.id,
             icon_path: event.payload.icon_path,
             tint_icon: event.payload.tint_icon,
             name: event.payload.name,
@@ -338,8 +338,8 @@ export class ViewModel {
     });
   }
 
-  closeSearchEngineMenu(index: number) {
-    const div = document.getElementById(`search-engine-menu-${index}`)!!;
+  closeSearchEngineMenu(id: number) {
+    const div = document.getElementById(`search-engine-menu-${id}`)!!;
     div.style.display = "none";
   }
 
@@ -453,6 +453,7 @@ export interface Settings {
 }
 
 export interface SearchEngine {
+  id: number;
   icon_path: string | null;
   tint_icon: boolean;
   keyword: string;

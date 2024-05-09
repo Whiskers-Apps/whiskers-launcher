@@ -7,7 +7,7 @@ import InputSetting from "@/components/InputSetting.vue";
 import PrimaryButton from "@/components/PrimaryButton.vue";
 import SecondaryButton from "@/components/SecondaryButton.vue";
 import { open } from "@tauri-apps/api/dialog";
-import { convertFileSrc } from "@tauri-apps/api/tauri";
+import { convertFileSrc, invoke } from "@tauri-apps/api/tauri";
 import { SearchEnginePayload } from "@/DialogPayloads";
 import { emit } from "@tauri-apps/api/event";
 import { appWindow } from "@tauri-apps/api/window";
@@ -72,8 +72,9 @@ async function selectIcon() {
   }
 }
 
-function addSearchEngine() {
+async function addSearchEngine() {
   let payload: SearchEnginePayload = {
+    id: await invoke("get_new_search_engine_id"),
     icon_path: uiState.value.realIconPath,
     tint_icon: uiState.value.tintIcon,
     keyword: uiState.value.keyword,

@@ -1,10 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-mod pages;
+pub mod pages;
+pub mod utils;
 
 use pages::search::*;
 use pages::settings_page::*;
+use crate::utils::get_new_search_engine_id;
 
 use enigo::MouseControllable;
 use std::env;
@@ -42,7 +44,8 @@ async fn main() {
             get_os,
             open_extension,
             get_display_server,
-            get_recent_apps_results
+            get_recent_apps_results,
+            get_new_search_engine_id
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();

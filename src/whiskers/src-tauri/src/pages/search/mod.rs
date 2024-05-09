@@ -154,7 +154,11 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
                     let text_result =
                         results::Text::new(text, actions::Action::OpenUrl(url_action))
                             .icon(icon_path)
-                            .tint_icon(search_engine.tint_icon);
+                            .tint_icon(if search_engine.icon_path.is_none() {
+                                true
+                            } else {
+                                search_engine.tint_icon
+                            });
 
                     results.push(results::WhiskersResult::Text(text_result));
                     return results;
@@ -189,7 +193,10 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
     // If no result is found, it uses the default search engine
     if results.len() == 0 {
         for search_engine in settings.search_engines.to_owned() {
+            let search_engine = search_engine.to_owned();
+            
             if search_engine.default {
+                let search_engine = search_engine.to_owned();
                 let url = search_engine.query.replace("%s", &typed_text);
                 let url_action = actions::OpenUrl::new(url);
                 let mut default_search_icon_path =
@@ -197,7 +204,7 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
                 default_search_icon_path.push("search.svg");
 
                 let text = format!("Search for {}", &typed_text);
-                let icon_path = match search_engine.icon_path {
+                let icon_path = match search_engine.to_owned().icon_path {
                     Some(path) => path.to_string(),
                     None => default_search_icon_path
                         .into_os_string()
@@ -207,7 +214,11 @@ pub async fn get_search_results(typed_text: String) -> Vec<WhiskersResult> {
 
                 let text_result = results::Text::new(text, actions::Action::OpenUrl(url_action))
                     .icon(icon_path)
-                    .tint_icon(search_engine.tint_icon);
+                    .tint_icon(if search_engine.icon_path.is_none() {
+                        true
+                    } else {
+                        search_engine.tint_icon
+                    });
 
                 results.push(results::WhiskersResult::Text(text_result));
                 return results;
@@ -305,7 +316,11 @@ pub async fn open_app(exec_path: String, window: Window) {
     let recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap();
     let apps = get_indexed_apps().unwrap();
 
-    let mut new_recent_apps: Vec<RecentApp> = recent_apps.iter().cloned().filter(|a|a.app.exec_path != exec_path).collect();
+    let mut new_recent_apps: Vec<RecentApp> = recent_apps
+        .iter()
+        .cloned()
+        .filter(|a| a.app.exec_path != exec_path)
+        .collect();
 
     for app in apps {
         if app.exec_path == exec_path {

@@ -26,6 +26,12 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
 }
 </script>
 
+<!-- 
+============================================================================================================
+                                                    UI
+============================================================================================================ 
+--> 
+
 <template>
   <div>
     <div class="flex justify-end items-center">
@@ -33,8 +39,8 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
     </div>
     <div class="mt-2">
       <div
-        v-for="(searchEngine, index) in vm.settings!!.search_engines"
-        :key="`search-engine-${index}`"
+        v-for="searchEngine in vm.settings!!.search_engines"
+        :key="`search-engine-${searchEngine.id}`"
         class="flex search-engine-card p-4 rounded-2xl mb-1 items-center"
       >
         <img
@@ -66,7 +72,7 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
         </div>
         <button
           class="hover-background-tertiary p-1 pr-2 pl-2 ml-2 rounded-full"
-          @click="vm.editSearchEngine(index)"
+          @click="vm.editSearchEngine(searchEngine.id)"
         >
           <img
             :src="getIconUrl('pencil.svg')"
@@ -76,7 +82,7 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
         </button>
         <button
           class="hover-background-tertiary p-1 pr-2 pl-2 ml-2 rounded-full"
-          @click="vm.toggleSearchEngineMenu(index)"
+          @click="vm.toggleSearchEngineMenu(searchEngine.id)"
         >
           <img
             :src="getIconUrl('three-dots.svg')"
@@ -85,16 +91,16 @@ function canTintIcon(searchEngine: SearchEngine): boolean {
           />
         </button>
         <div class="menu">
-          <div class="menu-content" :id="`search-engine-menu-${index}`">
+          <div class="menu-content" :id="`search-engine-menu-${searchEngine.id}`">
             <button
               class="p-2 pl-3 pr-3 hover:opacity-80 text-start w-full whitespace-nowrap"
-              @click="vm.makeDefaultSearchEngine(index)"
+              @click="vm.makeDefaultSearchEngine(searchEngine.id)"
             >
               Make Default
             </button>
             <button
               class="p-2 pl-3 pr-3 hover:opacity-80 text-start w-full whitespace-nowrap"
-              @click="vm.deleteSearchEngine(index)"
+              @click="vm.deleteSearchEngine(searchEngine.id)"
             >
               Delete
             </button>

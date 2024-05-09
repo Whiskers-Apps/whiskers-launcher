@@ -1,6 +1,7 @@
 Add-Type -AssemblyName System.Drawing
 
 class App {
+    [string] $id
     [string] $icon_path
     [string] $exec_path
     [string] $name
@@ -47,6 +48,7 @@ foreach($startApp in $startApps){
     
     #Adds app to apps
     $app = [App]::new()
+    $app.id = $startApp.AppID
     $app.name =  $startApp.Name
     $app.exec_path = $shortcutPath
     $app.icon_path = $iconPath
@@ -61,10 +63,12 @@ foreach($startApp in $startApps){
 
 $appsJson += "[`n"
 foreach ($app in $apps) {
+    $appId = $app.id -replace "\\", "\\"
     $iconPath = $app.icon_path -replace "\\", "\\"
     $execPath = $app.exec_path -replace "\\", "\\"
     
     $appsJson += "{`n"
+    $appsJson += "`"id`" : `"$appId`",`n"
     $appsJson += "`"icon_path`" : `"$iconPath`",`n"
     $appsJson += "`"exec_path`" : `"$execPath`",`n"
     $appsJson += "`"name`" : `"$($app.name)`"`n"

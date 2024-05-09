@@ -10,7 +10,7 @@ import { emit } from "@tauri-apps/api/event";
 import { DeleteSearchEnginePayload } from "@/DialogPayloads";
 
 
-const index = +(useRoute().query.index ?? -1);
+const id = +(useRoute().query.id ?? -1);
 const settings = ref<Settings>();
 const hasLoaded = ref(false);
 
@@ -19,7 +19,6 @@ const accentPrimary = ref("");
 const textOnBackground = ref("");
 
 onMounted(async () => {
-    console.log(index)
     settings.value = await invoke("get_settings");
 
     backgroundMain.value = settings.value!!.theme.background_main;
@@ -31,7 +30,7 @@ onMounted(async () => {
 
 function deleteSearchEngine(){
 
-    let payload: DeleteSearchEnginePayload = { index: index};
+    let payload: DeleteSearchEnginePayload = { id: id};
 
     emit("delete-search-engine", payload);
     appWindow.close();

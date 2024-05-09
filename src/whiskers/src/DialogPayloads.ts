@@ -1,5 +1,5 @@
 export interface DeleteSearchEnginePayload{
-    index: number
+    id: number
 }
 
 export interface AddToBlacklistPayload{
@@ -7,6 +7,7 @@ export interface AddToBlacklistPayload{
 }
 
 export interface SearchEnginePayload{
+    id: number,
     icon_path: string | null,
     tint_icon: boolean,
     keyword: string,
