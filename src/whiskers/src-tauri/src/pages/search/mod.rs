@@ -313,7 +313,7 @@ pub async fn open_app(exec_path: String, window: Window) {
 
     let recent_apps_path = get_recent_apps_path().unwrap();
     let recent_apps_json = read_to_string(&recent_apps_path).unwrap_or("[]".to_owned());
-    let recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap();
+    let recent_apps = serde_json::from_str::<Vec<RecentApp>>(&recent_apps_json).unwrap_or(Vec::new());
     let apps = get_indexed_apps().unwrap();
 
     let mut new_recent_apps: Vec<RecentApp> = recent_apps

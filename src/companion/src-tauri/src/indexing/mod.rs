@@ -43,7 +43,7 @@ pub fn index_apps() {
                                     path.clone().into_os_string().into_string().unwrap();
                                 let name = entry.name(None).unwrap().to_string();
 
-                                apps.push(AppIndex::new(icon_path, exec_path, name))
+                                apps.push(AppIndex::new(&exec_path, &icon_path, &exec_path, &name))
                             }
                         }
                     }
