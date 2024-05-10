@@ -1,56 +1,66 @@
 {
+  "$schema": "../node_modules/@tauri-apps/cli/schema.json",
   "build": {
-    "beforeDevCommand": "npm run dev",
-    "beforeBuildCommand": "npm run build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist",
-    "withGlobalTauri": false
+    "beforeBuildCommand": "yarn run build",
+    "beforeDevCommand": "yarn run dev",
+    "devPath": "http://localhost:5173",
+    "distDir": "../public"
   },
   "package": {
     "productName": "whiskers-launcher",
-    "version": "1.2.0"
+    "version": "0.1.0"
   },
   "tauri": {
     "allowlist": {
-      "all": true,
-      "fs": {
-        "all": true,
-        "scope": ["**"]
-      },
-      "protocol": {
-        "asset": true,
-        "all": true,
-        "assetScope": ["**", "$HOME/.local/**"]
-      }
+      "all": false
     },
-    "macOSPrivateApi": true,
     "bundle": {
       "active": true,
-      "targets": "app",
-      "identifier": "com.lighttigerxiv.simple.keyboard.launcher",
+      "category": "DeveloperTool",
+      "copyright": "",
+      "deb": {
+        "depends": []
+      },
+      "externalBin": [],
       "icon": [
         "icons/32x32.png",
         "icons/128x128.png",
         "icons/128x128@2x.png",
         "icons/icon.icns",
         "icons/icon.ico"
-      ]
+      ],
+      "identifier": "com.tauri.dev",
+      "longDescription": "",
+      "macOS": {
+        "entitlements": null,
+        "exceptionDomain": "",
+        "frameworks": [],
+        "providerShortName": null,
+        "signingIdentity": null
+      },
+      "resources": [],
+      "shortDescription": "",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": ""
+      }
     },
     "security": {
       "csp": null
     },
+    "updater": {
+      "active": false
+    },
     "windows": [
       {
-        "fullscreen": true,
-        "resizable": false,
+        "fullscreen": false,
+        "height": 600,
+        "resizable": true,
         "title": "Whiskers Launcher",
-        "decorations": false,
-        "transparent": true
+        "width": 800
       }
-    ],
-    "systemTray": {
-      "iconPath": "icons/icon.png",
-      "iconAsTemplate": true
-    }
+    ]
   }
 }
