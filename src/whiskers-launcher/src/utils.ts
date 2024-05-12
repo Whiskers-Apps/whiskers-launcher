@@ -1,0 +1,3 @@
+function getCssVars(): String{
+    return "";
+}

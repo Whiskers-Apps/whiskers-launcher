@@ -1,0 +1,33 @@
+<script lang="ts">
+	import { invoke } from '@tauri-apps/api/tauri';
+	import { appWindow } from '@tauri-apps/api/window';
+
+	// ===========================
+	// UI
+	// ===========================
+	let text = 'Hello World!';
+
+	// ===========================
+	// UI Events
+	// ===========================
+	appWindow.setResizable(false);
+
+	window.addEventListener('keydown', (event) => {
+		switch (event.key) {
+			case 'Escape': {
+				appWindow.close();
+				break;
+			}
+		}
+	});
+</script>
+
+<!-- 
+======================================================================================
+UI
+======================================================================================
+-->
+
+<div class="bg-blue-400 h-screen overflow-hidden flex justify-center">
+	<div class=" w-[800px] bg-red-500"></div>
+</div>
