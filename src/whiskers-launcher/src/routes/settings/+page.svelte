@@ -41,7 +41,7 @@
 
 		<div class="  p-4 max-w-[800px] flex-grow">
 			{#if selectedTab === 0}
-				<GeneralTab />
+				<GeneralTab settings={settings} />
 			{/if}
 			{#if selectedTab === 1}
 				<SearchBoxTab />

@@ -60,43 +60,72 @@ export function getThemeCss(settings: Settings): string {
 	return `
 <style>
 
+:root{
+	--background: ${settings.theme.background};
+	--secondary: ${settings.theme.secondary};
+	--tertiary: ${settings.theme.tertiary};
+	--accent: ${settings.theme.accent};
+	--warning: ${settings.theme.warning};
+	--danger: ${settings.theme.danger};
+	--on-accent: ${settings.theme.on_accent};
+	--on-danger: ${settings.theme.on_danger};
+	--text: ${settings.theme.text};
+	--sub-text: ${settings.theme.sub_text};
+}
+
 .bg-background{
-    background-color: ${settings.theme.background};
+    background-color: var(--background);
 }
 
 .bg-secondary{
-    background-color: ${settings.theme.secondary};
+    background-color: var(--secondary);
 }
 
 .hover-bg-tertiary:hover{
-    background-color: ${settings.theme.tertiary};
+    background-color: var(--tertiary);
 }
 
 .text-text{
-    color: ${settings.theme.text};
+    color: var(--text);
 }
 
 .text-sub-text{
-	color: ${settings.theme.sub_text};
+	color: var(--sub-text);
 }
 
 .text-accent{
-    color: ${settings.theme.accent};
+    color: var(--accent);
 }
 
 .hover-text-accent:hover{
-    color: ${settings.theme.accent};
+    color: var(--accent);
 }
 
 .card{
-    background-color: ${settings.theme.secondary};
-    border: 1px solid ${settings.theme.tertiary};
+    background-color: var(--secondary);
+    border: 1px solid var(--tertiary);
     padding: 12px;
 	border-radius: 14px;
 }
 
+.input{
+	background-color: var(--secondary);
+	border: 1px solid var(--tertiary);
+	padding: 8px;
+	border-radius: 6px;
+	width: 100%;
+}
+
+.input:focus{
+	outline: 1px solid var(--accent);
+}
+
+.input::placeholder{
+	color: var(--sub-text);
+}
+
 .warning{
-    border: 1px solid ${settings.theme.warning};
+    border: 1px solid var(--warning);
 }
 
 </style>
