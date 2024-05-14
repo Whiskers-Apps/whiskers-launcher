@@ -20,14 +20,20 @@
 			}
 		}
 	});
+
+	function openSettings(){
+		invoke("open_settings_window");
+	}
 </script>
 
 <!-- 
 ======================================================================================
-UI
+ UI
 ======================================================================================
 -->
 
 <div class="bg-blue-400 h-screen overflow-hidden flex justify-center">
-	<div class=" w-[800px] bg-red-500"></div>
+	<div class=" w-[800px] bg-red-500">
+		<button on:click={openSettings}>Open Settings</button>
+	</div>
 </div>

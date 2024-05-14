@@ -1,4 +1,7 @@
+use whiskers_launcher_rs::{api::settings::{self}, settings::Settings};
+
 #[tauri::command]
-pub fn get_new_text() -> String {
-    return String::from("Bulbasaur");
+pub async fn get_settings() -> Settings{
+    settings::get_settings()
 }
+

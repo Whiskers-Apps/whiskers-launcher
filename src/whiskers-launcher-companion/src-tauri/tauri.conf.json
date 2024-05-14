@@ -4,15 +4,28 @@
     "beforeBuildCommand": "yarn run build",
     "beforeDevCommand": "yarn run dev",
     "devPath": "http://localhost:5173",
-    "distDir": "../public"
+    "distDir": "../public",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "whiskers-launcher-companion",
-    "version": "0.1.0"
+    "version": "2.0.0"
   },
   "tauri": {
     "allowlist": {
-      "all": false
+      "all": false,
+      "globalShortcut": {
+        "all": true
+      },
+      "fs": {
+        "all": true,
+        "scope": ["**"]
+      },
+      "protocol": {
+        "asset": true,
+        "all": true,
+        "assetScope": ["**", "$HOME/.local/**"]
+      }
     },
     "bundle": {
       "active": true,
@@ -29,7 +42,7 @@
         "icons/icon.icns",
         "icons/icon.ico"
       ],
-      "identifier": "com.tauri.dev",
+      "identifier": "whiskers-launcher-companion",
       "longDescription": "",
       "macOS": {
         "entitlements": null,
@@ -56,11 +69,15 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
-        "resizable": true,
+        "height": 100,
+        "resizable": false,
         "title": "Whiskers Launcher Companion",
-        "width": 800
+        "width": 100
       }
-    ]
+    ],
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    }
   }
 }

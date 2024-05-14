@@ -3,17 +3,18 @@
 
 
 pub mod commands;
+pub mod windows;
 
-use commands::settings::get_new_text;
-
-
+use windows::open_settings_window;
+use commands::settings::get_settings;
 
 
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
-      get_new_text      
+      open_settings_window,
+      get_settings     
     ])
     .run(tauri::generate_context!())
-    .expect("error while running tauri application");
+    .expect("Error running app");
 }
