@@ -81,6 +81,10 @@ export function getThemeCss(settings: Settings): string {
     background-color: var(--secondary);
 }
 
+.hover-bg-secondary:hover{
+	background-color: var(--secondary);
+}
+
 .hover-bg-tertiary:hover{
     background-color: var(--tertiary);
 }
@@ -109,7 +113,7 @@ export function getThemeCss(settings: Settings): string {
 }
 
 .input{
-	background-color: var(--secondary);
+	background-color: var(--background);
 	border: 1px solid var(--tertiary);
 	padding: 8px;
 	border-radius: 6px;
@@ -124,8 +128,21 @@ export function getThemeCss(settings: Settings): string {
 	color: var(--sub-text);
 }
 
+.select{
+	background-color: var(--background);
+	border: 1px solid var(--tertiary);
+	border-radius: 6px;
+	width: 100%;
+}
+
 .warning{
     border: 1px solid var(--warning);
+}
+
+.v-divider{
+	height: 1px;
+	width: 100%;
+	background-color: var(--tertiary);
 }
 
 </style>

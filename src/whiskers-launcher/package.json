@@ -35,8 +35,10 @@
   },
   "type": "module",
   "dependencies": {
+    "@poppanator/sveltekit-svg": "^4.2.1",
     "@sveltejs/adapter-static": "^3.0.1",
     "@tauri-apps/api": "^1.5.5",
-    "@tauri-apps/cli": "^1.5.13"
+    "@tauri-apps/cli": "^1.5.13",
+    "svgo": "^3.3.2"
   }
 }
