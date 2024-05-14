@@ -1,3 +1,4 @@
+import type { SelectValue } from '$lib/components/classes';
 import { invoke } from '@tauri-apps/api';
 
 export interface Settings {
@@ -77,6 +78,7 @@ export function getThemeCss(settings: Settings): string {
     background-color: var(--background);
 }
 
+
 .bg-secondary{
     background-color: var(--secondary);
 }
@@ -99,6 +101,10 @@ export function getThemeCss(settings: Settings): string {
 
 .text-accent{
     color: var(--accent);
+}
+
+.border-accent{
+	border: 2px solid var(--accent);
 }
 
 .hover-text-accent:hover{
@@ -148,3 +154,152 @@ export function getThemeCss(settings: Settings): string {
 </style>
     `;
 }
+
+export const LAUNCH_FIRST_KEY_OPTIONS: SelectValue[] = [
+	{
+		id: 'ctrl',
+		value: 'Ctrl'
+	},
+	{
+		id: 'alt',
+		value: 'Alt'
+	},
+	{
+		id: 'super',
+		value: 'Super'
+	},
+	{
+		id: 'shift',
+		value: 'Shift'
+	}
+];
+
+export const LAUNCH_SECOND_KEY_OPTIONS: SelectValue[] = [
+	{
+		id: '-',
+		value: '-'
+	},
+	{
+		id: 'alt',
+		value: 'Alt'
+	},
+	{
+		id: 'shift',
+		value: 'Shift'
+	},
+	{
+		id: 'super',
+		value: 'Super'
+	}
+];
+
+export const LAUNCH_THIRD_KEY_OPTIONS: SelectValue[] = [
+	{
+		id: 'space',
+		value: 'Space'
+	},
+	{
+		id: 'a',
+		value: 'A'
+	},
+	{
+		id: 'b',
+		value: 'B'
+	},
+	{
+		id: 'c',
+		value: 'C'
+	},
+	{
+		id: 'd',
+		value: 'D'
+	},
+	{
+		id: 'e',
+		value: 'E'
+	},
+	{
+		id: 'f',
+		value: 'F'
+	},
+	{
+		id: 'g',
+		value: 'G'
+	},
+	{
+		id: 'h',
+		value: 'H'
+	},
+	{
+		id: 'i',
+		value: 'I'
+	},
+	{
+		id: 'j',
+		value: 'J'
+	},
+	{
+		id: 'k',
+		value: 'K'
+	},
+	{
+		id: 'l',
+		value: 'L'
+	},
+	{
+		id: 'm',
+		value: 'M'
+	},
+	{
+		id: 'n',
+		value: 'N'
+	},
+	{
+		id: 'o',
+		value: 'O'
+	},
+	{
+		id: 'p',
+		value: 'P'
+	},
+	{
+		id: 'q',
+		value: 'Q'
+	},
+	{
+		id: 'r',
+		value: 'R'
+	},
+	{
+		id: 's',
+		value: 'S'
+	},
+	{
+		id: 't',
+		value: 'T'
+	},
+	{
+		id: 'u',
+		value: 'U'
+	},
+	{
+		id: 'v',
+		value: 'V'
+	},
+	{
+		id: 'w',
+		value: 'W'
+	},
+	{
+		id: 'x',
+		value: 'X'
+	},
+	{
+		id: 'y',
+		value: 'Y'
+	},
+	{
+		id: 'z',
+		value: 'Z'
+	}
+];
