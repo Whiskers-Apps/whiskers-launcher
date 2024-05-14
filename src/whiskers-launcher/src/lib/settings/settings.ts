@@ -7,6 +7,7 @@ export interface Settings {
 	third_key: string;
 	auto_start: boolean;
 	show_recent_apps: boolean;
+	split_results: boolean;
 	show_search_icon: boolean;
 	show_settings_icon: boolean;
 	show_placeholder: boolean;
@@ -55,6 +56,10 @@ export interface ExtensionSetting {
 
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
+}
+
+export function writeSettings(settings: Settings) {
+	invoke('write_settings', { settings: settings });
 }
 
 export function getThemeCss(settings: Settings): string {
@@ -143,6 +148,10 @@ export function getThemeCss(settings: Settings): string {
 
 .warning{
     border: 1px solid var(--warning);
+}
+
+.text-warning{
+	color: var(--warning);
 }
 
 .v-divider{

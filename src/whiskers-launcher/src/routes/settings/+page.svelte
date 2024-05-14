@@ -44,7 +44,7 @@
 				<GeneralTab settings={settings} />
 			{/if}
 			{#if selectedTab === 1}
-				<SearchBoxTab />
+				<SearchBoxTab settings={settings} />
 			{/if}
 			{#if selectedTab === 2}
 				<SearchResultsTab />

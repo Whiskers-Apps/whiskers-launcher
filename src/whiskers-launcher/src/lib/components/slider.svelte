@@ -70,7 +70,7 @@
 	}
 
 	::-ms-track {
-		background: purple;
+		background: var(--accent);
 		color: transparent;
 		height: 40px;
 		border: none;

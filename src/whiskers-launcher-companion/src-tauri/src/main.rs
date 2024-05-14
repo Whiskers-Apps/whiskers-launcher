@@ -1,10 +1,7 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{
-    env,
-    process::exit,
-};
+use std::{env, process::exit};
 
 use indexing::index_apps;
 use serde::Serialize;
@@ -16,8 +13,8 @@ use tokio::time::sleep;
 use whiskers_launcher_rs::api::settings::get_settings;
 use windows::{open_launcher_window, open_settings_window};
 
-mod windows;
 mod indexing;
+mod windows;
 
 #[tokio::main]
 async fn main() {
@@ -54,14 +51,16 @@ async fn main() {
                 .expect("Error closing main window");
 
             tokio::spawn(async move {
-              loop{
-                {
-                  index_apps();
-                }
+                let _ = get_settings();
 
-                // Reindex apps every 5 minutes
-                sleep(tokio::time::Duration::from_secs(300)).await;
-              }
+                loop {
+                    {
+                        index_apps();
+                    }
+
+                    // Reindex apps every 5 minutes
+                    sleep(tokio::time::Duration::from_secs(300)).await;
+                }
             });
 
             Ok(())
