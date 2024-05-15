@@ -54,6 +54,13 @@ export interface ExtensionSetting {
 	setting_value: string;
 }
 
+export interface App{
+	id: string;
+	title: string;
+	icon: string | null;
+	path: string;
+}
+
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
 }
@@ -108,6 +115,10 @@ export function getThemeCss(settings: Settings): string {
     color: var(--accent);
 }
 
+.text-on-accent{
+	color: var(--on-accent);
+}
+
 .border-accent{
 	border: 2px solid var(--accent);
 }
@@ -123,28 +134,7 @@ export function getThemeCss(settings: Settings): string {
 	border-radius: 14px;
 }
 
-.input{
-	background-color: var(--background);
-	border: 1px solid var(--tertiary);
-	padding: 8px;
-	border-radius: 6px;
-	width: 100%;
-}
 
-.input:focus{
-	outline: 1px solid var(--accent);
-}
-
-.input::placeholder{
-	color: var(--sub-text);
-}
-
-.select{
-	background-color: var(--background);
-	border: 1px solid var(--tertiary);
-	border-radius: 6px;
-	width: 100%;
-}
 
 .warning{
     border: 1px solid var(--warning);

@@ -17,7 +17,7 @@
 
 	function selectValue(value: SelectValue) {
 		dispatch('selection', value);
-        showOptions = false;
+		showOptions = false;
 	}
 </script>
 
@@ -44,3 +44,12 @@
 		</div>
 	{/if}
 </div>
+
+<style>
+	.select {
+		background-color: var(--background);
+		border: 1px solid var(--tertiary);
+		border-radius: 6px;
+		width: 100%;
+	}
+</style>

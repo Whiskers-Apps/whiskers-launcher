@@ -1,8 +1,8 @@
 <script lang="ts">
 	import SliderSetting from '$lib/components/slider-setting.svelte';
-	import Slider from '$lib/components/slider.svelte';
 	import ToggleSetting from '$lib/components/toggle-setting.svelte';
 	import { writeSettings, type Settings } from '$lib/settings/settings';
+
 
 	// ==============================
 	// Props
@@ -69,14 +69,14 @@
 	function updateBorderRadius(value: CustomEvent<number>) {
 		borderRadius = value.detail;
 		let newSettings = settings;
-		newSettings.border_radius = +borderRadius;
+		newSettings.border_radius = borderRadius;
 		writeSettings(newSettings);
 	}
 
 	function updateBorderWidth(value: CustomEvent<number>) {
 		borderWidth = value.detail;
 		let newSettings = settings;
-		newSettings.border_width = +borderWidth;
+		newSettings.border_width = borderWidth;
 		writeSettings(newSettings);
 	}
 </script>

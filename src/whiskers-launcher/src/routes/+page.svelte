@@ -3,11 +3,6 @@
 	import { appWindow } from '@tauri-apps/api/window';
 
 	// ===========================
-	// UI
-	// ===========================
-	let text = 'Hello World!';
-
-	// ===========================
 	// UI Events
 	// ===========================
 	appWindow.setResizable(false);

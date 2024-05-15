@@ -41,25 +41,25 @@
 
 		<div class="  p-4 max-w-[800px] flex-grow">
 			{#if selectedTab === 0}
-				<GeneralTab settings={settings} />
+				<GeneralTab {settings} />
 			{/if}
 			{#if selectedTab === 1}
-				<SearchBoxTab settings={settings} />
+				<SearchBoxTab {settings} />
 			{/if}
 			{#if selectedTab === 2}
-				<SearchResultsTab />
+				<SearchResultsTab {settings} />
 			{/if}
 			{#if selectedTab === 3}
-				<SearchEnginesTab />
+				<SearchEnginesTab {settings} />
 			{/if}
 			{#if selectedTab === 4}
-				<ThemingTab />
+				<ThemingTab {settings} />
 			{/if}
 			{#if selectedTab === 5}
-				<ExtensionsTab />
+				<ExtensionsTab {settings} />
 			{/if}
 			{#if selectedTab === 6}
-				<AboutTab settings={settings} />
+				<AboutTab {settings} />
 			{/if}
 		</div>
 	</div>

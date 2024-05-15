@@ -18,6 +18,14 @@
 			},
 			"shell": {
 				"all": true
+			},
+			"fs": {
+				"all": true
+			},
+			"protocol": {
+				"all": true,
+				"asset": true,
+				"assetScope": ["**", "$HOME/.local/**"]
 			}
 		},
 		"bundle": {

@@ -9,7 +9,7 @@
 	let dispatch = createEventDispatcher();
 
 	function handleSlide(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		dispatch('slide', event.currentTarget.value);
+		dispatch('slide', +event.currentTarget.value);
 	}
 </script>
 

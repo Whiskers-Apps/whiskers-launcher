@@ -16,8 +16,10 @@
 	}
 </script>
 
-<div>
-	<p class=" text-xl font-medium">{title}</p>
-	<p class=" text-sub-text">{description}</p>
+<div class=" card space-y-2">
+	<div>
+		<p class=" text-xl font-medium">{title}</p>
+		<p class=" text-sub-text">{description}</p>
+	</div>
+	<Slider {min} {max} {step} {value} on:slide={onSlide} />
 </div>
-<Slider {min} {max} {step} {value} on:slide={onSlide} />
