@@ -3,6 +3,7 @@
 
 	export let text: string;
 	export let disabled = false;
+	export let alignStart = false;
 
 	let dispatch = createEventDispatcher();
 
@@ -11,22 +12,20 @@
 	}
 </script>
 
-<button class="pr-button p-2 pr-3 pl-3 text-on-accent rounded-full" on:click={onClick} {disabled}>
+<button class={`sec-button p-2 pr-3 pl-3 text-on-accent rounded-full ${alignStart ? 'text-start' : ''}`} on:click={onClick} {disabled}>
 	{text}
 </button>
 
 <style>
-	.pr-button {
-		background-color: var(--accent);
+	.sec-button {
+        color: var(--accent);
 	}
 
-	.pr-button:hover:enabled {
-		filter: brightness(0.9);
+	.sec-button:hover:enabled {
+		font-weight: bold;
 	}
 
-	.pr-button:disabled {
-		background-color: var(--secondary);
+	.sec-button:disabled {
 		color: var(--text);
-		outline: 1px solid var(--tertiary);
 	}
 </style>

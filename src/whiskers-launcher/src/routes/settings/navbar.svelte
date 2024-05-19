@@ -56,17 +56,17 @@
 	}
 </script>
 
-<div class="p-4 flex-col flex items-start gap-4">
+<div class="p-4 items-start space-y-4 max-w-[250px] overflow-auto">
 	<button
 		bind:this={generalButton}
-		class="text-xl hover-text-accent text-accent"
+		class="text-xl hover-text-accent text-accent w-full text-start"
 		on:click={() => {
 			selectTab(0);
 		}}>General</button
 	>
 	<button
 		bind:this={searchBoxButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(1);
 		}}>Search Box</button
@@ -74,7 +74,7 @@
 
 	<button
 		bind:this={searchResultsButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(2);
 		}}>Search Results</button
@@ -82,7 +82,7 @@
 
 	<button
 		bind:this={searchEnginesButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(3);
 		}}>Search Engines</button
@@ -90,7 +90,7 @@
 
 	<button
 		bind:this={themingButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(4);
 		}}>Theming</button
@@ -98,7 +98,7 @@
 
 	<button
 		bind:this={extensionButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(5);
 		}}>Extensions</button
@@ -106,7 +106,7 @@
 
 	<button
 		bind:this={aboutButton}
-		class="text-xl hover-text-accent"
+		class="text-xl hover-text-accent w-full text-start"
 		on:click={() => {
 			selectTab(6);
 		}}>About</button

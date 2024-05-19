@@ -1,83 +1,61 @@
 <script lang="ts">
 	import SliderSetting from '$lib/components/slider-setting.svelte';
 	import ToggleSetting from '$lib/components/toggle-setting.svelte';
-	import { writeSettings, type Settings } from '$lib/settings/settings';
+	import { getSettings, writeSettings, type Settings } from '$lib/settings/settings';
+	import { createEventDispatcher } from 'svelte';
 
 
 	// ==============================
 	// Props
 	// ==============================
 	export let settings: Settings;
+	let dispatch = createEventDispatcher();
 
 	// ==============================
 	// UI Elements
 	// ==============================
-	let splitResults = settings.split_results;
-	let showSearchIcon = settings.show_search_icon;
-	let showSettingsIcon = settings.show_settings_icon;
-	let showPlaceholder = settings.show_placeholder;
-	let accentSearchBorder = settings.accent_search_border;
-	let hideOnBlur = settings.hide_on_blur;
-	let borderRadius = settings.border_radius;
-	let borderWidth = settings.border_width;
+	$: splitResults = settings.split_results;
+	$: showSearchIcon = settings.show_search_icon;
+	$: showSettingsIcon = settings.show_settings_icon;
+	$: showPlaceholder = settings.show_placeholder;
+	$: accentSearchBorder = settings.accent_search_border;
+	$: hideOnBlur = settings.hide_on_blur;
+	$: borderRadius = settings.border_radius;
+	$: borderWidth = settings.border_width;
 
 	// ==============================
 	// Events
 	// ==============================
-	function updateSplitResults(value: CustomEvent<boolean>) {
-		splitResults = value.detail;
-		let newSettings = settings;
-		newSettings.split_results = splitResults;
-		writeSettings(newSettings);
+	async function updateSplitResults(value: CustomEvent<boolean>) {
+		dispatch("updateSplitResults", value.detail);
 	}
 
-	function updateShowSearchIcon(value: CustomEvent<boolean>) {
-		showSearchIcon = value.detail;
-		let newSettings = settings;
-		newSettings.show_search_icon = showSearchIcon;
-		writeSettings(newSettings);
+	async function updateShowSearchIcon(value: CustomEvent<boolean>) {
+		dispatch("updateShowSearchIcon", value.detail);
 	}
 
-	function updateShowSettingsIcon(value: CustomEvent<boolean>) {
-		showSettingsIcon = value.detail;
-		let newSettings = settings;
-		newSettings.show_settings_icon = showSettingsIcon;
-		writeSettings(newSettings);
+	async function updateShowSettingsIcon(value: CustomEvent<boolean>) {
+		dispatch("updateShowSettingsIcon", value.detail);
 	}
 
-	function updateShowPlaceholder(value: CustomEvent<boolean>) {
-		showPlaceholder = value.detail;
-		let newSettings = settings;
-		newSettings.show_placeholder = showPlaceholder;
-		writeSettings(newSettings);
+	async function updateShowPlaceholder(value: CustomEvent<boolean>) {
+		dispatch("updateShowPlaceholder", value.detail);
 	}
 
-	function updateAccentSearchBorder(value: CustomEvent<boolean>) {
-		accentSearchBorder = value.detail;
-		let newSettings = settings;
-		newSettings.accent_search_border = accentSearchBorder;
-		writeSettings(newSettings);
+	async function updateAccentSearchBorder(value: CustomEvent<boolean>) {
+		dispatch("updateAccentSearchBorder", value.detail);
 	}
 
-	function updateHideOnBlur(value: CustomEvent<boolean>) {
-		hideOnBlur = value.detail;
-		let newSettings = settings;
-		newSettings.hide_on_blur = hideOnBlur;
-		writeSettings(newSettings);
+	async function updateHideOnBlur(value: CustomEvent<boolean>) {
+		dispatch("updateHideOnBlur", value.detail);
 	}
 
-	function updateBorderRadius(value: CustomEvent<number>) {
-		borderRadius = value.detail;
-		let newSettings = settings;
-		newSettings.border_radius = borderRadius;
-		writeSettings(newSettings);
+	async function updateBorderRadius(value: CustomEvent<number>) {
+		dispatch("updateBorderRadius", value.detail);
 	}
 
-	function updateBorderWidth(value: CustomEvent<number>) {
-		borderWidth = value.detail;
-		let newSettings = settings;
-		newSettings.border_width = borderWidth;
-		writeSettings(newSettings);
+	async function updateBorderWidth(value: CustomEvent<number>) {
+		dispatch("updateBorderWidth", value.detail);
 	}
 </script>
 
@@ -125,7 +103,7 @@
 	/>
 
 	<SliderSetting
-		title={`Border Radius ${borderRadius}`}
+		title={`Border Radius (${borderRadius})`}
 		description="Applies a border radius to the search box."
 		min={0}
 		max={48}
@@ -135,7 +113,7 @@
 	/>
 
 	<SliderSetting
-		title={`Border Width ${borderWidth}`}
+		title={`Border Width (${borderWidth})`}
 		description="Applies a border width to the search box."
 		min={0}
 		max={10}

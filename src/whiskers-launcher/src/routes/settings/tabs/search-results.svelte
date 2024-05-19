@@ -4,43 +4,41 @@
 	import PlusIcon from '$lib/icons/plus.svg?component';
 	import MinusIcon from '$lib/icons/minus.svg?component';
 	import QuestionIcon from '$lib/icons/question.svg?component';
-	import { writeSettings, type App, type Settings } from '$lib/settings/settings';
+	import { type App, type Settings } from '$lib/settings/settings';
 	import { invoke } from '@tauri-apps/api';
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { WebviewWindow } from '@tauri-apps/api/window';
 	import { listen } from '@tauri-apps/api/event';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 
+	// ================================
+	// Props
+	// ================================
 	export let settings: Settings;
+	let dispatch = createEventDispatcher();
 
-	let highlightBackground = settings.highlight_selected_background;
-	let showAltHint = settings.show_alt_hint;
-	let resultsCount = settings.results_count;
+	// ================================
+	// UI
+	// ================================
+	$: highlightBackground = settings.highlight_selected_background;
+	$: showAltHint = settings.show_alt_hint;
+	$: resultsCount = settings.results_count;
 	let blacklist_apps: App[] = [];
 
 	onMount(async () => {
 		blacklist_apps = await invoke('get_blacklisted_apps');
 	});
 
-	function updateHighlightBackground(event: CustomEvent<boolean>) {
-		highlightBackground = event.detail;
-		let newSettings = settings;
-		newSettings.highlight_selected_background = highlightBackground;
-		writeSettings(newSettings);
+	async function updateHighlightBackground(event: CustomEvent<boolean>) {
+		dispatch('updateHighlightBackground', event.detail);
 	}
 
-	function updateShowAltHint(event: CustomEvent<boolean>) {
-		showAltHint = event.detail;
-		let newSettings = settings;
-		newSettings.show_alt_hint = showAltHint;
-		writeSettings(newSettings);
+	async function updateShowAltHint(event: CustomEvent<boolean>) {
+		dispatch('updateShowAltHint', event.detail);
 	}
 
-	function updateResultsCount(event: CustomEvent<number>) {
-		resultsCount = event.detail;
-		let newSettings = settings;
-		newSettings.results_count = +resultsCount;
-		writeSettings(newSettings);
+	async function updateResultsCount(event: CustomEvent<number>) {
+		dispatch('updateResultsCount', event.detail);
 	}
 
 	async function openAddToBlacklistDialog() {
@@ -54,6 +52,7 @@
 		});
 
 		const unlisten = await listen('refresh-blacklist', async (_) => {
+			dispatch('refreshBlacklist');
 			blacklist_apps = await invoke('get_blacklisted_apps');
 			unlisten();
 		});
@@ -70,6 +69,7 @@
 		});
 
 		const unlisten = await listen('refresh-blacklist', async (_) => {
+			dispatch('refreshBlacklist');
 			blacklist_apps = await invoke('get_blacklisted_apps');
 			unlisten();
 		});

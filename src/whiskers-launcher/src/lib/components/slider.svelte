@@ -36,7 +36,7 @@
 		appearance: none;
 		position: relative;
 		overflow: hidden;
-		height: 30px;
+		height: 25px;
 		width: 200px;
 		cursor: pointer;
 		border-radius: 0;
@@ -49,11 +49,11 @@
 
 	::-webkit-slider-thumb {
 		-webkit-appearance: none;
-		width: 30px;
-		height: 30px;
+		width: 25px;
+		height: 25px;
 		background: var(--background);
-		box-shadow: -2000px 0 0 1985px var(--accent);
-		border: 3px solid var(--accent);
+		box-shadow: -2000px 0 0 1990px var(--accent);
+		border: 2px solid var(--accent);
 		border-radius: 999px;
 	}
 

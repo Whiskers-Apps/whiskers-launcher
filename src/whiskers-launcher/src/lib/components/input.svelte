@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { createEventDispatcher } from 'svelte';
-	import Toggle from './toggle.svelte';
 
-	export let text = '';
+	export let value = '';
 	export let placeholder = '';
 
 	let dispatch = createEventDispatcher();
@@ -12,7 +11,7 @@
 	}
 </script>
 
-<input class=" input" bind:value={text} on:input={handleInput} {placeholder} />
+<input class=" input" bind:value={value} on:input={handleInput} {placeholder} />
 
 <style>
 	.input {

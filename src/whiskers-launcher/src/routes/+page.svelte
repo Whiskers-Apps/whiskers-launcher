@@ -14,6 +14,11 @@
 				break;
 			}
 		}
+
+		if (event.ctrlKey && event.key === 's') {
+            openSettings();
+			appWindow.close();
+        }
 	});
 
 	function openSettings(){

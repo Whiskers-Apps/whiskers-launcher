@@ -1,10 +1,12 @@
 import type { SelectValue } from '$lib/components/classes';
 import { invoke } from '@tauri-apps/api';
+import CssFilterConverter from 'css-filter-converter';
 
 export interface Settings {
 	first_key: string;
 	second_key: string | null;
 	third_key: string;
+	scaling: number;
 	auto_start: boolean;
 	show_recent_apps: boolean;
 	split_results: boolean;
@@ -28,7 +30,7 @@ export interface Settings {
 
 export interface SearchEngine {
 	id: number;
-	icon_path: string;
+	icon_path: string | null;
 	tint_icon: boolean;
 	keyword: string;
 	name: string;
@@ -54,7 +56,7 @@ export interface ExtensionSetting {
 	setting_value: string;
 }
 
-export interface App{
+export interface App {
 	id: string;
 	title: string;
 	icon: string | null;
@@ -67,6 +69,26 @@ export async function getSettings(): Promise<Settings> {
 
 export function writeSettings(settings: Settings) {
 	invoke('write_settings', { settings: settings });
+}
+
+export function getCssFilter(hex: string): string {
+	let loss = 0;
+	let attempts = 0;
+	let filter = '';
+
+	do {
+		let result = CssFilterConverter.hexToFilter(hex);
+		loss = result.loss ?? 0;
+		filter = result.color ?? '';
+
+		attempts += 1;
+
+		if (attempts === 100) {
+			break;
+		}
+	} while (loss > 0.1);
+
+	return filter;
 }
 
 export function getThemeCss(settings: Settings): string {
@@ -90,6 +112,9 @@ export function getThemeCss(settings: Settings): string {
     background-color: var(--background);
 }
 
+.hover-background:hover{
+	background-color: var(--background);
+}
 
 .bg-secondary{
     background-color: var(--secondary);
@@ -97,6 +122,38 @@ export function getThemeCss(settings: Settings): string {
 
 .hover-bg-secondary:hover{
 	background-color: var(--secondary);
+}
+
+.bg-tertiary{
+	background-color: var(--tertiary);
+}
+
+.bg-accent{
+	background-color: var(--accent);
+}
+
+.bg-warning{
+	background-color: var(--warning);
+}
+
+.bg-danger{
+	background-color: var(--danger);
+}
+
+.bg-on-accent{
+    background-color: var(--on-accent);
+}
+
+.bg-on-danger{
+    background-color: var(--on-danger);
+}
+
+.bg-text{
+    background-color: var(--text);
+}
+
+.bg-sub-text{
+	background-color: var(--sub-text);
 }
 
 .hover-bg-tertiary:hover{
@@ -115,11 +172,24 @@ export function getThemeCss(settings: Settings): string {
     color: var(--accent);
 }
 
+
+.accent-filter{
+	filter: ${getCssFilter(settings.theme.accent)};
+}
+
 .text-on-accent{
 	color: var(--on-accent);
 }
 
 .border-accent{
+	border: 2px solid var(--accent);
+}
+
+.border-tertiary{
+	border: 2px solid var(--tertiary);
+}
+
+.hover-border-accent:hover{
 	border: 2px solid var(--accent);
 }
 

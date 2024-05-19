@@ -5,27 +5,29 @@
 		LAUNCH_FIRST_KEY_OPTIONS as FIRST_KEY_OPTIONS,
 		LAUNCH_THIRD_KEY_OPTIONS as THIRD_KEY_OPTIONS,
 		LAUNCH_SECOND_KEY_OPTIONS as SECOND_KEY_OPTIONS,
-		type Settings,
-		writeSettings as writeSettings
+		type Settings
 	} from '$lib/settings/settings';
 	import Warning from '$lib/icons/warning.svg?component';
-	import { onMount } from 'svelte';
+	import { createEventDispatcher, onMount } from 'svelte';
 	import { invoke } from '@tauri-apps/api';
 	import ToggleSetting from '$lib/components/toggle-setting.svelte';
+	import SliderSetting from '$lib/components/slider-setting.svelte';
 
 	// ==============================
 	// Props
 	// ==============================
 	export let settings: Settings;
+	let dispatch = createEventDispatcher();
 
 	// ==============================
 	// UI Elements
 	// ==============================
-	let firstKey = settings.first_key;
-	let secondKey = settings.second_key;
-	let thirdKey = settings.third_key;
-	let autoStart = settings.auto_start;
-	let showRecentApps = settings.show_recent_apps;
+	$: firstKey = settings.first_key;
+	$: secondKey = settings.second_key;
+	$: thirdKey = settings.third_key;
+	$: scaling = settings.scaling;
+	$: autoStart = settings.auto_start;
+	$: showRecentApps = settings.show_recent_apps;
 
 	let showShortcutWarning = false;
 	let shortcutSettingsCard: HTMLDivElement;
@@ -38,42 +40,31 @@
 		isWayland = await invoke('is_wayland');
 	});
 
-	function updateFirstKey(value: CustomEvent<SelectValue>) {
-		firstKey = value.detail.id;
-		let newSettings = settings;
-		newSettings.first_key = firstKey;
-		writeSettings(settings);
+	async function updateFirstKey(value: CustomEvent<SelectValue>) {
+		dispatch('updateFirstKey', value.detail.id);
 		warnShortcutChange();
 	}
 
-	function updateSecondKey(value: CustomEvent<SelectValue>) {
-		secondKey = value.detail.id;
-		let newSettings = settings;
-		newSettings.second_key = secondKey === '-' ? null : secondKey;
-		writeSettings(settings);
+	async function updateSecondKey(value: CustomEvent<SelectValue>) {
+		dispatch('updateSecondKey', value.detail.id === '-' ? null : value.detail.id);
 		warnShortcutChange();
 	}
 
-	function updateThirdKey(value: CustomEvent<SelectValue>) {
-		thirdKey = value.detail.id;
-		let newSettings = settings;
-		newSettings.third_key = thirdKey;
-		writeSettings(settings);
+	async function updateThirdKey(value: CustomEvent<SelectValue>) {
+		dispatch('updateThirdKey', value.detail.id);
 		warnShortcutChange();
 	}
 
-	function updateAutoStart(value: CustomEvent<boolean>) {
-		autoStart = value.detail;
-		let newSettings = settings;
-		newSettings.auto_start = autoStart;
-		writeSettings(settings);
+	async function updateScaling(value: CustomEvent<number>) {
+		dispatch('updateScaling', value.detail);
 	}
 
-	function updateShowRecentApps(value: CustomEvent<boolean>) {
-		showRecentApps = value.detail;
-		let newSettings = settings;
-		newSettings.show_recent_apps = showRecentApps;
-		writeSettings(settings);
+	async function updateAutoStart(value: CustomEvent<boolean>) {
+		dispatch('updateAutoStart', value.detail);
+	}
+
+	async function updateShowRecentApps(value: CustomEvent<boolean>) {
+		dispatch('updateShowRecentApps', value.detail);
 	}
 
 	function warnShortcutChange() {
@@ -132,6 +123,17 @@
 			</div>
 		{/if}
 	</div>
+
+	<SliderSetting
+		title={`Scaling (${scaling.toFixed(2)})`}
+		description="This scaling is applied in the search window"
+		min={0.5}
+		max={2}
+		step={0.1}
+		value={scaling}
+		on:slide={updateScaling}
+	/>
+
 	<ToggleSetting
 		title="Auto Start"
 		description="When enabled, it auto starts the app at login"

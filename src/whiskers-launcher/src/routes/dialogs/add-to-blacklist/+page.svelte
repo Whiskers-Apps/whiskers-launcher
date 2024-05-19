@@ -33,7 +33,6 @@
 
 	async function addApps() {
 		for (const id in selectedApps) {
-			console.log(id)
 			await invoke('add_to_blacklist', { id: selectedApps[id] });
 		}
 
