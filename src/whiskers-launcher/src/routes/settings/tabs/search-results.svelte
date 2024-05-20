@@ -60,7 +60,7 @@
 
 	async function openRemoveDialog(id: string) {
 		new WebviewWindow('remove-from-blacklist', {
-			url: `dialogs/remove-from-blacklist/${encodeURIComponent(id)}`,
+			url: `dialogs/remove-from-blacklist/?id=${encodeURIComponent(id)}`,
 			title: 'Remove from Blacklist',
 			resizable: false,
 			width: 800,

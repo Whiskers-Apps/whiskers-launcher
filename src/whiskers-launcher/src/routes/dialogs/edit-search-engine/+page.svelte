@@ -16,7 +16,7 @@
 	import { emit } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 
-	let id = +$page.params.id;
+	let id = +$page.url.searchParams.get('id')!!;
 	let settings: Settings | null = null;
 	let css = '';
 	let showPage = false;

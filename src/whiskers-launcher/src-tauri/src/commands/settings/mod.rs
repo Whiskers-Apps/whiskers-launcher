@@ -1,7 +1,7 @@
 use std::{env, fs};
 
 use whiskers_launcher_rs::{
-    api::{apps::get_apps_indexing, settings},
+    api::{apps::get_apps, settings},
     indexing::App,
     settings::{SearchEngine, Settings, Theme},
 };
@@ -37,7 +37,7 @@ pub fn is_wayland() -> bool {
 pub async fn get_blacklisted_apps() -> Vec<App> {
     let settings = settings::get_settings();
     let ids = settings.blacklist;
-    let apps = get_apps_indexing();
+    let apps = get_apps();
 
     let mut blacklisted_apps = Vec::<App>::new();
 
@@ -54,7 +54,7 @@ pub async fn get_blacklisted_apps() -> Vec<App> {
 pub async fn get_whitelisted_apps() -> Vec<App> {
     let settings = settings::get_settings();
     let ids = settings.blacklist;
-    let apps = get_apps_indexing();
+    let apps = get_apps();
 
     let mut whitelisted_apps = Vec::<App>::new();
 

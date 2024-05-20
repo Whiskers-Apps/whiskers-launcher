@@ -63,6 +63,126 @@ export interface App {
 	path: string;
 }
 
+export interface WLResult {
+	result_type: string;
+	text: TextResult | null;
+	title_and_description: TitleAndDescriptionResult | null;
+	divider: boolean;
+}
+
+export interface TextResult {
+	icon: string | null;
+	tint: string | null;
+	text: string;
+	action: Action;
+}
+
+export interface TitleAndDescriptionResult {
+	icon: string | null;
+	tint: string | null;
+	title: string;
+	description: string;
+	action: Action;
+}
+
+export interface Action {
+	action_type: string;
+	open_app: OpenAppAction | null;
+	open_url: OpenURLAction | null;
+	copy: CopyAction | null;
+	extension: ExtensionAction | null;
+	dialog: DialogAction | null;
+	ignore: boolean;
+	ask_confirmation: boolean;
+}
+
+export interface OpenAppAction {
+	id: string;
+}
+
+export interface OpenURLAction {
+	url: string;
+}
+
+export interface CopyAction {
+	text: string;
+}
+
+export interface ExtensionAction {
+	extension_id: string;
+	action: string;
+	args: string[] | null;
+}
+
+export interface DialogAction {
+	extension_id: String;
+	action: String;
+	title: String;
+	action_text: String;
+	fields: Field[];
+	args: string[] | null;
+}
+
+export interface Field {
+	field_type: string;
+	input_field: InputField | null;
+	text_area_field: TextAreaField | null;
+	toggle_field: ToggleField | null;
+	select_field: SelectField | null;
+	file_picker_field: FilePickerField | null;
+	args: string[] | null;
+}
+
+export interface InputField {
+	id: string;
+	default_value: string;
+	title: string;
+	description: string;
+	placeholder: string;
+}
+
+export interface TextAreaField {
+	id: string;
+	default_value: string;
+	title: string;
+	description: string;
+	placeholder: string;
+}
+
+export interface ToggleField {
+	id: string;
+	default_value: boolean;
+	title: string;
+	description: string;
+}
+
+export interface SelectField {
+	id: string;
+	default_value: string;
+	title: string;
+	description: string;
+	options: SelectOption[];
+}
+
+export interface SelectOption {
+	id: string;
+	value: string;
+}
+
+export interface FilePickerField {
+	id: string;
+	title: string;
+	description: string;
+	default_path: string | null;
+	filters: FileFilter[] | null;
+	pick_directory: boolean;
+}
+
+export interface FileFilter {
+	name: string;
+	extensions: string[];
+}
+
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
 }
@@ -70,6 +190,7 @@ export async function getSettings(): Promise<Settings> {
 export function writeSettings(settings: Settings) {
 	invoke('write_settings', { settings: settings });
 }
+
 
 export function getCssFilter(hex: string): string {
 	let loss = 0;
@@ -106,7 +227,16 @@ export function getThemeCss(settings: Settings): string {
 	--on-danger: ${settings.theme.on_danger};
 	--text: ${settings.theme.text};
 	--sub-text: ${settings.theme.sub_text};
+	--search-radius: ${settings.border_radius}px;
+	--search-border-width: ${settings.border_width}px;
+	--search-border-color: ${settings.accent_search_border ? settings.theme.accent : settings.theme.tertiary};
+	--result-icon-size: ${settings.scaling * 28}px;
+	--search-icon-size: ${settings.scaling * 24}px;
+	--result-title-size: ${settings.scaling * 16}px;
+	--result-alt-size: ${settings.scaling * 14}px;
+	--result-description-size: ${settings.scaling * 14}px;
 }
+
 
 .bg-background{
     background-color: var(--background);
@@ -204,8 +334,6 @@ export function getThemeCss(settings: Settings): string {
 	border-radius: 14px;
 }
 
-
-
 .warning{
     border: 1px solid var(--warning);
 }
@@ -218,6 +346,54 @@ export function getThemeCss(settings: Settings): string {
 	height: 1px;
 	width: 100%;
 	background-color: var(--tertiary);
+}
+
+.round{
+	border-radius: ${settings.border_radius}px;
+}
+
+input::placeholder{
+	color: var(--sub-text);
+}
+
+/*Search Box*/
+
+.search-round{
+	border-radius: var(--search-radius);
+}
+
+.search-border{
+    border: var(--search-border-width) solid var(--search-border-color);
+}
+
+
+
+.icon-size{
+	height: var(--result-icon-size);
+	width: var(--result-icon-size);
+}
+
+.search-icon-size{
+    height: var(--search-icon-size);
+    width: var(--search-icon-size);
+}
+
+.highlight-result{
+	font-weight: 600;
+	color: var(--accent);
+	background-color: var(${settings.highlight_selected_background ? '--secondary' : '--background'});
+}
+
+.result-title{
+    font-size: var(--result-title-size);
+}
+
+.result-alt{
+	font-size: var(--result-alt-size);
+}
+
+.result-description{
+    font-size: var(--result-description-size);
 }
 
 </style>

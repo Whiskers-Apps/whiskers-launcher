@@ -8,6 +8,8 @@
 	// Props
 	// ====================================
 	export let settings: Settings;
+	console.log(settings);
+	
 
 	// ====================================
 	// UI Elements

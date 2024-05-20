@@ -5,7 +5,7 @@
 	import { emit } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 	
-	let id = decodeURIComponent($page.params.id);
+	let id = decodeURIComponent($page.url.searchParams.get('id')!!);
 
 	async function removeApp() {
 		await invoke('remove_from_blacklist', { id: id });

@@ -4,7 +4,7 @@
 		"beforeBuildCommand": "yarn run build",
 		"beforeDevCommand": "yarn run dev",
 		"devPath": "http://localhost:5173",
-		"distDir": "../public"
+		"distDir": "../build"
 	},
 	"package": {
 		"productName": "whiskers-launcher",
@@ -50,7 +50,7 @@
 				"icons/icon.icns",
 				"icons/icon.ico"
 			],
-			"identifier": "com.tauri.dev",
+			"identifier": "com.whiskersapps.launcher",
 			"longDescription": "",
 			"macOS": {
 				"entitlements": null,
@@ -61,7 +61,7 @@
 			},
 			"resources": [],
 			"shortDescription": "",
-			"targets": "all",
+			"targets": "app",
 			"windows": {
 				"certificateThumbprint": null,
 				"digestAlgorithm": "sha256",

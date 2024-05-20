@@ -75,7 +75,7 @@
 
 	async function editSearchEngine(id: number) {
 		new WebviewWindow('edit-search-engine', {
-			url: `dialogs/edit-search-engine/${id}`,
+			url: `dialogs/edit-search-engine/?id=${id}`,
 			title: 'Edit Search Engine',
 			resizable: false,
 			width: WindowSizes.SearchEngine.width,
@@ -91,7 +91,7 @@
 
 	async function deleteSearchEngine(id: number) {
 		new WebviewWindow('delete-search-engine', {
-			url: `dialogs/delete-search-engine/${id}`,
+			url: `dialogs/delete-search-engine/?id=${id}`,
 			title: 'Delete Search Engine',
 			resizable: false,
 			width: WindowSizes.ConfirmDialog.width,
