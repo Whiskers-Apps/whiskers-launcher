@@ -25,7 +25,8 @@ fn main() {
             get_theme_from_file,
             export_theme,
             get_results,
-            run_action
+            run_action,
+            clone_extension
         ])
         .run(tauri::generate_context!())
         .expect("Error running app");

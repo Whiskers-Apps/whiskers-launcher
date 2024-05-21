@@ -145,6 +145,10 @@
 		css = getThemeCss(settings!!);
 		writeSettings(settings!!);
 	}
+
+	async function refreshExtensions() {
+		settings!!.extensions = (await getSettings()).extensions;
+	}
 </script>
 
 {#if settings !== null}
@@ -198,7 +202,7 @@
 					<ThemingTab {settings} on:updateTheme={updateTheme} />
 				{/if}
 				{#if selectedTab === 5}
-					<ExtensionsTab {settings} />
+					<ExtensionsTab {settings} on:refresh-extensions={refreshExtensions} />
 				{/if}
 				{#if selectedTab === 6}
 					<AboutTab {settings} />

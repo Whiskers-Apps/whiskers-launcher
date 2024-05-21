@@ -10,7 +10,7 @@ use tauri::{
     SystemTrayMenu,
 };
 use tokio::time::sleep;
-use whiskers_launcher_rs::api::settings::get_settings;
+use whiskers_launcher_rs::api::{extensions::index_extensions, settings::get_settings};
 use windows::{open_launcher_window, open_settings_window};
 
 mod indexing;
@@ -52,6 +52,7 @@ async fn main() {
 
             tokio::spawn(async move {
                 let _ = get_settings();
+                index_extensions();
 
                 loop {
                     {

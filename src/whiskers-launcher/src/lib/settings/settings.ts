@@ -183,6 +183,10 @@ export interface FileFilter {
 	extensions: string[];
 }
 
+export interface Extension{
+	
+}
+
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
 }
@@ -190,7 +194,6 @@ export async function getSettings(): Promise<Settings> {
 export function writeSettings(settings: Settings) {
 	invoke('write_settings', { settings: settings });
 }
-
 
 export function getCssFilter(hex: string): string {
 	let loss = 0;
@@ -230,11 +233,13 @@ export function getThemeCss(settings: Settings): string {
 	--search-radius: ${settings.border_radius}px;
 	--search-border-width: ${settings.border_width}px;
 	--search-border-color: ${settings.accent_search_border ? settings.theme.accent : settings.theme.tertiary};
+	--search-text-size: ${settings.scaling * 16}px;
 	--result-icon-size: ${settings.scaling * 28}px;
 	--search-icon-size: ${settings.scaling * 24}px;
 	--result-title-size: ${settings.scaling * 16}px;
 	--result-alt-size: ${settings.scaling * 14}px;
 	--result-description-size: ${settings.scaling * 14}px;
+	--result-divider-size: ${settings.scaling * 6}px;
 }
 
 
@@ -302,7 +307,6 @@ export function getThemeCss(settings: Settings): string {
     color: var(--accent);
 }
 
-
 .accent-filter{
 	filter: ${getCssFilter(settings.theme.accent)};
 }
@@ -356,6 +360,11 @@ input::placeholder{
 	color: var(--sub-text);
 }
 
+/*Search Bar*/
+.search-text{
+	font-size: var(--search-text-size);
+}
+
 /*Search Box*/
 
 .search-round{
@@ -364,6 +373,10 @@ input::placeholder{
 
 .search-border{
     border: var(--search-border-width) solid var(--search-border-color);
+}
+
+.search-box-width{
+	width: ${settings.scaling * 800}px;
 }
 
 
@@ -394,6 +407,11 @@ input::placeholder{
 
 .result-description{
     font-size: var(--result-description-size);
+}
+
+.result-divider{
+	height: var(--result-divider-size);
+	width: 100%;
 }
 
 </style>

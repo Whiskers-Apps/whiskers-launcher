@@ -16,7 +16,7 @@
 	import { emit } from '@tauri-apps/api/event';
 	import { appWindow } from '@tauri-apps/api/window';
 
-	let id = +$page.url.searchParams.get('id')!!;
+	let id = 0;
 	let settings: Settings | null = null;
 	let css = '';
 	let showPage = false;
@@ -32,6 +32,8 @@
 	onMount(async () => {
 		settings = await getSettings();
 		css = getThemeCss(settings);
+
+		id = +$page.url.searchParams.get('id')!!;
 
 		let engine = settings.search_engines.find((engine) => engine.id === id)!!;
 		iconPath = engine.icon_path;

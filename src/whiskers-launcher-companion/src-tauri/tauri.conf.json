@@ -4,7 +4,7 @@
     "beforeBuildCommand": "yarn run build",
     "beforeDevCommand": "yarn run dev",
     "devPath": "http://localhost:5173",
-    "distDir": "../public",
+    "distDir": "../build",
     "withGlobalTauri": true
   },
   "package": {
@@ -53,7 +53,7 @@
       },
       "resources": [],
       "shortDescription": "",
-      "targets": "all",
+      "targets": "app",
       "windows": {
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",

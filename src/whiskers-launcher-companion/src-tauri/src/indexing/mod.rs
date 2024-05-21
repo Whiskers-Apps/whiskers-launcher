@@ -6,7 +6,7 @@ use std::{
 use walkdir::WalkDir;
 #[cfg(target_os = "windows")]
 use whiskers_launcher_rs::paths::get_app_resources_dir;
-use whiskers_launcher_rs::{indexing::AppIndexing, paths::get_home_dir};
+use whiskers_launcher_rs::{indexing::App, paths::get_home_dir};
 
 #[cfg(target_os = "linux")]
 use {
@@ -18,7 +18,7 @@ use {
 pub fn index_apps() {
     #[cfg(target_os = "linux")]
     if cfg!(target_os = "linux") {
-        let mut apps_indexing = Vec::<AppIndexing>::new();
+        let mut apps_indexing = Vec::<App>::new();
         let mut ids = Vec::<String>::new();
 
         //Gets All Apps
@@ -41,7 +41,7 @@ pub fn index_apps() {
                                 let title = entry.name(None).unwrap().to_string();
 
                                 let mut app_indexing =
-                                    AppIndexing::new(&exec_path, &title, &exec_path);
+                                    App::new(&exec_path, &title, &exec_path);
 
                                 match get_app_icon(icon) {
                                     Some(path) => {
@@ -85,7 +85,7 @@ pub fn index_apps() {
 
 pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     let data_dirs_string =
-        env::var("XDG_DATA_DIRS").unwrap_or("/usr/local/share:/usr/share".to_string());
+        env::var("XDG_DATA_DIRS/icons").unwrap_or("/usr/local/share:/usr/share".to_string());
 
     let mut xdg_data_dirs: Vec<&str> = data_dirs_string.split(":").collect();
 

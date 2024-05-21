@@ -10,5 +10,9 @@ export const WindowSizes = {
 	SearchEngine: {
 		width: 800,
 		height: 700
+	},
+	CloneExtension: {
+		width: 700,
+		height: 200
 	}
 };
