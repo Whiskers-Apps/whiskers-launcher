@@ -78,7 +78,7 @@
 		}, 200);
 	}
 
-	async function search_with_input(
+	async function searchWithInput(
 		event: Event & { currentTarget: EventTarget & HTMLInputElement }
 	) {
 		searchText = event.currentTarget.value;
@@ -188,7 +188,7 @@
 						type="text"
 						placeholder={settings.show_placeholder ? 'Search apps, extensions, web' : ''}
 						value={searchText}
-						on:input={search_with_input}
+						on:input={searchWithInput}
 						autofocus
 					/>
 

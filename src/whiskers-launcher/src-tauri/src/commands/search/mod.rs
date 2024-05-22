@@ -1,12 +1,20 @@
 use std::{fs, path::Path, process::Command};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use tauri::Window;
+use tauri::{AppHandle, Manager, Window};
+
 use whiskers_launcher_rs::{
-    action::{self, Action, OpenAppAction, OpenURLAction},
-    api::{apps::get_apps, settings},
+    action::{self, Action, CopyAction, ExtensionAction, OpenAppAction, OpenURLAction},
+    api::{
+        apps::get_apps,
+        extensions::{
+            get_extension_dir, get_extension_response, write_extension_request, ActionContext,
+            ExtensionRequest,
+        },
+        settings,
+    },
     indexing::App,
-    paths::{get_app_resources_icons_dir, get_recent_apps_path},
+    paths::{get_api_dir, get_app_resources_icons_dir, get_recent_apps_path},
     result::{self, TextResult, WLResult},
     settings::SearchEngine,
     utils::get_search,
@@ -45,6 +53,55 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
             if engine.keyword == keyword.to_owned().unwrap() {
                 results.push(get_engine_result(engine.to_owned(), &search.search_text));
                 return results;
+            }
+        }
+
+        for extension_setting in settings.extensions {
+            if extension_setting.setting_id == "keyword"
+                && extension_setting.setting_value == keyword.to_owned().unwrap()
+            {
+                let request = ExtensionRequest::new(
+                    &extension_setting.extension_id,
+                    ActionContext::ResultsRequest,
+                )
+                .search_text(&search.search_text);
+
+                if !get_api_dir().exists() {
+                    fs::create_dir_all(get_api_dir()).expect("Error creating api directory");
+                }
+
+                write_extension_request(request);
+
+                let extension_dir = get_extension_dir(&extension_setting.extension_id)
+                    .expect("Error getting extension directory");
+
+                if cfg!(target_os = "linux") {
+                    let extension_run = Command::new("sh")
+                        .arg("-c")
+                        .arg("./linux-extension")
+                        .current_dir(&extension_dir)
+                        .output()
+                        .expect("Error running extension");
+
+                    if extension_run.status.success() {
+                        return get_extension_response().results;
+                    }
+                }
+
+                #[cfg(target_os = "windows")]
+                if cfg!(target_os = "windows") {
+                    let extension_run = Command::new("cmd")
+                        .arg("/C")
+                        .arg("start /min windows-extension")
+                        .current_dir(&extension_dir)
+                        .creation_flags(FLAG_NO_WINDOW)
+                        .output()
+                        .unwrap();
+
+                    if extension_run.status.success() {
+                        return get_extension_results().expect("Error getting extension results");
+                    }
+                }
             }
         }
     }
@@ -114,7 +171,7 @@ fn get_engine_result(engine: SearchEngine, search_text: impl Into<String>) -> WL
 }
 
 #[tauri::command]
-pub async fn run_action(result: WLResult, window: Window) {
+pub async fn run_action(result: WLResult, window: Window, app: AppHandle) {
     let result_action: Option<Action> = match result.result_type {
         result::ResultType::Text => Some(result.text.unwrap().action),
         result::ResultType::TitleAndDescription => {
@@ -131,9 +188,13 @@ pub async fn run_action(result: WLResult, window: Window) {
 
     match action.action_type {
         action::ActionType::OpenApp => open_app(action.open_app.unwrap(), window.to_owned()),
-        action::ActionType::OpenURL => open_url(action.open_url.unwrap(), window),
-        action::ActionType::Copy => {}
-        action::ActionType::Extension => {}
+        action::ActionType::OpenURL => open_url(action.open_url.unwrap(), window.to_owned()),
+        action::ActionType::Copy => {
+            copy_text(action.copy.unwrap(), window.to_owned(), app.to_owned())
+        }
+        action::ActionType::Extension => {
+            run_extension_action(action.extension.unwrap(), window.to_owned())
+        }
         action::ActionType::Dialog => {}
         action::ActionType::Ignore => {}
     };
@@ -230,5 +291,47 @@ fn get_recent_apps() -> Vec<App> {
 
 fn open_url(action: OpenURLAction, window: Window) {
     open::that(&action.url).expect("Error opening url");
+    window.close().expect("Error closing window");
+}
+
+fn copy_text(action: CopyAction, window: Window, app: AppHandle) {
+    let clipboard = app.state::<tauri_plugin_clipboard::ClipboardManager>();
+
+    clipboard
+        .write_text(action.text)
+        .expect("Error writing to clipboard");
+
+    window.close().expect("Error closing window");
+}
+
+fn run_extension_action(action: ExtensionAction, window: Window) {
+    let extension_dir =
+        get_extension_dir(&action.extension_id).expect("Error getting extension dir");
+
+    let request = ExtensionRequest::new(&action.extension_id, ActionContext::RunAction)
+        .extension_action(action.action);
+
+    write_extension_request(request);
+
+    if cfg!(target_os = "linux") {
+        Command::new("sh")
+            .arg("-c")
+            .arg("./linux-extension")
+            .current_dir(&extension_dir)
+            .output()
+            .expect("Error running extension");
+    }
+
+    #[cfg(target_os = "windows")]
+    if cfg!(target_os = "windows") {
+        let extension_run = Command::new("cmd")
+            .arg("/C")
+            .arg("start /min windows-extension")
+            .current_dir(&extension_dir)
+            .creation_flags(FLAG_NO_WINDOW)
+            .output()
+            .unwrap();
+    }
+
     window.close().expect("Error closing window");
 }

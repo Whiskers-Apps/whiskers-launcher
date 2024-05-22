@@ -2,7 +2,11 @@ use std::{env, fs};
 
 use git2::Repository;
 use whiskers_launcher_rs::{
-    api::{apps::get_apps, settings}, indexing::App, paths::get_extensions_dir, settings::{SearchEngine, Settings, Theme}
+    api::{apps::get_apps, settings},
+    extension::Extension,
+    indexing::App,
+    paths::get_extensions_dir,
+    settings::{SearchEngine, Settings, Theme},
 };
 
 #[tauri::command]
@@ -157,7 +161,7 @@ pub async fn export_theme(path: String) {
 }
 
 #[tauri::command]
-pub async fn clone_extension(url: String){
+pub async fn clone_extension(url: String) {
     let url_split: Vec<&str> = url.split("/").collect();
     let mut repo_name = url_split[url_split.len() - 1].to_owned();
 
@@ -169,4 +173,9 @@ pub async fn clone_extension(url: String){
     path.push(repo_name);
 
     Repository::clone(&url, path).expect("Error cloning repo");
+}
+
+#[tauri::command]
+pub async fn get_extensions() -> Vec<Extension> {
+    whiskers_launcher_rs::api::extensions::get_extensions()
 }

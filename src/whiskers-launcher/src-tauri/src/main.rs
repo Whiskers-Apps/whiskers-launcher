@@ -26,8 +26,10 @@ fn main() {
             export_theme,
             get_results,
             run_action,
-            clone_extension
+            clone_extension,
+            get_extensions
         ])
+        .plugin(tauri_plugin_clipboard::init())
         .run(tauri::generate_context!())
         .expect("Error running app");
 }

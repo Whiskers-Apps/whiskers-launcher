@@ -95,7 +95,7 @@
 		title={`Results Count (${resultsCount})`}
 		description="The amount of results to show."
 		min={2}
-		max={8}
+		max={9}
 		step={1}
 		value={resultsCount}
 		on:slide={updateResultsCount}

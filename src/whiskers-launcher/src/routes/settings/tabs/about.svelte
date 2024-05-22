@@ -1,5 +1,7 @@
 <script lang="ts">
-	import type { Settings } from '$lib/settings/settings';
+	import logo from "$lib/images/whiskers-launcher.webp";
+	import type { Extension, Settings } from '$lib/settings/settings';
+	import { invoke } from '@tauri-apps/api';
 	import { getVersion } from '@tauri-apps/api/app';
 	import { open } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
@@ -8,8 +10,6 @@
 	// Props
 	// ====================================
 	export let settings: Settings;
-	console.log(settings);
-	
 
 	// ====================================
 	// UI Elements
@@ -23,6 +23,8 @@
 	// ====================================
 	onMount(async () => {
 		appVersion = await getVersion();
+		let extensions: Extension[] = await invoke("get_extensions")
+		extensionsCount = extensions.length;
 	});
 
 	function openLink() {
@@ -31,6 +33,9 @@
 </script>
 
 <div class=" space-y-4">
+	<div class=" flex justify-center">
+		<img src={logo} alt="whiskers launcher logo" width="200">
+	</div>
 	<div class="card">
 		<p class=" text-xl font-medium">Version</p>
 		<p class=" text-sub-text">{appVersion}</p>
