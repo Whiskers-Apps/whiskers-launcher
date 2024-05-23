@@ -4,7 +4,8 @@
 		getThemeCss,
 		writeSettings,
 		type Theme,
-		type Settings
+		type Settings,
+		type ExtensionSetting
 	} from '$lib/settings/settings';
 	import { onMount } from 'svelte';
 	import Navbar from './navbar.svelte';
@@ -149,6 +150,11 @@
 	async function refreshExtensions() {
 		settings!!.extensions = (await getSettings()).extensions;
 	}
+
+	async function updateExtensionsSettings(event: CustomEvent<ExtensionSetting[]>) {
+		settings!!.extensions = event.detail;
+		writeSettings(settings!!);
+	}
 </script>
 
 {#if settings !== null}
@@ -202,7 +208,11 @@
 					<ThemingTab {settings} on:updateTheme={updateTheme} />
 				{/if}
 				{#if selectedTab === 5}
-					<ExtensionsTab {settings} on:refresh-extensions={refreshExtensions} />
+					<ExtensionsTab
+						{settings}
+						on:refresh-extensions={refreshExtensions}
+						on:updateExtensionsSettings={updateExtensionsSettings}
+					/>
 				{/if}
 				{#if selectedTab === 6}
 					<AboutTab {settings} />

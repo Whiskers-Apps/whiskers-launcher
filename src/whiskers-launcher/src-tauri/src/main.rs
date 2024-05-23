@@ -12,6 +12,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             open_settings_window,
             get_settings,
+            get_os,
             write_settings,
             is_wayland,
             get_blacklisted_apps,

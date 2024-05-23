@@ -199,18 +199,13 @@ export interface ExtensionSetting {
 	setting_type: string;
 	default_value: string;
 	show_conditions: ShowCondition[] | null;
-	select_options: SelectOption[] | null;
+	select_options: SelectValue[] | null;
 	os: string;
 }
 
 export interface ShowCondition {
 	setting_id: string;
 	setting_value: string;
-}
-
-export interface SelectOption{
-	id: string;
-	value: string;
 }
 
 export async function getSettings(): Promise<Settings> {
