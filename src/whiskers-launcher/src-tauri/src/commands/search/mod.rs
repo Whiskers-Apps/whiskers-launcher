@@ -1,15 +1,18 @@
 use std::{fs, path::Path, process::Command};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
-use tauri::{AppHandle, Manager, Window};
+use tauri::{AppHandle, Manager, Window, WindowBuilder};
 
+use tokio::time::sleep;
 use whiskers_launcher_rs::{
-    action::{self, Action, CopyAction, ExtensionAction, OpenAppAction, OpenURLAction},
+    action::{
+        self, Action, CopyAction, DialogAction, ExtensionAction, OpenAppAction, OpenURLAction,
+    },
     api::{
         apps::get_apps,
         extensions::{
-            get_extension_dir, get_extension_response, write_extension_request, ActionContext,
-            ExtensionRequest,
+            get_extension_dir, get_extension_response, write_dialog_request, write_dialog_response,
+            write_extension_request, ActionContext, DialogResponse, DialogResult, ExtensionRequest,
         },
         settings,
     },
@@ -35,6 +38,17 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
 
                 if app.icon.is_some() {
                     text_result.icon(app.icon.unwrap());
+                } else {
+                    let mut icon_path = get_app_resources_icons_dir();
+                    icon_path.push("question.svg");
+
+                    text_result.icon(
+                        icon_path
+                            .into_os_string()
+                            .into_string()
+                            .expect("Error getting icon path"),
+                    );
+                    text_result.tint("accent");
                 }
 
                 results.push(WLResult::new_text(text_result))
@@ -122,6 +136,17 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
 
                 if app.icon.is_some() {
                     text_result.icon(app.icon.unwrap());
+                } else {
+                    let mut icon_path = get_app_resources_icons_dir();
+                    icon_path.push("question.svg");
+
+                    text_result.icon(
+                        icon_path
+                            .into_os_string()
+                            .into_string()
+                            .expect("Error getting icon path"),
+                    );
+                    text_result.tint("accent");
                 }
 
                 results.push(WLResult::new_text(text_result))
@@ -195,7 +220,10 @@ pub async fn run_action(result: WLResult, window: Window, app: AppHandle) {
         action::ActionType::Extension => {
             run_extension_action(action.extension.unwrap(), window.to_owned())
         }
-        action::ActionType::Dialog => {}
+        action::ActionType::Dialog => {
+            open_dialog(action.dialog.unwrap(), window.to_owned(), app.to_owned()).await
+        }
+
         action::ActionType::Ignore => {}
     };
 }
@@ -305,6 +333,77 @@ fn copy_text(action: CopyAction, window: Window, app: AppHandle) {
 }
 
 fn run_extension_action(action: ExtensionAction, window: Window) {
+    let extension_dir =
+        get_extension_dir(&action.extension_id).expect("Error getting extension dir");
+
+    let mut request = ExtensionRequest::new(&action.extension_id, ActionContext::RunAction)
+        .extension_action(action.action);
+
+    if action.args.is_some() {
+        request.args(action.args.unwrap());
+    }
+
+    write_extension_request(request);
+
+    if cfg!(target_os = "linux") {
+        Command::new("sh")
+            .arg("-c")
+            .arg("./linux-extension")
+            .current_dir(&extension_dir)
+            .output()
+            .expect("Error running extension");
+    }
+
+    #[cfg(target_os = "windows")]
+    if cfg!(target_os = "windows") {
+        let extension_run = Command::new("cmd")
+            .arg("/C")
+            .arg("start /min windows-extension")
+            .current_dir(&extension_dir)
+            .creation_flags(FLAG_NO_WINDOW)
+            .output()
+            .unwrap();
+    }
+
+    window.close().expect("Error closing window");
+}
+
+async fn open_dialog(action: DialogAction, window: Window, app: AppHandle) {
+    write_dialog_request(action.to_owned());
+
+    WindowBuilder::new(
+        &app,
+        "extension-dialog",
+        tauri::WindowUrl::App("/dialogs/extension-dialog".parse().unwrap()),
+    )
+    .title(&action.title)
+    .inner_size(800.0, 700.0)
+    .max_inner_size(800.0, 700.0)
+    .fullscreen(false)
+    .maximizable(false)
+    .center()
+    .build()
+    .expect("Error opening dialog window");
+
+    sleep(tokio::time::Duration::from_millis(200)).await;
+
+    window.close().expect("Error closing window");
+}
+
+#[tauri::command]
+pub async fn get_dialog_request() -> DialogAction {
+    whiskers_launcher_rs::api::extensions::get_dialog_request()
+}
+
+#[tauri::command]
+pub async fn run_dialog_action(action: DialogAction, results: Vec<DialogResult>, window: Window) {
+    let response = DialogResponse {
+        results,
+        args: action.args,
+    };
+
+    write_dialog_response(response);
+
     let extension_dir =
         get_extension_dir(&action.extension_id).expect("Error getting extension dir");
 

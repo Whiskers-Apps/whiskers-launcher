@@ -5,12 +5,7 @@
 	import { getVersion } from '@tauri-apps/api/app';
 	import { open } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
-
-	// ====================================
-	// Props
-	// ====================================
-	export let settings: Settings;
-
+	
 	// ====================================
 	// UI Elements
 	// ====================================

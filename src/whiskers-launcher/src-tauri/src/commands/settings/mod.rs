@@ -2,7 +2,7 @@ use std::{env, fs};
 
 use git2::Repository;
 use whiskers_launcher_rs::{
-    api::{apps::get_apps, settings},
+    api::{apps::get_apps, extensions::get_extension_dir, settings},
     extension::Extension,
     indexing::App,
     paths::get_extensions_dir,
@@ -178,4 +178,15 @@ pub async fn clone_extension(url: String) {
 #[tauri::command]
 pub async fn get_extensions() -> Vec<Extension> {
     whiskers_launcher_rs::api::extensions::get_extensions()
+}
+
+#[tauri::command]
+pub async fn open_extension_dir(id: String) {
+    let path = get_extension_dir(&id).expect("Error getting extension dir");
+    open::that(&path).expect("Error opening extension dir");
+}
+
+#[tauri::command]
+pub async fn index_extensions() {
+    whiskers_launcher_rs::api::extensions::index_extensions();
 }

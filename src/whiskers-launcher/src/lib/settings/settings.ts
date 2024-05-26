@@ -115,15 +115,16 @@ export interface ExtensionAction {
 }
 
 export interface DialogAction {
-	extension_id: String;
-	action: String;
-	title: String;
-	action_text: String;
+	extension_id: string;
+	action: string;
+	title: string;
+	action_text: string;
 	fields: Field[];
 	args: string[] | null;
 }
 
 export interface Field {
+	id: string,
 	field_type: string;
 	input_field: InputField | null;
 	text_area_field: TextAreaField | null;
@@ -134,7 +135,6 @@ export interface Field {
 }
 
 export interface InputField {
-	id: string;
 	default_value: string;
 	title: string;
 	description: string;
@@ -142,7 +142,6 @@ export interface InputField {
 }
 
 export interface TextAreaField {
-	id: string;
 	default_value: string;
 	title: string;
 	description: string;
@@ -150,14 +149,12 @@ export interface TextAreaField {
 }
 
 export interface ToggleField {
-	id: string;
 	default_value: boolean;
 	title: string;
 	description: string;
 }
 
 export interface SelectField {
-	id: string;
 	default_value: string;
 	title: string;
 	description: string;
@@ -170,7 +167,6 @@ export interface SelectOption {
 }
 
 export interface FilePickerField {
-	id: string;
 	title: string;
 	description: string;
 	default_path: string | null;
@@ -183,7 +179,7 @@ export interface FileFilter {
 	extensions: string[];
 }
 
-export interface Extension{
+export interface Extension {
 	id: string;
 	name: string;
 	description: string;
@@ -207,6 +203,13 @@ export interface ShowCondition {
 	setting_id: string;
 	setting_value: string;
 }
+
+export interface DialogResult {
+	field_id: string;
+	field_value: string;
+	args: string[] | null;
+}
+
 
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
@@ -367,6 +370,26 @@ export function getThemeCss(settings: Settings): string {
 	color: var(--warning);
 }
 
+.text-danger{
+	color: var(--danger);
+}
+
+.hover-bg-accent:hover{
+	background-color: var(--accent);
+}
+
+.hover-bg-danger:hover{
+	background-color: var(--danger);
+}
+
+.hover-text-on-accent:hover{
+	color: var(--on-accent);
+}
+
+.hover-text-on-danger:hover{
+    color: var(--on-danger);
+}
+
 .v-divider{
 	height: 1px;
 	width: 100%;
@@ -433,6 +456,13 @@ input::placeholder{
 .result-divider{
 	height: var(--result-divider-size);
 	width: 100%;
+}
+
+.one-line{
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 </style>

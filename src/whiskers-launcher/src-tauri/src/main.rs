@@ -5,6 +5,8 @@ pub mod commands;
 pub mod windows;
 
 use commands::{search::*, settings::*};
+use serde::Serialize;
+use tauri::Manager;
 use windows::open_settings_window;
 
 fn main() {
@@ -28,9 +30,23 @@ fn main() {
             get_results,
             run_action,
             clone_extension,
-            get_extensions
+            get_extensions,
+            open_extension_dir,
+            index_extensions,
+            get_dialog_request,
+            run_dialog_action
         ])
         .plugin(tauri_plugin_clipboard::init())
+        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
+            #[derive(Clone, Serialize)]
+            struct PluginPayload {
+                args: Vec<String>,
+                cwd: String,
+            }
+
+            app.emit_all("single-instance", PluginPayload { args: argv, cwd })
+                .unwrap();
+        }))
         .run(tauri::generate_context!())
         .expect("Error running app");
 }

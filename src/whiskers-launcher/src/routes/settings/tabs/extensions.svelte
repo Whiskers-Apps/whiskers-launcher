@@ -1,4 +1,6 @@
 <script lang="ts">
+	import FolderIcon from '$lib/icons/folder.svg?component';
+	import TrashIcon from '$lib/icons/trash.svg?component';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import { type Extension, type ExtensionSetting, type Settings } from '$lib/settings/settings';
 	import { listen } from '@tauri-apps/api/event';
@@ -8,6 +10,7 @@
 	import { invoke } from '@tauri-apps/api';
 	import Input from '$lib/components/input.svelte';
 	import Select from '$lib/components/select.svelte';
+	import TextArea from '$lib/components/text-area.svelte';
 
 	export let settings: Settings;
 	let dispatch = createEventDispatcher();
@@ -36,6 +39,16 @@
 		});
 	}
 
+	async function reloadExtensions() {
+		await invoke("index_extensions");
+		dispatch('refresh-extensions');
+		extensions = await invoke('get_extensions');
+	}
+
+	async function openExtensionDirectory(extensionId: string) {
+		invoke('open_extension_dir', { id: extensionId });
+	}
+
 	function getSettingValue(extensionId: string, settingId: string): string {
 		for (const index in extensionsSettings) {
 			if (
@@ -50,16 +63,13 @@
 	}
 
 	function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean {
-
-		if(setting.os !== "*" && setting.os.toLowerCase() != os){
+		if (setting.os !== '*' && setting.os.toLowerCase() != os) {
 			return false;
-		}	
+		}
 
 		if (setting.show_conditions !== null) {
 			for (const index in setting.show_conditions) {
 				const condition = setting.show_conditions[index];
-				console.log(condition)
-				console.log(getSettingValue(extensionId, condition.setting_id))
 
 				if (condition.setting_value !== getSettingValue(extensionId, condition.setting_id)) {
 					return false;
@@ -95,47 +105,75 @@
 <div class="flex">
 	<SecondaryButton text="Extensions Store" />
 	<SecondaryButton text="Git Clone" on:click={openCloneDialog} />
-	<SecondaryButton text="Reload" />
+	<SecondaryButton text="Reload" on:click={reloadExtensions} />
 </div>
+<div class=" space-y-4">
+	{#each extensions as extension}
+		<div class=" card">
+			<div class=" flex">
+				<p class=" flex-grow text-2xl font-bold">{extension.name}</p>
+				<button
+					class=" p-2 hover-bg-tertiary text-accent rounded-full hover-text-on-accent hover-bg-accent"
+					on:click={() => openExtensionDirectory(extension.id)}
+				>
+					<FolderIcon class=" " width="24" height="24" />
+				</button>
+				<button
+					class=" p-2 hover-bg-tertiary text-danger rounded-full hover-text-on-danger hover-bg-danger"
+				>
+					<TrashIcon class=" " width="24" height="24" />
+				</button>
+			</div>
+			<p class=" text-sub-text">{extension.description}</p>
+			<div class=" v-divider mb-4 mt-4"></div>
+			<div class=" space-y-4">
+				<div>
+					<div class=" font-medium">Keyword</div>
+					<div class=" text-sub-text">The extension keyword</div>
+					<Input
+						value={getSettingValue(extension.id, 'keyword')}
+						on:input={(event) => {
+							updateSetting(extension.id, 'keyword', event.detail);
+						}}
+					/>
+				</div>
+				{#if extension.settings !== null}
+					{#each extension.settings as setting}
+						{#if canShowSetting(extension.id, setting)}
+							<div>
+								<div class=" font-medium">{setting.title}</div>
+								<div class=" text-sub-text">{setting.description}</div>
 
-{#each extensions as extension}
-	<div class=" card">
-		<div class=" flex">
-			<p class=" flex-grow text-2xl font-bold">{extension.name}</p>
-			<div>Open</div>
-			<div>Uninstall</div>
+								{#if setting.setting_type === 'Input'}
+									<Input
+										value={getSettingValue(extension.id, setting.id)}
+										on:input={(event) => {
+											updateSetting(extension.id, setting.id, event.detail);
+										}}
+									/>
+								{/if}
+								{#if setting.setting_type === 'TextArea'}
+									<TextArea
+										value={getSettingValue(extension.id, setting.id)}
+										on:input={(event) => {
+											updateSetting(extension.id, setting.id, event.detail);
+										}}
+									/>
+								{/if}
+								{#if setting.setting_type === 'Select'}
+									<Select
+										values={setting.select_options ?? []}
+										selectedValue={getSettingValue(extension.id, setting.id)}
+										on:selection={(event) => {
+											updateSetting(extension.id, setting.id, event.detail.id);
+										}}
+									/>
+								{/if}
+							</div>
+						{/if}
+					{/each}
+				{/if}
+			</div>
 		</div>
-		<p class=" text-sub-text">{extension.description}</p>
-		<div class=" v-divider mb-4 mt-4"></div>
-		<div class=" space-y-4">
-			{#if extension.settings !== null}
-				{#each extension.settings as setting}
-					{#if canShowSetting(extension.id, setting)}
-						<div>
-							<div class=" font-medium">{setting.title}</div>
-							<div class=" text-sub-text">{setting.description}</div>
-
-							{#if setting.setting_type === 'Input'}
-								<Input
-									value={getSettingValue(extension.id, setting.id)}
-									on:input={(event) => {
-										updateSetting(extension.id, setting.id, event.detail);
-									}}
-								/>
-							{/if}
-							{#if setting.setting_type === 'Select'}
-								<Select
-									values={setting.select_options ?? []}
-									selectedValue={getSettingValue(extension.id, setting.id)}
-									on:selection={(event) => {
-										updateSetting(extension.id, setting.id, event.detail.id);
-									}}
-								/>
-							{/if}
-						</div>
-					{/if}
-				{/each}
-			{/if}
-		</div>
-	</div>
-{/each}
+	{/each}
+</div>

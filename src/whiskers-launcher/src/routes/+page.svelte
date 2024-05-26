@@ -1,5 +1,4 @@
 <script lang="ts">
-	import QuestionIcon from '$lib/icons/question.svg?component';
 	import SettingsIcon from '$lib/icons/settings.svg?component';
 	import SearchIcon from '$lib/icons/search.svg?component';
 	import {
@@ -10,7 +9,7 @@
 		type WLResult
 	} from '$lib/settings/settings';
 	import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-	import { appWindow } from '@tauri-apps/api/window';
+	import { WebviewWindow, appWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
 
 	// ===========================
@@ -24,6 +23,7 @@
 	let displayedResults: WLResult[] = [];
 	$: selectedIndex = 0;
 	let resultOffset = 0;
+	let showConfirmationBox = false;
 
 	// ===========================
 	// UI Events
@@ -70,7 +70,15 @@
 		}
 	});
 
-	async function openSettings() {
+	async function handleBlur() {
+		if (settings?.hide_on_blur) {
+			appWindow.close();
+		}
+	}
+
+	async function openSettings(event: Event | undefined = undefined) {
+		event?.stopPropagation();
+
 		invoke('open_settings_window');
 
 		setTimeout(() => {
@@ -78,9 +86,7 @@
 		}, 200);
 	}
 
-	async function searchWithInput(
-		event: Event & { currentTarget: EventTarget & HTMLInputElement }
-	) {
+	async function searchWithInput(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
 		searchText = event.currentTarget.value;
 		search();
 	}
@@ -156,6 +162,8 @@
 	}
 
 	async function runAction() {
+		let result = displayedResults[selectedIndex];
+
 		invoke('run_action', { result: displayedResults[selectedIndex] });
 	}
 
@@ -175,7 +183,9 @@
 <div>
 	{#if settings !== null}
 		{@html css}
-		<div class="h-screen overflow-hidden flex justify-center text-text pt-16">
+		<!-- svelte-ignore a11y-click-events-have-key-events -->
+		<!-- svelte-ignore a11y-no-static-element-interactions -->
+		<div class="h-screen overflow-hidden flex justify-center text-text pt-16" on:click={handleBlur}>
 			<div class=" search-box-width h-fit search-round search-border overflow-hidden">
 				<div class=" flex bg-background p-3 gap-2">
 					{#if settings.show_search_icon}
@@ -193,7 +203,12 @@
 					/>
 
 					{#if settings.show_settings_icon}
-						<button class=" hover-bg-tertiary rounded-full" on:click={openSettings}>
+						<button
+							class=" hover-bg-tertiary rounded-full"
+							on:click={(event) => {
+								openSettings(event);
+							}}
+						>
 							<SettingsIcon class=" search-icon-size text-accent" />
 						</button>
 					{/if}
@@ -218,11 +233,9 @@
 											alt=""
 											style="filter: {getColorFilter(result.text?.tint ?? null)}"
 										/>
-									{:else}
-										<QuestionIcon class=" icon-size text-accent" />
 									{/if}
 									<div
-										class={`flex-grow text-start result-title ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
 									>
 										{result.text?.text}
 									</div>
@@ -244,14 +257,14 @@
 											alt=""
 											style="filter: {getColorFilter(result.title_and_description?.tint ?? null)}"
 										/>
-									{:else}
-										<QuestionIcon class=" icon-size text-accent" />
 									{/if}
 									<div
-										class={`flex-grow text-start result-title flex flex-col ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title flex flex-col ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
 									>
-										<p class="result-title">{result.title_and_description?.title}</p>
-										<p class="result-description">{result.title_and_description?.description}</p>
+										<p class="result-title one-line">{result.title_and_description?.title}</p>
+										<p class="result-description one-line">
+											{result.title_and_description?.description}
+										</p>
 									</div>
 									{#if settings.show_alt_hint}
 										<div
@@ -264,7 +277,9 @@
 							{/if}
 							{#if result.result_type === 'Divider'}
 								<div class="p-2 pt-4 pb-4 w-full">
-									<div class={`result-divider rounded-full ${selectedIndex === index ? 'bg-accent': 'bg-tertiary'}`}></div>
+									<div
+										class={`result-divider rounded-full ${selectedIndex === index ? 'bg-accent' : 'bg-tertiary'}`}
+									></div>
 								</div>
 							{/if}
 						</button>
