@@ -40,8 +40,7 @@ pub fn index_apps() {
                                     path.clone().into_os_string().into_string().unwrap();
                                 let title = entry.name(None).unwrap().to_string();
 
-                                let mut app_indexing =
-                                    App::new(&exec_path, &title, &exec_path);
+                                let mut app_indexing = App::new(&exec_path, &title, &exec_path);
 
                                 match get_app_icon(icon) {
                                     Some(path) => {
@@ -95,6 +94,19 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     let home_icons_location_str = home_icons_location.into_os_string().into_string().unwrap();
 
     xdg_data_dirs.push(&home_icons_location_str);
+
+    /*
+    let nix_store_paths = PathBuf::from("/nix/store");
+
+    if nix_store_paths.exists() {
+        for entry in fs::read_dir(nix_store_paths).expect("Error reading dir") {
+            if let Ok(entry) = entry {
+                let path = entry.path().into_os_string().into_string().unwrap();
+                xdg_data_dirs.to_owned().push(&path);
+            }
+        }
+    }
+    */
 
     if Path::new(&icon).exists() {
         return Some(Path::new(&icon).to_owned());

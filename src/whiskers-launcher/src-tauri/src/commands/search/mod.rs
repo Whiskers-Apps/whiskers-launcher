@@ -62,17 +62,30 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     let keyword = search.keyword;
 
     // Search extensions and search engines
-    if keyword.is_some() {
-        for engine in &settings.search_engines {
-            if engine.keyword == keyword.to_owned().unwrap() {
+    if let Some(keyword) = keyword {
+        if keyword == settings.search_keyword {
+            if let Some(engine) = settings
+                .search_engines
+                .iter()
+                .find(|e| e.id == settings.default_search_engine)
+            {
                 results.push(get_engine_result(engine.to_owned(), &search.search_text));
                 return results;
             }
         }
 
+        if let Some(engine) = settings
+            .search_engines
+            .iter()
+            .find(|e| e.keyword == keyword)
+        {
+            results.push(get_engine_result(engine.to_owned(), &search.search_text));
+            return results;
+        }
+
         for extension_setting in settings.extensions {
             if extension_setting.setting_id == "keyword"
-                && extension_setting.setting_value == keyword.to_owned().unwrap()
+                && extension_setting.setting_value == keyword.to_owned()
             {
                 let request = ExtensionRequest::new(
                     &extension_setting.extension_id,
@@ -212,13 +225,13 @@ pub async fn run_action(result: WLResult, window: Window, app: AppHandle) {
     let action = result_action.unwrap();
 
     match action.action_type {
-        action::ActionType::OpenApp => open_app(action.open_app.unwrap(), window.to_owned()),
-        action::ActionType::OpenURL => open_url(action.open_url.unwrap(), window.to_owned()),
+        action::ActionType::OpenApp => open_app(action.open_app.unwrap(), window.to_owned()).await,
+        action::ActionType::OpenURL => open_url(action.open_url.unwrap(), window.to_owned()).await,
         action::ActionType::Copy => {
-            copy_text(action.copy.unwrap(), window.to_owned(), app.to_owned())
+            copy_text(action.copy.unwrap(), window.to_owned(), app.to_owned()).await
         }
         action::ActionType::Extension => {
-            run_extension_action(action.extension.unwrap(), window.to_owned())
+            run_extension_action(action.extension.unwrap(), window.to_owned()).await
         }
         action::ActionType::Dialog => {
             open_dialog(action.dialog.unwrap(), window.to_owned(), app.to_owned()).await
@@ -232,77 +245,75 @@ fn get_app(id: String) -> App {
     get_apps().iter().find(|a| a.id == id).unwrap().to_owned()
 }
 
-fn open_app(action: OpenAppAction, window: Window) {
-    let app = get_app(action.id);
+async fn open_app(action: OpenAppAction, window: Window) {
+    std::thread::spawn(move || {
+        let app = get_app(action.id);
 
-    #[cfg(target_os = "linux")]
-    if cfg!(target_os = "linux") {
-        let desktop_file_dir = Path::new(&app.path)
-            .parent()
-            .expect("Error reading parent directory")
-            .to_owned();
+        #[cfg(target_os = "linux")]
+        if cfg!(target_os = "linux") {
+            let desktop_file_dir = Path::new(&app.path)
+                .parent()
+                .expect("Error reading parent directory")
+                .to_owned();
 
-        let desktop_file_name = Path::new(&app.path)
-            .file_name()
-            .expect("Error getting app file name")
-            .to_owned();
+            let desktop_file_name = Path::new(&app.path)
+                .file_name()
+                .expect("Error getting app file name")
+                .to_owned();
 
-        std::thread::spawn(|| {
             Command::new("gtk-launch")
                 .arg(desktop_file_name)
                 .current_dir(desktop_file_dir)
                 .spawn()
                 .expect("Error opening app");
-        });
-    }
+        }
 
-    #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {
-        let path = Path::new(&exec_path).to_owned();
+        #[cfg(target_os = "windows")]
+        if cfg!(target_os = "windows") {
+            let path = Path::new(&exec_path).to_owned();
 
-        std::thread::spawn(move || {
             let script = format!(
                 "invoke-item '{}'",
                 path.into_os_string().into_string().unwrap()
             );
 
             powershell_script::run(&script).expect("Error opening app");
-        });
-    }
+        }
 
-    // Adds app to the recent apps list
+        // Adds app to the recent apps list
 
-    let mut recent_apps = get_recent_apps();
+        let mut recent_apps = get_recent_apps();
 
-    recent_apps = recent_apps
-        .iter()
-        .cloned()
-        .filter(|a| a.id != app.id)
-        .collect();
+        recent_apps = recent_apps
+            .iter()
+            .cloned()
+            .filter(|a| a.id != app.id)
+            .collect();
 
-    recent_apps.insert(0, app.to_owned());
+        recent_apps.insert(0, app.to_owned());
 
-    let cut_size = if recent_apps.len() < 14 {
-        recent_apps.len()
-    } else {
-        14
-    };
-    let recent_apps = &recent_apps[0..cut_size].to_owned();
+        let cut_size = if recent_apps.len() < 14 {
+            recent_apps.len()
+        } else {
+            14
+        };
+        let recent_apps = &recent_apps[0..cut_size].to_owned();
 
-    if !get_recent_apps_path()
-        .parent()
-        .expect("Error getting parent")
-        .exists()
-    {
-        fs::create_dir_all(&get_recent_apps_path().parent().unwrap())
-            .expect("Error creating recent apps dir");
-    }
+        if !get_recent_apps_path()
+            .parent()
+            .expect("Error getting parent")
+            .exists()
+        {
+            fs::create_dir_all(&get_recent_apps_path().parent().unwrap())
+                .expect("Error creating recent apps dir");
+        }
 
-    fs::write(
-        &get_recent_apps_path(),
-        bincode::serialize(recent_apps).expect("Error serrialing recent apps"),
-    )
-    .expect("Error writing recent apps");
+        fs::write(
+            &get_recent_apps_path(),
+            bincode::serialize(recent_apps).expect("Error serrialing recent apps"),
+        )
+        .expect("Error writing recent apps");
+    });
 
     window.close().expect("Error closing window");
 }
@@ -317,53 +328,60 @@ fn get_recent_apps() -> Vec<App> {
     }
 }
 
-fn open_url(action: OpenURLAction, window: Window) {
-    open::that(&action.url).expect("Error opening url");
-    window.close().expect("Error closing window");
-}
-
-fn copy_text(action: CopyAction, window: Window, app: AppHandle) {
-    let clipboard = app.state::<tauri_plugin_clipboard::ClipboardManager>();
-
-    clipboard
-        .write_text(action.text)
-        .expect("Error writing to clipboard");
+async fn open_url(action: OpenURLAction, window: Window) {
+    std::thread::spawn(move || {
+        open::that(&action.url).expect("Error opening url");
+    });
 
     window.close().expect("Error closing window");
 }
 
-fn run_extension_action(action: ExtensionAction, window: Window) {
-    let extension_dir =
-        get_extension_dir(&action.extension_id).expect("Error getting extension dir");
+async fn copy_text(action: CopyAction, window: Window, app: AppHandle) {
+    std::thread::spawn(move || {
+        let clipboard = app.state::<tauri_plugin_clipboard::ClipboardManager>();
 
-    let mut request = ExtensionRequest::new(&action.extension_id, ActionContext::RunAction)
-        .extension_action(action.action);
+        clipboard
+            .write_text(action.text.to_owned())
+            .expect("Error writing to clipboard");
+    });
 
-    if action.args.is_some() {
-        request.args(action.args.unwrap());
-    }
+    window.close().expect("Error closing window");
+}
 
-    write_extension_request(request);
+async fn run_extension_action(action: ExtensionAction, window: Window) {
+    std::thread::spawn(move || {
+        let extension_dir =
+            get_extension_dir(&action.extension_id).expect("Error getting extension dir");
 
-    if cfg!(target_os = "linux") {
-        Command::new("sh")
-            .arg("-c")
-            .arg("./linux-extension")
-            .current_dir(&extension_dir)
-            .output()
-            .expect("Error running extension");
-    }
+        let mut request = ExtensionRequest::new(&action.extension_id, ActionContext::RunAction)
+            .extension_action(action.action);
 
-    #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {
-        let extension_run = Command::new("cmd")
-            .arg("/C")
-            .arg("start /min windows-extension")
-            .current_dir(&extension_dir)
-            .creation_flags(FLAG_NO_WINDOW)
-            .output()
-            .unwrap();
-    }
+        if action.args.is_some() {
+            request.args(action.args.unwrap());
+        }
+
+        write_extension_request(request);
+
+        if cfg!(target_os = "linux") {
+            Command::new("sh")
+                .arg("-c")
+                .arg("./linux-extension")
+                .current_dir(&extension_dir)
+                .output()
+                .expect("Error running extension");
+        }
+
+        #[cfg(target_os = "windows")]
+        if cfg!(target_os = "windows") {
+            let extension_run = Command::new("cmd")
+                .arg("/C")
+                .arg("start /min windows-extension")
+                .current_dir(&extension_dir)
+                .creation_flags(FLAG_NO_WINDOW)
+                .output()
+                .unwrap();
+        }
+    });
 
     window.close().expect("Error closing window");
 }

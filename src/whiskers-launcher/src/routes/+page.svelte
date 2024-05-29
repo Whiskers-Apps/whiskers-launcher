@@ -65,7 +65,7 @@
 			appWindow.close();
 		}
 
-		if (event.altKey && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(event.key)) {
+		if (event.altKey && ['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
 			selectAltResult(+event.key - 1);
 		}
 	});
