@@ -190,3 +190,9 @@ pub async fn open_extension_dir(id: String) {
 pub async fn index_extensions() {
     whiskers_launcher_rs::api::extensions::index_extensions();
 }
+
+#[tauri::command]
+pub async fn remove_extension(id: String) {
+    let dir = get_extension_dir(&id).expect("Error getting extension dir");
+    fs::remove_dir_all(&dir).expect("Error removing extension dir");
+}

@@ -34,13 +34,13 @@
 		});
 
 		const unlisten = await listen('refresh-extensions', async () => {
-			dispatch('refresh-extensions');
+			await reloadExtensions();
 			unlisten();
 		});
 	}
 
 	async function reloadExtensions() {
-		await invoke("index_extensions");
+		await invoke('index_extensions');
 		dispatch('refresh-extensions');
 		extensions = await invoke('get_extensions');
 	}
@@ -100,6 +100,22 @@
 
 		dispatch('updateExtensionsSettings', newExtensionsSettings);
 	}
+
+	async function openRemoveExtensionDialog(extensionId: string) {
+		new WebviewWindow('remove-extension', {
+			url: `dialogs/remove-extension?id=${encodeURIComponent(extensionId)}`,
+			title: 'Remove Extension',
+			height: WindowSizes.ConfirmDialog.height,
+			width: WindowSizes.ConfirmDialog.width,
+			resizable: false,
+			maximizable: false
+		});
+
+		const unlisten = await listen('refresh-extensions', async () => {
+			await reloadExtensions();
+			unlisten();
+		});
+	}
 </script>
 
 <div class="flex">
@@ -120,6 +136,7 @@
 				</button>
 				<button
 					class=" p-2 hover-bg-tertiary text-danger rounded-full hover-text-on-danger hover-bg-danger"
+					on:click={() => openRemoveExtensionDialog(extension.id)}
 				>
 					<TrashIcon class=" " width="24" height="24" />
 				</button>
