@@ -186,8 +186,10 @@
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
 		<div class="h-screen overflow-hidden flex justify-center text-text pt-16" on:click={handleBlur}>
-			<div class=" search-box-width h-fit search-round search-border overflow-hidden">
-				<div class=" flex bg-background p-3 gap-2">
+			<div class={`search-box-width h-fit search-round overflow-hidden ${settings.split_results ? '' : 'search-border bg-background'}`}>
+				<div
+					class={`flex p-3 gap-2 bg-background search-round ${settings.split_results ? 'search-border' : ''}`}
+				>
 					{#if settings.show_search_icon}
 						<SearchIcon class=" search-icon-size text-accent" />
 					{/if}
@@ -214,7 +216,13 @@
 					{/if}
 				</div>
 
-				<div class=" bg-background">
+				{#if settings.split_results}
+					<div class="split-divider"></div>
+				{/if}
+
+				<div
+					class={`search-round bg-background overflow-hidden ${settings.split_results ? 'search-border' : ''}`}
+				>
 					{#each displayedResults as result, index}
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<!-- svelte-ignore a11y-mouse-events-have-key-events -->

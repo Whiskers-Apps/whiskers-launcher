@@ -409,6 +409,11 @@ input::placeholder{
 	font-size: var(--search-text-size);
 }
 
+.split-divider{
+	height: ${settings.scaling * 16}px;
+	width: 100%;
+}
+
 /*Search Box*/
 
 .search-round{
