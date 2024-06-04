@@ -1,4 +1,4 @@
-use std::{fs, path::Path, process::Command};
+use std::{env, fs, path::Path, process::Command};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tauri::{AppHandle, Manager, Window, WindowBuilder};
@@ -343,6 +343,18 @@ async fn copy_text(action: CopyAction, window: Window, app: AppHandle) {
         clipboard
             .write_text(action.text.to_owned())
             .expect("Error writing to clipboard");
+
+        if cfg!(target_os = "linux") {
+            if let Ok(environment) = env::var("XDG_CURRENT_DESKTOP") {
+                if environment.to_lowercase() == "hyprland" {
+                    Command::new("sh")
+                        .arg("-c")
+                        .arg(format!("wl-copy '{}'", action.text.to_owned()))
+                        .spawn()
+                        .expect("Error writing to clipboard");
+                }
+            }
+        }
     });
 
     window.close().expect("Error closing window");
