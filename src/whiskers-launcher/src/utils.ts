@@ -14,5 +14,9 @@ export const WindowSizes = {
 	CloneExtension: {
 		width: 700,
 		height: 200
+	},
+	Store:{
+		width: 700,
+		height: 700
 	}
 };

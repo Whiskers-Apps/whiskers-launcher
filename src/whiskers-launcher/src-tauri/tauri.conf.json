@@ -85,7 +85,8 @@
 				"maximizable": true,
 				"title": "Whiskers Launcher",
 				"decorations": false,
-				"transparent": true
+				"transparent": true,
+				"alwaysOnTop": true
 			}
 		]
 	}

@@ -1,13 +1,29 @@
 use std::{env, fs};
 
 use git2::Repository;
+use serde::{Deserialize, Serialize};
 use whiskers_launcher_rs::{
     api::{apps::get_apps, extensions::get_extension_dir, settings},
     extension::Extension,
     indexing::App,
-    paths::get_extensions_dir,
+    paths::{get_extensions_dir, get_extensions_store_path},
     settings::{SearchEngine, Settings, Theme},
 };
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ExtensionStoreItem {
+    pub id: String,
+    pub name: String,
+    pub description: String,
+    pub repo: String,
+    pub preview: String,
+    #[serde(default = "default_os")]
+    pub os: Option<Vec<String>>,
+}
+
+fn default_os() -> Option<Vec<String>> {
+    None
+}
 
 #[tauri::command]
 pub async fn get_settings() -> Settings {
@@ -173,6 +189,8 @@ pub async fn clone_extension(url: String) {
     path.push(repo_name);
 
     Repository::clone(&url, path).expect("Error cloning repo");
+
+    index_extensions().await;
 }
 
 #[tauri::command]
@@ -196,3 +214,31 @@ pub async fn remove_extension(id: String) {
     let dir = get_extension_dir(&id).expect("Error getting extension dir");
     fs::remove_dir_all(&dir).expect("Error removing extension dir");
 }
+
+#[tauri::command]
+pub async fn get_extensions_store() -> Vec<ExtensionStoreItem> {
+    let path = get_extensions_store_path();
+
+    if !path.exists() {
+        return Vec::new();
+    }
+
+    let bytes = fs::read(&path).expect("Error reading extensions store");
+    let store = bincode::deserialize::<Vec<ExtensionStoreItem>>(&bytes)
+        .expect("Error deserializing extensions store");
+
+    store
+}
+
+#[tauri::command]
+pub async fn write_extensions_store(store: Vec<ExtensionStoreItem>) {
+    let path = get_extensions_store_path();
+
+    if !path.exists(){
+        fs::create_dir_all(path.parent().expect("Expected parent directory")).expect("Error creating extensions store directory");
+    }
+    
+    let bytes = bincode::serialize(&store).expect("Error serializing extensions store");
+    fs::write(&path, &bytes).expect("Error writing extensions store");
+}
+

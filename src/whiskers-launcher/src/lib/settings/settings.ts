@@ -124,7 +124,7 @@ export interface DialogAction {
 }
 
 export interface Field {
-	id: string,
+	id: string;
 	field_type: string;
 	input_field: InputField | null;
 	text_area_field: TextAreaField | null;
@@ -210,6 +210,14 @@ export interface DialogResult {
 	args: string[] | null;
 }
 
+export interface ExtensionStoreItem {
+	id: string;
+	name: string;
+	description: string;
+	repo: string;
+	preview: string;
+	os: string[] | null;
+}
 
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');

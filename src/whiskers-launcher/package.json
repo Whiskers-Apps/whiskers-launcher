@@ -39,6 +39,7 @@
     "@sveltejs/adapter-static": "^3.0.1",
     "@tauri-apps/api": "^1.5.5",
     "@tauri-apps/cli": "^1.5.13",
+    "axios": "^1.7.2",
     "css-filter-converter": "^1.0.109",
     "svgo": "^3.3.2"
   }

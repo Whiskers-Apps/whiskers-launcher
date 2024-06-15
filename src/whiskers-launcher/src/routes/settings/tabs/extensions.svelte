@@ -45,6 +45,22 @@
 		extensions = await invoke('get_extensions');
 	}
 
+	async function openExtensionsStore() {
+		new WebviewWindow('clone-extension', {
+			url: 'dialogs/extensions-store',
+			title: 'Extensions Store',
+			height: WindowSizes.Store.height,
+			width: WindowSizes.Store.width,
+			resizable: false,
+			maximizable: false
+		});
+
+		const unlisten = await listen('refresh-extensions', async () => {
+			await reloadExtensions();
+			unlisten();
+		});
+	}
+
 	async function openExtensionDirectory(extensionId: string) {
 		invoke('open_extension_dir', { id: extensionId });
 	}
@@ -119,7 +135,7 @@
 </script>
 
 <div class="flex">
-	<SecondaryButton text="Extensions Store" />
+	<SecondaryButton text="Extensions Store" on:click={openExtensionsStore} />
 	<SecondaryButton text="Git Clone" on:click={openCloneDialog} />
 	<SecondaryButton text="Reload" on:click={reloadExtensions} />
 </div>
