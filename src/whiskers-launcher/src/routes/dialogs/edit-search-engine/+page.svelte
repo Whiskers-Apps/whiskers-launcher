@@ -33,7 +33,9 @@
 		settings = await getSettings();
 		css = getThemeCss(settings);
 
+		
 		id = +$page.url.searchParams.get('id')!!;
+		console.log($page);
 
 		let engine = settings.search_engines.find((engine) => engine.id === id)!!;
 		iconPath = engine.icon_path;

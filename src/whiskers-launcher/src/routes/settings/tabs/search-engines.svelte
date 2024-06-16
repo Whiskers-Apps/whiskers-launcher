@@ -75,7 +75,7 @@
 
 	async function editSearchEngine(id: number) {
 		new WebviewWindow('edit-search-engine', {
-			url: `dialogs/edit-search-engine/?id=${id}`,
+			url: `dialogs/edit-search-engine?id=${id}`,
 			title: 'Edit Search Engine',
 			resizable: false,
 			width: WindowSizes.SearchEngine.width,
