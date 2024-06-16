@@ -169,6 +169,8 @@
 					result.title_and_description?.action.ask_confirmation)
 			) {
 				showConfirmationBox = true;
+			} else {
+				invoke('run_action', { result: displayedResults[selectedIndex] });
 			}
 		} else {
 			showConfirmationBox = false;
@@ -302,7 +304,11 @@
 								</div>
 							{/if}
 							{#if showConfirmationBox && selectedIndex === index}
-								<div class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2">Confirm Action</div>
+								<div
+									class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2"
+								>
+									Confirm Action
+								</div>
 							{/if}
 						</button>
 					{/each}
