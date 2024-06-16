@@ -286,6 +286,7 @@ export function getThemeCss(settings: Settings): string {
 	--result-alt-size: ${settings.scaling * 14}px;
 	--result-description-size: ${settings.scaling * 14}px;
 	--result-divider-size: ${settings.scaling * 6}px;
+	--result-confirm-size: ${settings.scaling * 40}px;
 }
 
 
@@ -483,6 +484,10 @@ input::placeholder{
 .result-divider{
 	height: var(--result-divider-size);
 	width: 100%;
+}
+
+.result-confirm{
+	height: var(--result-confirm-size);
 }
 
 .one-line{

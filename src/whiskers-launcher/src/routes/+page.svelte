@@ -9,12 +9,9 @@
 		type WLResult
 	} from '$lib/settings/settings';
 	import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-	import { WebviewWindow, appWindow } from '@tauri-apps/api/window';
+	import { appWindow } from '@tauri-apps/api/window';
 	import { onMount } from 'svelte';
 
-	// ===========================
-	// UI
-	// ===========================
 	let settings: Settings | null = null;
 	let css = '';
 
@@ -25,9 +22,6 @@
 	let resultOffset = 0;
 	let showConfirmationBox = false;
 
-	// ===========================
-	// UI Events
-	// ===========================
 	onMount(async () => {
 		appWindow.setResizable(false);
 
@@ -105,6 +99,8 @@
 	}
 
 	async function goToPreviousResult() {
+		showConfirmationBox = false;
+
 		if (selectedIndex > 0) {
 			selectedIndex--;
 			return;
@@ -129,6 +125,8 @@
 	}
 
 	async function goToNextResult() {
+		showConfirmationBox = false;
+
 		if (selectedIndex < displayedResults.length - 1) {
 			selectedIndex++;
 			return;
@@ -164,7 +162,18 @@
 	async function runAction() {
 		let result = displayedResults[selectedIndex];
 
-		invoke('run_action', { result: displayedResults[selectedIndex] });
+		if (!showConfirmationBox) {
+			if (
+				(result.result_type === 'Text' && result.text?.action.ask_confirmation) ||
+				(result.result_type === 'TitleAndDescription' &&
+					result.title_and_description?.action.ask_confirmation)
+			) {
+				showConfirmationBox = true;
+			}
+		} else {
+			showConfirmationBox = false;
+			invoke('run_action', { result: displayedResults[selectedIndex] });
+		}
 	}
 
 	function getColorFilter(tint: string | null): string {
@@ -223,19 +232,19 @@
 				{/if}
 
 				<div
-					class={`search-round overflow-hidden ${settings.split_results ? ` bg-background ${displayedResults.length > 0 ? 'search-border' : ''}` : ''}`}
+					class={`overflow-hidden ${settings.split_results ? ` bg-background search-round  ${displayedResults.length > 0 ? 'search-border' : ''}` : ''}`}
 				>
 					{#each displayedResults as result, index}
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 						<button
-							class={`flex w-full items-center cursor-pointer ${index === selectedIndex ? 'highlight-result' : ''}`}
+							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === selectedIndex ? 'highlight-result' : ''}`}
 							on:mouseover={() => (selectedIndex = index)}
 							on:focus={() => (selectedIndex = index)}
 							on:click={runAction}
 						>
 							{#if result.result_type === 'Text'}
-								<div class="w-full flex gap-4 p-3 items-center">
+								<div class="flex-grow flex gap-4 p-3 items-center">
 									{#if result.text?.icon !== null}
 										<img
 											class={`icon-size ${result.text?.tint}`}
@@ -259,7 +268,7 @@
 								</div>
 							{/if}
 							{#if result.result_type === 'TitleAndDescription'}
-								<div class="w-full flex gap-4 p-3 items-center">
+								<div class="flex-grow flex gap-4 p-3 items-center">
 									{#if result.title_and_description?.icon !== null}
 										<img
 											class={`icon-size ${result.title_and_description?.tint}`}
@@ -291,6 +300,9 @@
 										class={`result-divider rounded-full ${selectedIndex === index ? 'bg-accent' : 'bg-tertiary'}`}
 									></div>
 								</div>
+							{/if}
+							{#if showConfirmationBox && selectedIndex === index}
+								<div class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2">Confirm Action</div>
 							{/if}
 						</button>
 					{/each}
