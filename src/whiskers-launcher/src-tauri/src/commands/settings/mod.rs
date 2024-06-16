@@ -6,7 +6,7 @@ use whiskers_launcher_rs::{
     api::{apps::get_apps, extensions::get_extension_dir, settings},
     extension::Extension,
     indexing::App,
-    paths::{get_extensions_dir, get_extensions_store_path},
+    paths::{get_extensions_dir, get_extensions_store_path, get_themes_store_path},
     settings::{SearchEngine, Settings, Theme},
 };
 
@@ -21,7 +21,33 @@ pub struct ExtensionStoreItem {
     pub os: Option<Vec<String>>,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeStoreItem {
+    pub id: String,
+    pub name: String,
+    pub repo: String,
+    pub preview: String,
+    #[serde(default = "default_file")]
+    pub file: Option<String>,
+    #[serde(default = "default_variants")]
+    pub variants: Option<Vec<ThemeStoreVariant>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ThemeStoreVariant {
+    name: String,
+    file: String,
+}
+
 fn default_os() -> Option<Vec<String>> {
+    None
+}
+
+fn default_file() -> Option<String> {
+    None
+}
+
+fn default_variants() -> Option<Vec<ThemeStoreVariant>> {
     None
 }
 
@@ -234,11 +260,39 @@ pub async fn get_extensions_store() -> Vec<ExtensionStoreItem> {
 pub async fn write_extensions_store(store: Vec<ExtensionStoreItem>) {
     let path = get_extensions_store_path();
 
-    if !path.exists(){
-        fs::create_dir_all(path.parent().expect("Expected parent directory")).expect("Error creating extensions store directory");
+    if !path.exists() {
+        fs::create_dir_all(path.parent().expect("Expected parent directory"))
+            .expect("Error creating extensions store directory");
     }
-    
+
     let bytes = bincode::serialize(&store).expect("Error serializing extensions store");
     fs::write(&path, &bytes).expect("Error writing extensions store");
 }
 
+#[tauri::command]
+pub async fn get_themes_store() -> Vec<ThemeStoreItem> {
+    let path = get_themes_store_path();
+
+    if !path.exists() {
+        return Vec::new();
+    }
+
+    let bytes = fs::read(&path).expect("Error reading extensions store");
+    let store = bincode::deserialize::<Vec<ThemeStoreItem>>(&bytes)
+        .expect("Error deserializing theme store");
+
+    store
+}
+
+#[tauri::command]
+pub async fn write_themes_store(store: Vec<ThemeStoreItem>) {
+    let path = get_themes_store_path();
+
+    if !path.exists() {
+        fs::create_dir_all(path.parent().expect("Expected parent directory"))
+            .expect("Error creating themes store directory");
+    }
+
+    let bytes = bincode::serialize(&store).expect("Error serializing themes store");
+    fs::write(&path, &bytes).expect("Error writing themes store");
+}

@@ -45,8 +45,8 @@
 		extensions = await invoke('get_extensions');
 	}
 
-	async function openExtensionsStore() {
-		new WebviewWindow('clone-extension', {
+	async function openStore() {
+		new WebviewWindow('extensions-store', {
 			url: 'dialogs/extensions-store',
 			title: 'Extensions Store',
 			height: WindowSizes.Store.height,
@@ -135,7 +135,7 @@
 </script>
 
 <div class="flex">
-	<SecondaryButton text="Extensions Store" on:click={openExtensionsStore} />
+	<SecondaryButton text="Extensions Store" on:click={openStore} />
 	<SecondaryButton text="Git Clone" on:click={openCloneDialog} />
 	<SecondaryButton text="Reload" on:click={reloadExtensions} />
 </div>

@@ -1,11 +1,14 @@
 <script lang="ts">
 	import Input from '$lib/components/input.svelte';
+	import Select from '$lib/components/select.svelte';
 	import {
 		getSettings,
 		getThemeCss,
+		writeSettings,
 		type Extension,
-		type ExtensionStoreItem,
-		type Settings
+		type Settings,
+		type ThemeStoreItem,
+		type ThemeStoreVariant
 	} from '$lib/settings/settings';
 	import ChevronRightIcon from '$lib/icons/chevron-right.svg?component';
 	import ChevronLeftIcon from '$lib/icons/chevron-left.svg?component';
@@ -14,44 +17,60 @@
 	import axios from 'axios';
 	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
+	import type { SelectValue } from '$lib/components/classes';
 	import { emit } from '@tauri-apps/api/event';
 
 	let settings: Settings | null = null;
 	let css = '';
 	let searchText = '';
-	let store: ExtensionStoreItem[] = [];
-	let filteredStore: ExtensionStoreItem[] = [];
-	let displayedStore: ExtensionStoreItem[] = [];
+	let store: ThemeStoreItem[] = [];
+	let filteredStore: ThemeStoreItem[] = [];
+	let displayedStore: ThemeStoreItem[] = [];
 	let page = 0;
-	let installedExtensions: String[] = [];
-	let installingExtension = false;
+	let applyingTheme = false;
+	let listingSelectValues: ListingSelectValue[] = [];
+
+	interface ListingSelectValue {
+		theme_id: string;
+		value_id: string;
+	}
 
 	onMount(async () => {
 		settings = await getSettings();
 		css = getThemeCss(settings);
-		let extensions: Extension[] = await invoke('get_extensions');
-		extensions.forEach((extension) => {
-			installedExtensions.push(extension.id);
-		});
 
 		// Cached Store
-		store = await invoke('get_extensions_store');
+		store = await invoke('get_themes_store');
 		filteredStore = store;
 		displayedStore = store.slice(0, 12);
+		indexSelectValues();
 
-		axios
+		await axios
 			.get(
-				'https://raw.githubusercontent.com/Whiskers-Apps/whiskers-launcher-extensions/main/extensions.json'
+				'https://raw.githubusercontent.com/Whiskers-Apps/whiskers-launcher-themes/master/themes.json'
 			)
 			.then((response) => {
 				store = [...response.data];
 				filteredStore = store;
+
 				displayedStore = [...store.slice(0, 12)];
 
-				invoke('write_extensions_store', { store: store });
+				indexSelectValues();
+
+				invoke('write_themes_store', { store: store });
 			})
 			.catch((error) => console.error(error));
 	});
+
+	async function indexSelectValues() {
+		let newValues: ListingSelectValue[] = [];
+		store.forEach((listing) => {
+			if (listing.variants) {
+				newValues.push({ theme_id: listing.id, value_id: listing.variants!![0].file });
+			}
+		});
+		listingSelectValues = [...newValues];
+	}
 
 	async function search() {
 		if (searchText.length === 0) {
@@ -64,11 +83,7 @@
 		let searchTerm = searchText.toLowerCase();
 
 		filteredStore = store
-			.filter(
-				(item) =>
-					item.name.toLowerCase().includes(searchTerm) ||
-					item.description.toLowerCase().includes(searchTerm)
-			)
+			.filter((item) => item.name.toLowerCase().includes(searchTerm))
 			.slice(0, 12);
 
 		page = 0;
@@ -76,22 +91,62 @@
 		displayedStore = [...filteredStore];
 	}
 
-	async function installExtension(repo: string) {
+	function getSelectValues(variants: ThemeStoreVariant[]): SelectValue[] {
+		return variants.map((variant) => ({
+			id: variant.file,
+			value: variant.name
+		}));
+	}
+
+	function getSelectValueId(id: string): string {
+		for (let value of listingSelectValues) {
+			if (value.theme_id === id) {
+				return value.value_id;
+			}
+		}
+
+		return '';
+	}
+
+	function setSelectValue(theme_id: string, value_id: string) {
+		let newListing = listingSelectValues.map((value) =>
+			value.theme_id === theme_id ? { theme_id: theme_id, value_id: value_id } : value
+		);
+		listingSelectValues = [...newListing];
+		displayedStore = [...displayedStore];
+	}
+
+	async function applyTheme(theme: ThemeStoreItem) {
 		try {
-			installingExtension = true;
-			await invoke('clone_extension', { url: repo });
-			installingExtension = false;
+			let repo = theme.file ? theme.file : getSelectValueId(theme.id);
 
-			installedExtensions = [];
-			let extensions: Extension[] = await invoke('get_extensions');
-			extensions.forEach((extension) => {
-				installedExtensions.push(extension.id);
-			});
+			axios
+				.get(repo)
+				.then(async (response) => {
+					let json = response.data;
+					let settings = await getSettings();
+					settings.theme = {
+						background: json.background,
+						secondary: json.secondary,
+						tertiary: json.tertiary,
+						accent: json.accent,
+						warning: json.warning,
+						danger: json.danger,
+						on_accent: json.on_accent,
+						on_danger: json.on_danger,
+						text: json.text,
+						sub_text: json.sub_text
+					};
 
-			store = await invoke('get_extensions_store');
-			search();
+					console.log(settings)
 
-			emit('refresh-extensions');
+					writeSettings(settings);
+
+					css = getThemeCss(settings);
+
+					emit('refresh-theme');
+				})
+				.catch((error) => console.error(error));
 		} catch (error) {
 			console.error(error);
 		}
@@ -114,7 +169,7 @@
 		<div class=" bg-background p-4 h-screen w-full text-text space-y-4 flex flex-col">
 			<Input
 				value={searchText}
-				placeholder="Search extensions"
+				placeholder="Search themes"
 				on:input={(e) => {
 					searchText = e.detail;
 					search();
@@ -134,18 +189,20 @@
 						<div class=" text-xl font-medium text-start">{storeListing.name}</div>
 						<div class="flex items-start">
 							<div class="text-start flex flex-col gap-2 flex-grow">
-								<div class="flex-grow">
-									{storeListing.description}
-								</div>
+								{#if storeListing.variants !== null}
+									<Select
+										values={getSelectValues(storeListing.variants)}
+										selectedValue={getSelectValueId(storeListing.id)}
+										on:selection={(e) => setSelectValue(storeListing.id, e.detail.id)}
+									/>
+								{/if}
 								<div class="flex justify-end space-x-2">
 									<SecondaryButton text="Source Code" on:click={() => open(storeListing.repo)} />
-									{#if !installedExtensions.includes(storeListing.id)}
-										<SecondaryButton
-											text="Install"
-											disabled={installingExtension}
-											on:click={() => installExtension(storeListing.repo)}
-										/>
-									{/if}
+									<SecondaryButton
+										text="Apply"
+										disabled={applyingTheme}
+										on:click={() => applyTheme(storeListing)}
+									/>
 								</div>
 							</div>
 						</div>

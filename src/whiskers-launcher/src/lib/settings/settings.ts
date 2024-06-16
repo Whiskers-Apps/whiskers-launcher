@@ -219,11 +219,25 @@ export interface ExtensionStoreItem {
 	os: string[] | null;
 }
 
+export interface ThemeStoreItem {
+	id: string;
+	name: string;
+	repo: string;
+	preview: string;
+	file: string | null;
+	variants: ThemeStoreVariant[] | null;
+}
+
+export interface ThemeStoreVariant{
+	name: string;
+	file: string;
+}
+
 export async function getSettings(): Promise<Settings> {
 	return await invoke('get_settings');
 }
 
-export function writeSettings(settings: Settings) {
+export async function writeSettings(settings: Settings) {
 	invoke('write_settings', { settings: settings });
 }
 

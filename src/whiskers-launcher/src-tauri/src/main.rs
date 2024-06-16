@@ -37,7 +37,9 @@ fn main() {
             run_dialog_action,
             remove_extension,
             get_extensions_store,
-            write_extensions_store
+            write_extensions_store,
+            get_themes_store,
+            write_themes_store
         ])
         .plugin(tauri_plugin_clipboard::init())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {

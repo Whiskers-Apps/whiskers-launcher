@@ -215,7 +215,7 @@
 					/>
 				{/if}
 				{#if selectedTab === 6}
-					<AboutTab {settings} />
+					<AboutTab />
 				{/if}
 			</div>
 		</div>

@@ -1,10 +1,13 @@
 <script lang="ts">
-	import type { Settings } from '$lib/settings/settings';
+	import { getSettings, type Settings } from '$lib/settings/settings';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import { createEventDispatcher } from 'svelte';
 	import { save, open } from '@tauri-apps/api/dialog';
 	import { downloadDir } from '@tauri-apps/api/path';
 	import { invoke } from '@tauri-apps/api';
+	import { listen } from '@tauri-apps/api/event';
+	import { WindowSizes } from '../../../utils';
+	import { WebviewWindow } from '@tauri-apps/api/window';
 
 	// =============================
 	// Props
@@ -20,7 +23,20 @@
 	// =============================
 	// Events
 	// =============================
-	async function openStore() {}
+	async function openStore() {
+		new WebviewWindow('themes-store', {
+			url: 'dialogs/themes-store',
+			title: 'Themes Store',
+			height: WindowSizes.Store.height,
+			width: WindowSizes.Store.width,
+			resizable: false,
+			maximizable: false
+		});
+
+		const _ = await listen('refresh-theme', async () => {
+			dispatch('updateTheme', (await getSettings()).theme);
+		});
+	}
 
 	async function importTheme() {
 		const path = await open({
