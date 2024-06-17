@@ -23,8 +23,6 @@
 	let showConfirmationBox = false;
 
 	onMount(async () => {
-		appWindow.setResizable(false);
-
 		settings = await getSettings();
 		css = getThemeCss(settings);
 

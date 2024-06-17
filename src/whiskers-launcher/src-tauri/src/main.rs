@@ -5,8 +5,10 @@ pub mod commands;
 pub mod windows;
 
 use commands::{search::*, settings::*};
+use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
-use tauri::Manager;
+use tauri::{Manager, PhysicalPosition, RunEvent, WindowEvent};
+use whiskers_launcher_rs::api::settings;
 use windows::open_settings_window;
 
 fn main() {
@@ -41,6 +43,50 @@ fn main() {
             get_themes_store,
             write_themes_store
         ])
+        .setup(|app| {
+            let main_window = app
+                .handle()
+                .to_owned()
+                .get_window("main")
+                .expect("Error getting main window");
+
+            // Opens the window in the monitor where the cursor is
+            if !is_wayland() {
+                let monitors = main_window
+                    .available_monitors()
+                    .expect("Error getting monitors");
+
+                let (cursor_x, _cursor_y) = Enigo::new(&Settings::default())
+                    .expect("Error initializing enigo")
+                    .location()
+                    .expect("Error getting cursor location");
+
+                let mut monitors_x: Vec<i32> = monitors
+                    .iter()
+                    .map(|monitor| monitor.position().x)
+                    .collect();
+
+                monitors_x.sort_by(|a, b| b.cmp(a));
+
+                for monitor_x in monitors_x {
+                    if monitor_x <= cursor_x {
+                        main_window
+                            .set_position(PhysicalPosition::new(monitor_x, 0))
+                            .expect("Error moving window");
+
+                        main_window.center().expect("Error centering window");
+
+                        break;
+                    }
+                }
+            }
+
+            main_window.set_fullscreen(true).unwrap();
+            main_window.maximize().expect("Error maximizing window");
+            main_window.show().expect("Error showing window");
+
+            Ok(())
+        })
         .plugin(tauri_plugin_clipboard::init())
         .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
             #[derive(Clone, Serialize)]
@@ -52,6 +98,26 @@ fn main() {
             app.emit_all("single-instance", PluginPayload { args: argv, cwd })
                 .unwrap();
         }))
-        .run(tauri::generate_context!())
-        .expect("Error running app");
+        .build(tauri::generate_context!())
+        .expect("Error building app")
+        .run(|app, e| match e {
+            RunEvent::WindowEvent { label, event, .. } => {
+                if label == "main" {
+                    match event {
+                        WindowEvent::Focused(focused) => {
+                            if !focused {
+                                let settings = settings::get_settings();
+
+                                if settings.hide_on_blur {
+                                    let window = app.get_window("main").unwrap();
+                                    window.close().unwrap();
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        });
 }
