@@ -1,4 +1,4 @@
-use std::{env, fs, path::Path, process::Command};
+use std::{env, fs, path::Path};
 
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tauri::{AppHandle, Manager, Window, WindowBuilder};
@@ -20,8 +20,16 @@ use whiskers_launcher_rs::{
     paths::{get_api_dir, get_app_resources_icons_dir, get_recent_apps_path},
     result::{self, TextResult, WLResult},
     settings::SearchEngine,
-    utils::get_search,
+    utils::{get_search, FLAG_NO_WINDOW},
 };
+
+#[cfg(target_os = "linux")]
+use std::process::Command;
+
+use crate::get_os;
+
+#[cfg(target_os = "windows")]
+use {std::os::windows::process::CommandExt, std::process::Command};
 
 #[tauri::command]
 pub async fn get_results(text: String) -> Vec<WLResult> {
@@ -29,6 +37,11 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     let mut results = Vec::<WLResult>::new();
 
     if text.is_empty() {
+
+        if get_os() == "windows"{
+            return vec![];
+        }
+
         if settings.show_recent_apps {
             let recent_apps = get_recent_apps();
 
@@ -102,7 +115,8 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
                 let extension_dir = get_extension_dir(&extension_setting.extension_id)
                     .expect("Error getting extension directory");
 
-                if cfg!(target_os = "linux") {
+                #[cfg(target_os = "linux")]
+                {
                     let extension_run = Command::new("sh")
                         .arg("-c")
                         .arg("./linux-extension")
@@ -116,17 +130,17 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
                 }
 
                 #[cfg(target_os = "windows")]
-                if cfg!(target_os = "windows") {
+                {
                     let extension_run = Command::new("cmd")
                         .arg("/C")
-                        .arg("start /min windows-extension")
+                        .arg("start /min windows-extension.exe")
                         .current_dir(&extension_dir)
                         .creation_flags(FLAG_NO_WINDOW)
                         .output()
-                        .unwrap();
+                        .expect("Error running extension");
 
                     if extension_run.status.success() {
-                        return get_extension_results().expect("Error getting extension results");
+                        return get_extension_response().results;
                     }
                 }
             }
@@ -270,7 +284,7 @@ async fn open_app(action: OpenAppAction, window: Window) {
 
         #[cfg(target_os = "windows")]
         if cfg!(target_os = "windows") {
-            let path = Path::new(&exec_path).to_owned();
+            let path = Path::new(&app.path).to_owned();
 
             let script = format!(
                 "invoke-item '{}'",
@@ -280,49 +294,48 @@ async fn open_app(action: OpenAppAction, window: Window) {
             powershell_script::run(&script).expect("Error opening app");
         }
 
-        // Adds app to the recent apps list
+        if get_os() != "windows" {
+            // Adds app to the recent apps list
 
-        let mut recent_apps = get_recent_apps();
+            let mut recent_apps = get_recent_apps();
 
-        recent_apps = recent_apps
-            .iter()
-            .cloned()
-            .filter(|a| a.id != app.id)
-            .collect();
+            recent_apps = recent_apps
+                .iter()
+                .cloned()
+                .filter(|a| a.id != app.id)
+                .collect();
 
-        recent_apps.insert(0, app.to_owned());
+            recent_apps.insert(0, app.to_owned());
 
-        let cut_size = if recent_apps.len() < 14 {
-            recent_apps.len()
-        } else {
-            14
-        };
-        let recent_apps = &recent_apps[0..cut_size].to_owned();
+            let cut_size = if recent_apps.len() < 14 {
+                recent_apps.len()
+            } else {
+                14
+            };
+            let recent_apps = &recent_apps[0..cut_size].to_owned();
 
-        if !get_recent_apps_path()
-            .parent()
-            .expect("Error getting parent")
-            .exists()
-        {
-            fs::create_dir_all(&get_recent_apps_path().parent().unwrap())
-                .expect("Error creating recent apps dir");
+            if !get_recent_apps_path()
+                .parent()
+                .expect("Error getting parent")
+                .exists()
+            {
+                fs::create_dir_all(&get_recent_apps_path().parent().unwrap())
+                    .expect("Error creating recent apps dir");
+            }
+
+            fs::write(
+                &get_recent_apps_path(),
+                bincode::serialize(recent_apps).expect("Error serrialing recent apps"),
+            )
+            .expect("Error writing recent apps");
         }
-
-        fs::write(
-            &get_recent_apps_path(),
-            bincode::serialize(recent_apps).expect("Error serrialing recent apps"),
-        )
-        .expect("Error writing recent apps");
     });
 
     window.close().expect("Error closing window");
 }
 
 fn get_recent_apps() -> Vec<App> {
-    let recent_apps_path = get_recent_apps_path();
-    let recent_apps_bytes = fs::read(&recent_apps_path);
-
-    match recent_apps_bytes {
+    match fs::read(&get_recent_apps_path()) {
         Ok(bytes) => bincode::deserialize(&bytes).unwrap_or(Vec::new()),
         Err(_) => Vec::new(),
     }
@@ -374,7 +387,8 @@ async fn run_extension_action(action: ExtensionAction, window: Window) {
 
         write_extension_request(request);
 
-        if cfg!(target_os = "linux") {
+        #[cfg(target_os = "linux")]
+        {
             Command::new("sh")
                 .arg("-c")
                 .arg("./linux-extension")
@@ -384,14 +398,14 @@ async fn run_extension_action(action: ExtensionAction, window: Window) {
         }
 
         #[cfg(target_os = "windows")]
-        if cfg!(target_os = "windows") {
-            let extension_run = Command::new("cmd")
+        {
+            Command::new("cmd")
                 .arg("/C")
-                .arg("start /min windows-extension")
+                .arg("start /min windows-extension.exe")
                 .current_dir(&extension_dir)
                 .creation_flags(FLAG_NO_WINDOW)
                 .output()
-                .unwrap();
+                .expect("Error running extension");
         }
     });
 
@@ -442,7 +456,8 @@ pub async fn run_dialog_action(action: DialogAction, results: Vec<DialogResult>,
 
     write_extension_request(request);
 
-    if cfg!(target_os = "linux") {
+    #[cfg(target_os = "linux")]
+    {
         Command::new("sh")
             .arg("-c")
             .arg("./linux-extension")
@@ -452,14 +467,14 @@ pub async fn run_dialog_action(action: DialogAction, results: Vec<DialogResult>,
     }
 
     #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {
-        let extension_run = Command::new("cmd")
+    {
+        Command::new("cmd")
             .arg("/C")
-            .arg("start /min windows-extension")
+            .arg("start /min windows-extension.exe")
             .current_dir(&extension_dir)
             .creation_flags(FLAG_NO_WINDOW)
             .output()
-            .unwrap();
+            .expect("Error running extension");
     }
 
     window.close().expect("Error closing window");

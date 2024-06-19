@@ -22,7 +22,8 @@ tauri = { version = "1.6.3", features = [ "global-shortcut-all",
     "protocol-all",
 ] }
 
-whiskers-launcher-rs = { path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs" }
+#whiskers-launcher-rs = { path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs" }
+whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs" }
 
 tokio = { version = "1.37.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }

@@ -34,8 +34,11 @@
 			installedExtensions.push(extension.id);
 		});
 
+		let os: string = await invoke('get_os');
+
 		// Cached Store
 		store = await invoke('get_extensions_store');
+		store = store.filter((extension) => extension?.os?.includes(os));
 		filteredStore = store;
 		displayedStore = store.slice(0, 12);
 

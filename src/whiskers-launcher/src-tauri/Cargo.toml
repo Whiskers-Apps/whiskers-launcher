@@ -20,7 +20,8 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.6.3", features = [ "clipboard-all", "path-all", "dialog-save", "dialog-open", "protocol-all", "fs-all", "shell-all", "window-all"] }
 
 # whiskers-launcher-rs = {git = "https://github.com/lighttigerXIV/whiskers-launcher-rs.git"}
-whiskers-launcher-rs = {path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs"}
+#whiskers-launcher-rs = {path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs"}
+whiskers-launcher-rs = {path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs"}
 tokio = {version = "1.37.0", features = ["full"] }
 fuzzy-matcher = "*"
 bincode = "*"
@@ -29,6 +30,11 @@ git2 = "0.18.3"
 tauri-plugin-clipboard = "0.6.10"
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 enigo = "0.2.1"
+
+
+[target.'cfg(target_os = "windows")'.dependencies]
+powershell_script = "1.1.0"
+
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

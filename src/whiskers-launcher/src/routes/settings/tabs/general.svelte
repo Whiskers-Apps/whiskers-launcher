@@ -28,6 +28,9 @@
 	$: scaling = settings.scaling;
 	$: autoStart = settings.auto_start;
 	$: showRecentApps = settings.show_recent_apps;
+	let first_key_options = FIRST_KEY_OPTIONS;
+	let second_key_options = SECOND_KEY_OPTIONS;
+	let os = '';
 
 	let showShortcutWarning = false;
 	let shortcutSettingsCard: HTMLDivElement;
@@ -38,6 +41,13 @@
 	// ==============================
 	onMount(async () => {
 		isWayland = await invoke('is_wayland');
+
+		os = await invoke('get_os');
+
+		if (os === 'windows') {
+			first_key_options = [...FIRST_KEY_OPTIONS.filter((key) => key.id !== 'super')];
+			second_key_options = [...SECOND_KEY_OPTIONS.filter((key) => key.id !== 'super')];
+		}
 	});
 
 	async function updateFirstKey(value: CustomEvent<SelectValue>) {
@@ -82,7 +92,7 @@
 				<div>
 					<p class="">First Key</p>
 					<Select
-						values={FIRST_KEY_OPTIONS}
+						values={first_key_options}
 						selectedValue={firstKey}
 						on:selection={updateFirstKey}
 					/>
@@ -90,7 +100,7 @@
 				<div>
 					<p class="">Second Key</p>
 					<Select
-						values={SECOND_KEY_OPTIONS}
+						values={second_key_options}
 						selectedValue={secondKey ?? '-'}
 						on:selection={updateSecondKey}
 					/>
@@ -134,17 +144,19 @@
 		on:slide={updateScaling}
 	/>
 
+	{#if os !== 'windows'}
+		<ToggleSetting
+			title="Recent Apps"
+			description="When enabled, it shows the most recent opened apps when opening the launcher"
+			toggled={showRecentApps}
+			on:toggle={updateShowRecentApps}
+		/>
+	{/if}
+	
 	<ToggleSetting
 		title="Auto Start"
 		description="When enabled, it auto starts the app at login"
 		toggled={autoStart}
 		on:toggle={updateAutoStart}
-	/>
-
-	<ToggleSetting
-		title="Recent Apps"
-		description="When enabled, it shows the most recent opened apps when opening the launcher"
-		toggled={showRecentApps}
-		on:toggle={updateShowRecentApps}
 	/>
 </div>

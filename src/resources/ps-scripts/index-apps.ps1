@@ -7,9 +7,9 @@ class App {
     [string] $name
 }
 
-$INDEXING_DIR = $env:APPDATA + "\com-lighttigerxiv-whiskers-launcher\Indexing"
-$SHORTCUTS_DIR = $INDEXING_DIR + "\Shortcuts"
-$ICONS_DIR = $INDEXING_DIR + "\Icons"
+$INDEXING_DIR = $env:APPDATA + "\com-whiskersapps-launcher\indexing"
+$SHORTCUTS_DIR = $INDEXING_DIR + "\shortcuts"
+$ICONS_DIR = $INDEXING_DIR + "\icons"
 $APPS_JSON_PATH = $INDEXING_DIR + "\apps.json"
 
 $shell = New-Object -ComObject WScript.Shell
@@ -21,6 +21,7 @@ $appsJson = ""
 #############################################
 ## Init Directories
 #############################################
+
 if(!(Test-Path -Path $SHORTCUTS_DIR)){
     New-Item -ItemType Directory -Path $SHORTCUTS_DIR
 }
@@ -69,9 +70,9 @@ foreach ($app in $apps) {
     
     $appsJson += "{`n"
     $appsJson += "`"id`" : `"$appId`",`n"
-    $appsJson += "`"icon_path`" : `"$iconPath`",`n"
-    $appsJson += "`"exec_path`" : `"$execPath`",`n"
-    $appsJson += "`"name`" : `"$($app.name)`"`n"
+    $appsJson += "`"icon`" : `"$iconPath`",`n"
+    $appsJson += "`"path`" : `"$execPath`",`n"
+    $appsJson += "`"title`" : `"$($app.name)`"`n"
     $appsJson += "},`n"
 }
 $appsJson = $appsJson.Substring(0, $appsJson.Length - 2)
@@ -82,4 +83,4 @@ if (!(Test-Path -Path $APPS_JSON_PATH)) {
 }
 
 [System.IO.File]::WriteAllLines($APPS_JSON_PATH, $appsJson)
-#PS: It's very important to save as UTF8 AAAAAAAAAAAAAAAAAAAAAAAAAAAA
+#PS: It's very important to save as UTF8 (º_º)

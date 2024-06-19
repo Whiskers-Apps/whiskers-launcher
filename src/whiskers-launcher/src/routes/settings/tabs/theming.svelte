@@ -242,7 +242,7 @@
 			</div>
 			<div class=" flex flex-col flex-grow">
 				<input
-					class=" h-[100px] class bg-sub-text rounded-lg hover:brightness-90 border-tertiary cursor-pointer w-full"
+					class=" h-[100px] bg-sub-text class rounded-lg hover:brightness-90 border-tertiary cursor-pointer w-full"
 					type="color"
 					value={theme.sub_text}
 					on:input={updateSubText}
@@ -252,3 +252,9 @@
 		</div>
 	</div>
 </div>
+
+<style scoped>
+	input[type='color']::-webkit-color-swatch {
+		border: none;
+	}
+</style>

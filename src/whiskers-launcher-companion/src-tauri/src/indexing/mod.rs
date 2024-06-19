@@ -1,17 +1,22 @@
-use std::{
-    env, fs,
-    path::{Path, PathBuf},
-    process::Command,
-};
-use walkdir::WalkDir;
+use std::fs;
+use whiskers_launcher_rs::paths::{get_indexing_apps_path, get_indexing_dir};
+
 #[cfg(target_os = "windows")]
-use whiskers_launcher_rs::paths::get_app_resources_dir;
-use whiskers_launcher_rs::{indexing::App, paths::get_home_dir};
+use {
+    whiskers_launcher_rs::indexing::App,
+    whiskers_launcher_rs::paths::{get_app_dir, get_app_resources_dir},
+};
 
 #[cfg(target_os = "linux")]
 use {
     freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter},
-    whiskers_launcher_rs::paths::{get_indexing_apps_path, get_indexing_dir},
+    std::{
+        env,
+        path::{Path, PathBuf},
+        process::Command,
+    },
+    walkdir::WalkDir,
+    whiskers_launcher_rs::paths::get_home_dir,
 };
 
 /// Gets the apps from the system and indexes them into a file
@@ -74,14 +79,32 @@ pub fn index_apps() {
 
     #[cfg(target_os = "windows")]
     if cfg!(target_os = "windows") {
-        let mut script_path = get_app_resources_dir().unwrap();
-        script_path.push("Scripts/index-apps.ps1");
+        let mut script_path = get_app_resources_dir();
+        script_path.push("scripts/index-apps.ps1");
 
-        let script_content = fs::read_to_string(&script_path).unwrap();
-        powershell_script::run(&script_content).unwrap();
+        let script_content =
+            fs::read_to_string(&script_path).expect("Error getting script content");
+        powershell_script::run(&script_content).expect("Error running index script");
+
+        let mut apps_json_path = get_app_dir();
+        apps_json_path.push("indexing/apps.json");
+
+        let apps_json_content =
+            fs::read_to_string(&apps_json_path).expect("Error getting apps json");
+
+        let apps: Vec<App> = serde_json::from_str(&apps_json_content).expect("Error getting apps");
+
+        let bytes = bincode::serialize(&apps).expect("Error serializing apps");
+
+        if !get_indexing_dir().exists() {
+            fs::create_dir_all(get_indexing_dir()).expect("Error creating index directory");
+        }
+
+        fs::write(get_indexing_apps_path(), &bytes).expect("Error writing apps binary");
     }
 }
 
+#[cfg(target_os = "linux")]
 pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     let data_dirs_string =
         env::var("XDG_DATA_DIRS/icons").unwrap_or("/usr/local/share:/usr/share".to_string());
@@ -196,6 +219,7 @@ pub fn get_app_icon(icon: String) -> Option<PathBuf> {
     return None;
 }
 
+#[cfg(target_os = "linux")]
 pub fn get_icon_from_dir(path: PathBuf, icon: &str) -> Option<PathBuf> {
     if path.exists() && path.is_dir() {
         for entry in WalkDir::new(&path) {
