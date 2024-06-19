@@ -54,7 +54,6 @@
 
 		if (event.ctrlKey && event.key === 's') {
 			openSettings();
-			appWindow.close();
 		}
 
 		if (event.altKey && ['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
@@ -84,7 +83,9 @@
 	}
 
 	async function search() {
+
 		results = await invoke('get_results', { text: searchText });
+
 
 		selectedIndex = 0;
 		resultOffset = 0;

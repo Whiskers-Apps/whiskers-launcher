@@ -4,10 +4,12 @@
 pub mod commands;
 pub mod windows;
 
+use std::env;
+
 use commands::{search::*, settings::*};
 use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
-use tauri::{Manager, PhysicalPosition, RunEvent, WindowEvent};
+use tauri::{Manager, PhysicalPosition, RunEvent, WindowBuilder, WindowEvent};
 use whiskers_launcher_rs::api::settings;
 use windows::open_settings_window;
 
@@ -44,11 +46,30 @@ fn main() {
             write_themes_store
         ])
         .setup(|app| {
+            let arguments: Vec<String> = env::args().collect();
+            let open_settings = arguments
+                .iter()
+                .any(|arg| arg == "--settings" || arg == "-s");
+
             let main_window = app
                 .handle()
                 .to_owned()
                 .get_window("main")
                 .expect("Error getting main window");
+
+            if open_settings {
+
+                let app_clone = app.handle().to_owned();
+
+                let window =
+                    WindowBuilder::new(&app_clone, "settings", tauri::WindowUrl::App("settings".into()))
+                        .title("Settings")
+                        .inner_size(1200.0, 600.0);
+
+                window.build().expect("Error opening settings window");
+
+                return Ok(());
+            }
 
             // Opens the window in the monitor where the cursor is
             if !is_wayland() {
