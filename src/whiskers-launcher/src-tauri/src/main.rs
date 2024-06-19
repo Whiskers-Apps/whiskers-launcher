@@ -9,7 +9,7 @@ use std::env;
 use commands::{search::*, settings::*};
 use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
-use tauri::{Manager, PhysicalPosition, RunEvent, WindowBuilder, WindowEvent, WindowUrl};
+use tauri::{Manager, PhysicalPosition, RunEvent, WindowBuilder, WindowEvent};
 use whiskers_launcher_rs::api::settings;
 use windows::open_settings_window;
 
@@ -47,7 +47,9 @@ fn main() {
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();
-            let open_settings = arguments.iter().any(|arg| arg == "--settings" || arg == "-s");
+            let open_settings = arguments
+                .iter()
+                .any(|arg| arg == "--settings" || arg == "-s");
 
             let main_window = app
                 .handle()
@@ -56,12 +58,15 @@ fn main() {
                 .expect("Error getting main window");
 
             if open_settings {
-                WindowBuilder::new(app, "settings", WindowUrl::App("settings".into()))
-                    .title("Settings")
-                    .build()
-                    .expect("Error creating settings window");
 
-                main_window.close().expect("Error closing window");
+                let app_clone = app.handle().to_owned();
+
+                let window =
+                    WindowBuilder::new(&app_clone, "settings", tauri::WindowUrl::App("settings".into()))
+                        .title("Settings")
+                        .inner_size(1200.0, 600.0);
+
+                window.build().expect("Error opening settings window");
 
                 return Ok(());
             }
