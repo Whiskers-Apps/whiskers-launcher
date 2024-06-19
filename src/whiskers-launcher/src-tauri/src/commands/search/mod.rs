@@ -20,7 +20,7 @@ use whiskers_launcher_rs::{
     paths::{get_api_dir, get_app_resources_icons_dir, get_recent_apps_path},
     result::{self, TextResult, WLResult},
     settings::SearchEngine,
-    utils::{get_search, FLAG_NO_WINDOW},
+    utils::get_search,
 };
 
 #[cfg(target_os = "linux")]
@@ -29,7 +29,7 @@ use std::process::Command;
 use crate::get_os;
 
 #[cfg(target_os = "windows")]
-use {std::os::windows::process::CommandExt, std::process::Command};
+use {std::os::windows::process::CommandExt, std::process::Command, whiskers_launcher_rs::utils::FLAG_NO_WINDOW};
 
 #[tauri::command]
 pub async fn get_results(text: String) -> Vec<WLResult> {

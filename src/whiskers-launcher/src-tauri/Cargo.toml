@@ -20,8 +20,8 @@ serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.6.3", features = [ "clipboard-all", "path-all", "dialog-save", "dialog-open", "protocol-all", "fs-all", "shell-all", "window-all"] }
 
 # whiskers-launcher-rs = {git = "https://github.com/lighttigerXIV/whiskers-launcher-rs.git"}
-#whiskers-launcher-rs = {path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs"}
-whiskers-launcher-rs = {path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs"}
+whiskers-launcher-rs = {path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs"}
+#whiskers-launcher-rs = {path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs"}
 tokio = {version = "1.37.0", features = ["full"] }
 fuzzy-matcher = "*"
 bincode = "*"
