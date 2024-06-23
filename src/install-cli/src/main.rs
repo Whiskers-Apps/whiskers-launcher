@@ -8,8 +8,8 @@ use {is_elevated::is_elevated, std::io::stdin};
 #[cfg(target_os = "linux")]
 use {
     fs_extra::dir::CopyOptions,
-    whiskers_launcher_rs::paths::get_app_resources_dir,
     std::{fs, process::Command},
+    whiskers_launcher_rs::paths::get_app_resources_dir,
 };
 
 #[cfg(target_os = "windows")]
@@ -18,6 +18,13 @@ fn press_to_close() {
     println!("\nPress enter to close");
     stdin().read_line(&mut s).unwrap();
     exit(0);
+}
+
+pub fn is_wayland() -> bool {
+    match env::var("XDG_SESSION_TYPE") {
+        Ok(session) => &session.to_lowercase() == "wayland",
+        Err(_) => false,
+    }
 }
 
 fn main() {
@@ -31,12 +38,12 @@ fn main() {
     logo.push("whiskers-launcher.png");
 
     let mut icons_dir = installation_files_dir.to_owned();
-    icons_dir.push("AppResources");
-    icons_dir.push("Icons");
+    icons_dir.push("resources");
+    icons_dir.push("icons");
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
-        let resources_dir = get_app_resources_dir().unwrap();
+        let resources_dir = get_app_resources_dir();
 
         let mut launcher_bin = installation_files_dir.to_owned();
         launcher_bin.push("whiskers-launcher");
@@ -119,7 +126,12 @@ fn main() {
         )
         .expect("Error copying app icons");
 
-        println!("Installed");
+        match is_wayland() {
+            true => println!("Note: Wayland was detected. You need to manually make a shortcut for the app on your DE/WM. You can use 'whiskers-launcher' or 'WEBKIT_DISABLE_COMPOSITING_MODE=1 whiskers-launcher' if you problems with the app not launching"),
+            false => println!("Note: The default launch shortcut is 'ctrl + space'"),
+        }
+
+        println!("✅ Installed");
     }
 
     #[cfg(target_os = "windows")]

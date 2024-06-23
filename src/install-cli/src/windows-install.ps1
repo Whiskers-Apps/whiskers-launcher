@@ -1,10 +1,10 @@
 $installationFilesDir = "%installation_files_dir%"
-$localDir = $env:APPDATA + "\com-lighttigerxiv-whiskers-launcher"
+$localDir = $env:APPDATA + "\com-whiskersapps-launcher"
 $appsDir = $env:ALLUSERSPROFILE + "\Microsoft\Windows\Start Menu\Programs"
 
 $launcherExe = $installationFilesDir + "\whiskers-launcher.exe"
 $companionExe = $installationFilesDir + "\whiskers-launcher-companion.exe"
-$resourcesDir = $installationFilesDir + "\AppResources"
+$resourcesDir = $installationFilesDir + "\resources"
 
 if(!(Test-Path -Path $localDir)){
     New-Item -ItemType Directory -Path $localDir
