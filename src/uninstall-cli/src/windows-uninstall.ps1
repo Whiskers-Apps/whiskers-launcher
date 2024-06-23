@@ -1,4 +1,4 @@
-$localDir = $env:APPDATA + "\com-lighttigerxiv-whiskers-launcher"
+$localDir = $env:APPDATA + "\com-whiskersapps-launcher"
 $shortcut = $env:ALLUSERSPROFILE + "\Microsoft\Windows\Start Menu\Programs\Whiskers Launcher.lnk"
 $autoStartShortcut = $env:APPDATA + "\Microsoft\Windows\Start Menu\Programs\Startup\Whiskers-Launcher.lnk"
 

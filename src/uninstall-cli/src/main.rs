@@ -1,5 +1,5 @@
 #[cfg(target_os = "linux")]
-use whiskers_launcher_rs::paths::{get_autostart_path, get_local_dir};
+use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir};
 
 //Imports only used in windows
 #[cfg(target_os = "windows")]
@@ -23,9 +23,9 @@ fn press_to_close() {
 fn main() {
     #[cfg(target_os = "linux")]
     if cfg!(target_os = "linux") {
-        let local_dir = get_local_dir().unwrap();
+        let local_dir = get_app_dir();
 
-        let remove_binary_files_command = format!("sudo rm -f /usr/bin/whiskers-launcher /usr/bin/whiskers-launcher-companion /usr/share/pixmaps/whiskers-launcher.png /usr/share/applications/whiskers-launcher.desktop");
+        let remove_binary_files_command = String::from("sudo rm -f /usr/bin/whiskers-launcher /usr/bin/whiskers-launcher-companion /usr/share/pixmaps/whiskers-launcher.png /usr/share/applications/whiskers-launcher.desktop");
 
         let remove_binary_files_result = Command::new("sh")
             .arg("-c")
@@ -40,7 +40,7 @@ fn main() {
             );
         }
 
-        let mut auto_start_file = get_autostart_path().unwrap();
+        let mut auto_start_file = get_autostart_dir();
         auto_start_file.push("whiskers-launcher.desktop");
 
         if auto_start_file.exists() {
