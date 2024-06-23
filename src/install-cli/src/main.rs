@@ -38,8 +38,8 @@ fn main() {
     logo.push("whiskers-launcher.png");
 
     let mut icons_dir = installation_files_dir.to_owned();
-    icons_dir.push("AppResources");
-    icons_dir.push("Icons");
+    icons_dir.push("resources");
+    icons_dir.push("icons");
 
     #[cfg(target_os = "linux")]
     if env::consts::OS == "linux" {
