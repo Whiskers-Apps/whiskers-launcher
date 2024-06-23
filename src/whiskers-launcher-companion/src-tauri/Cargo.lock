@@ -4172,7 +4172,7 @@ dependencies = [
 [[package]]
 name = "whiskers-launcher-rs"
 version = "2.0.0"
-source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#8ea66f8b88e4f62a21370c10ea4ec0ad77144f84"
+source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#01c8f131628b36148bd6905385cac9603f5b5eb6"
 dependencies = [
  "bincode",
  "dirs 5.0.1",
