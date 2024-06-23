@@ -23,7 +23,7 @@ fn press_to_close() {
 fn main() {
     #[cfg(target_os = "linux")]
     if cfg!(target_os = "linux") {
-        let local_dir = get_app_dir();
+        let app_dir = get_app_dir();
 
         let remove_binary_files_command = String::from("sudo rm -f /usr/bin/whiskers-launcher /usr/bin/whiskers-launcher-companion /usr/share/pixmaps/whiskers-launcher.png /usr/share/applications/whiskers-launcher.desktop");
 
@@ -47,8 +47,8 @@ fn main() {
             fs::remove_file(&auto_start_file).expect("Error deleting autostart file");
         }
 
-        if local_dir.exists() {
-            fs::remove_dir_all(&local_dir).expect("Error removing local folder");
+        if app_dir.exists() {
+            fs::remove_dir_all(&app_dir).expect("Error removing local folder");
         }
 
         println!("Uninstalled");
