@@ -1097,7 +1097,7 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 [[package]]
 name = "whiskers-launcher-rs"
 version = "2.0.0"
-source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#2bedefa9a1be79eaab2ffc14124692161ad232a9"
+source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#8ea66f8b88e4f62a21370c10ea4ec0ad77144f84"
 dependencies = [
  "bincode",
  "dirs",
