@@ -503,7 +503,7 @@ dependencies = [
 
 [[package]]
 name = "install"
-version = "1.2.0"
+version = "2.0.0"
 dependencies = [
  "fs_extra",
  "is_elevated",

@@ -1,11 +1,9 @@
 use std::fs;
-use whiskers_launcher_rs::paths::{get_indexing_apps_path, get_indexing_dir};
+use whiskers_launcher_rs::{indexing::App, paths::{get_indexing_apps_path, get_indexing_dir}};
+
 
 #[cfg(target_os = "windows")]
-use {
-    whiskers_launcher_rs::indexing::App,
-    whiskers_launcher_rs::paths::{get_app_dir, get_app_resources_dir},
-};
+use whiskers_launcher_rs::paths::{get_app_dir, get_app_resources_dir};
 
 #[cfg(target_os = "linux")]
 use {

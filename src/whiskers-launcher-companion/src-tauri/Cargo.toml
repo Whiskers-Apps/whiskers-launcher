@@ -16,14 +16,16 @@ tauri-build = { version = "1.5.2", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.3", features = [ "global-shortcut-all",
+tauri = { version = "1.6.3", features = [
+    "global-shortcut-all",
     "system-tray",
     "fs-all",
     "protocol-all",
 ] }
 
 #whiskers-launcher-rs = { path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs" }
-whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs" }
+#whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs" }
+whiskers-launcher-rs = { git = "https://github.com/Whiskers-Apps/whiskers-launcher-rs" }
 
 tokio = { version = "1.37.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
