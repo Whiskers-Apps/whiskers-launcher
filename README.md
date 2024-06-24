@@ -1,5 +1,5 @@
 
-![Whiskers-Launcher-Cover](https://github.com/Whiskers-Apps/whiskers-launcher/assets/35658492/a9185310-3ade-477c-82f7-efaca946f92f)
+![Whiskers-Launcher-Cover](previews/cover.webp)
 
 # About
 Whiskers Launcher is a keyboard app launcher for 🐧Linux and 🪟Windows that aims to be easily customizable and support extensions. 
@@ -10,10 +10,10 @@ This app was born to fill the gap between a good launcher that could work with L
 ## Install
 - Go to the [releases](https://github.com/Whiskers-Apps/whiskers-launcher/releases) and download the appropriate package for your platform.
 - Extract the file.
-- Run the install script (with admininstrator if on windows)
+- Run the install script (with admininstrator if on windows).
 
 ## Uninstall
-- Run the uninstall script located on the release dir you previously downloaded ((with admininstrator if on windows)).
+- Run the uninstall script located on the release dir you previously downloaded (with admininstrator if on windows).
 
 # Contributors
 The people that are helping the project with minor or big changes.
