@@ -34,6 +34,9 @@ sudo dnf group install "C Development Tools and Libraries"
 ## Uninstall
 - Run the uninstall script located on the release dir you previously downloaded (with admininstrator if on windows).
 
+# Wiki
+To know how to make an extension or theme and how to publish them you can check out the [wiki](https://github.com/Whiskers-Apps/whiskers-launcher/wiki)
+
 # Contributors
 The people that are helping the project with minor or big changes.
 
