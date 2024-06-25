@@ -1,9 +1,9 @@
 use sysinfo::System;
 #[cfg(target_os = "linux")]
 use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir};
-use whiskers_launcher_rs::paths::{get_app_dir, get_indexing_dir};
+use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir, get_indexing_dir};
 
-use std::fs;
+use std::{env, fs, path::Path};
 //Imports only used in windows
 #[cfg(target_os = "windows")]
 use std::{io::stdin, process::exit};
@@ -69,6 +69,23 @@ fn main() {
 
         if home_launcher_dir.exists() {
             fs::remove_dir_all(home_launcher_dir).expect("Error removing home config dir");
+        }
+
+        let mut autostart_path = get_autostart_dir();
+        autostart_path.push("Whiskers-Launcher.lnk");
+
+        if autostart_path.exists(){
+            fs::remove_file(&autostart_path).expect("Error removing autostart file");
+        }
+
+        let mut shortcut_path =
+            Path::new(&env::var("APPDATA").expect("Error getting environment variable"))
+                .to_owned();
+
+        shortcut_path.push("Microsoft\\Windows\\Start Menu\\Programs\\Whiskers-Launcher.lnk");
+
+        if shortcut_path.exists(){
+            fs::remove_file(&shortcut_path).expect("Error removing shortcut file");
         }
 
         println!("✅ Uninstalled");

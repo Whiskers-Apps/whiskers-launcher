@@ -1,8 +1,20 @@
-use std::{env, process::exit};
+use std::{
+    env,
+    fs::{self, File},
+    io::Write,
+    path::{Path, PathBuf},
+    process::{exit, Command},
+};
 
 //Imports only used in windows
 #[cfg(target_os = "windows")]
-use {is_elevated::is_elevated, std::io::stdin};
+use std::io::stdin;
+
+use mslnk::ShellLink;
+use rust_embed::Embed;
+use whiskers_launcher_rs::paths::{
+    get_app_dir, get_app_resources_dir, get_app_resources_icons_dir,
+};
 
 //Imports only used in linux
 #[cfg(target_os = "linux")]
@@ -26,6 +38,23 @@ pub fn is_wayland() -> bool {
         Err(_) => false,
     }
 }
+
+pub fn write_file(path: PathBuf, bytes: &[u8]) {
+    let mut file = File::create(&path).expect("Error creating file");
+    file.write_all(bytes).expect("Error writing file");
+}
+
+#[derive(Embed)]
+#[folder = "files/windows/binaries/"]
+struct WindowsBinaries;
+
+#[derive(Embed)]
+#[folder = "files/windows/scripts/"]
+struct WindowsScripts;
+
+#[derive(Embed)]
+#[folder = "files/general/icons/"]
+struct Icons;
 
 fn main() {
     let binary_path = env::current_exe().expect("Error getting path");
@@ -136,28 +165,82 @@ fn main() {
 
     #[cfg(target_os = "windows")]
     if env::consts::OS == "windows" {
-        if !is_elevated() {
-            eprintln!("❌ Please run the script as administrator");
-            press_to_close();
+        let app_dir = get_app_dir();
+        let resources_dir = get_app_resources_dir();
+
+        let mut scripts_dir = resources_dir.to_owned();
+        scripts_dir.push("scripts");
+
+        let icons_dir = get_app_resources_icons_dir();
+
+        if !app_dir.exists() {
+            fs::create_dir_all(&app_dir).expect("Error creating app dir");
         }
 
-        let mut install_script = include_str!("windows-install.ps1").to_owned();
-        install_script = install_script.replace(
-            "%installation_files_dir%",
-            &installation_files_dir
-                .into_os_string()
-                .into_string()
-                .unwrap(),
-        );
+        if !resources_dir.exists() {
+            fs::create_dir_all(&resources_dir).expect("Error creating resources dir");
+        }
 
-        match powershell_script::run(&install_script) {
-            Ok(_) => {
-                println!("✅ Installed");
+        if !scripts_dir.exists() {
+            fs::create_dir_all(&scripts_dir).expect("Error creating scripts dir");
+        }
+
+        if !icons_dir.exists() {
+            fs::create_dir_all(&icons_dir).expect("Error creating icons dir");
+        }
+
+        for file in WindowsBinaries::iter() {
+            if let Some(content) = WindowsBinaries::get(&file) {
+                let mut path = app_dir.to_owned();
+                path.push(file.to_string());
+
+                write_file(path, content.data.as_ref());
             }
-            Err(error) => {
-                eprintln!("❌ Error: {}", error.to_string());
+        }
+
+        for file in WindowsScripts::iter() {
+            if let Some(content) = WindowsScripts::get(&file) {
+                let mut path = scripts_dir.to_owned();
+                path.push(file.to_string());
+
+                write_file(path, content.data.as_ref());
             }
-        };
+        }
+
+        for file in Icons::iter() {
+            if let Some(content) = Icons::get(&file) {
+                let mut path = icons_dir.to_owned();
+                path.push(file.to_string());
+
+                write_file(path, content.data.as_ref());
+            }
+        }
+
+        // Create the shortcut
+        let mut shortcut_path =
+            Path::new(&env::var("APPDATA").expect("Error getting environment variable")).to_owned();
+
+        shortcut_path.push("Microsoft\\Windows\\Start Menu\\Programs\\Whiskers-Launcher.lnk");
+
+        let mut target_path = app_dir.to_owned();
+        target_path.push("whiskers-launcher-companion.exe");
+
+        let link = ShellLink::new(target_path.into_os_string().into_string().unwrap())
+            .expect("Error initializing link");
+
+        link.create_lnk(shortcut_path.into_os_string().into_string().unwrap())
+            .expect("Error creating link");
+
+        let mut companion_path = app_dir.to_owned();
+        companion_path.push("whiskers-launcher-companion.exe");
+
+        Command::new("cmd")
+            .arg("/c")
+            .arg(companion_path.into_os_string().into_string().unwrap())
+            .spawn()
+            .expect("Error opening companion app");
+
+        println!("✅ Installed");
 
         press_to_close();
     }
