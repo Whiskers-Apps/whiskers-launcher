@@ -51,7 +51,7 @@ fn main() {
             fs::remove_dir_all(&app_dir).expect("Error removing local folder");
         }
 
-        println!("Uninstalled");
+        println!("✅ Uninstalled");
     }
 
     #[cfg(target_os = "windows")]

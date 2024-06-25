@@ -44,10 +44,12 @@ pub fn write_file(path: PathBuf, bytes: &[u8]) {
     file.write_all(bytes).expect("Error writing file");
 }
 
+#[cfg(target_os = "windows")]
 #[derive(Embed)]
 #[folder = "files/windows/binaries/"]
 struct WindowsBinaries;
 
+#[cfg(target_os = "windows")]
 #[derive(Embed)]
 #[folder = "files/windows/scripts/"]
 struct WindowsScripts;
