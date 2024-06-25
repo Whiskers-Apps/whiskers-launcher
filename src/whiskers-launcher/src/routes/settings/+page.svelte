@@ -22,6 +22,7 @@
 	// ===========================
 	let settings: Settings | null = null;
 	let css = '';
+	let tabContent: HTMLDivElement;
 
 	let selectedTab = 0;
 
@@ -38,6 +39,7 @@
 	// ===========================
 	function selectTab(event: CustomEvent<number>) {
 		selectedTab = event.detail;
+		tabContent.scrollTop = 0;
 	}
 
 	// ==========================
@@ -162,7 +164,7 @@
 	<div class=" bg-background min-h-screen h-screen text-text flex">
 		<Navbar on:tabSelected={selectTab} />
 
-		<div class="  p-4 flex-grow flex justify-center overflow-auto">
+		<div bind:this={tabContent} class="  p-4 flex-grow flex justify-center overflow-auto">
 			<div class=" w-full max-w-[800px]">
 				{#if selectedTab === 0}
 					<GeneralTab
