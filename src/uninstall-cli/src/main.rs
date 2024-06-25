@@ -1,16 +1,16 @@
+use sysinfo::System;
 #[cfg(target_os = "linux")]
 use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir};
+use whiskers_launcher_rs::paths::{get_app_dir, get_indexing_dir};
 
+use std::fs;
 //Imports only used in windows
 #[cfg(target_os = "windows")]
-use {
-    is_elevated::is_elevated,
-    std::{io::stdin, process::exit},
-};
+use std::{io::stdin, process::exit};
 
 //Imports only used in linux
 #[cfg(target_os = "linux")]
-use std::{fs, process::Command};
+use std::process::Command;
 
 #[cfg(target_os = "windows")]
 fn press_to_close() {
@@ -22,7 +22,7 @@ fn press_to_close() {
 
 fn main() {
     #[cfg(target_os = "linux")]
-    if cfg!(target_os = "linux") {
+    {
         let app_dir = get_app_dir();
 
         let remove_binary_files_command = String::from("sudo rm -f /usr/bin/whiskers-launcher /usr/bin/whiskers-launcher-companion /usr/share/pixmaps/whiskers-launcher.png /usr/share/applications/whiskers-launcher.desktop");
@@ -55,22 +55,23 @@ fn main() {
     }
 
     #[cfg(target_os = "windows")]
-    if cfg!(target_os = "windows") {
-        if !is_elevated() {
-            eprintln!("❌ Please run the script as administrator");
-            press_to_close();
+    {
+        for process in System::new_all().processes_by_name("whiskers-launcher") {
+            process.kill();
         }
 
-        let uninstall_script = include_str!("windows-uninstall.ps1").to_owned();
+        let app_dir = get_app_dir();
+        let home_launcher_dir = get_indexing_dir().parent().unwrap().to_owned();
 
-        match powershell_script::run(&uninstall_script) {
-            Ok(_) => {
-                println!("✅ Uninstalled");
-            }
-            Err(error) => {
-                eprintln!("❌ Error: {}", error.to_string());
-            }
-        };
+        if app_dir.exists() {
+            fs::remove_dir_all(app_dir).expect("Error removing app dir");
+        } 
+
+        if home_launcher_dir.exists() {
+            fs::remove_dir_all(home_launcher_dir).expect("Error removing home config dir");
+        }
+
+        println!("✅ Uninstalled");
 
         press_to_close();
     }
