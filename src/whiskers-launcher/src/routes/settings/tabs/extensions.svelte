@@ -11,6 +11,7 @@
 	import Input from '$lib/components/input.svelte';
 	import Select from '$lib/components/select.svelte';
 	import TextArea from '$lib/components/text-area.svelte';
+	import Toggle from '$lib/components/toggle.svelte';
 
 	export let settings: Settings;
 	let dispatch = createEventDispatcher();
@@ -174,10 +175,10 @@
 					{#each extension.settings as setting}
 						{#if canShowSetting(extension.id, setting)}
 							<div>
-								<div class=" font-medium">{setting.title}</div>
-								<div class=" text-sub-text">{setting.description}</div>
-
 								{#if setting.setting_type === 'Input'}
+									<div class=" font-medium">{setting.title}</div>
+									<div class=" text-sub-text">{setting.description}</div>
+
 									<Input
 										value={getSettingValue(extension.id, setting.id)}
 										on:input={(event) => {
@@ -186,6 +187,9 @@
 									/>
 								{/if}
 								{#if setting.setting_type === 'TextArea'}
+									<div class=" font-medium">{setting.title}</div>
+									<div class=" text-sub-text">{setting.description}</div>
+
 									<TextArea
 										value={getSettingValue(extension.id, setting.id)}
 										on:input={(event) => {
@@ -194,6 +198,9 @@
 									/>
 								{/if}
 								{#if setting.setting_type === 'Select'}
+									<div class=" font-medium">{setting.title}</div>
+									<div class=" text-sub-text">{setting.description}</div>
+
 									<Select
 										values={setting.select_options ?? []}
 										selectedValue={getSettingValue(extension.id, setting.id)}
@@ -201,6 +208,20 @@
 											updateSetting(extension.id, setting.id, event.detail.id);
 										}}
 									/>
+								{/if}
+								{#if setting.setting_type === 'Toggle'}
+									<div class="flex">
+										<div class="flex-grow">
+											<div class=" font-medium">{setting.title}</div>
+											<div class=" text-sub-text">{setting.description}</div>
+										</div>
+										<Toggle
+											toggled={getSettingValue(extension.id, setting.id) === 'true' ? true : false}
+											on:toggle={(e) => {
+												updateSetting(extension.id, setting.id, String(e.detail));
+											}}
+										/>
+									</div>
 								{/if}
 							</div>
 						{/if}
