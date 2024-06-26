@@ -11,7 +11,7 @@ use std::{
 use {mslnk::ShellLink, std::io::stdin, std::path::Path, std::process::exit};
 
 #[cfg(target_os = "linux")]
-use os::unix::fs::PermissionsExt;
+use std::os::unix::fs::PermissionsExt;
 
 use rust_embed::Embed;
 use sysinfo::System;

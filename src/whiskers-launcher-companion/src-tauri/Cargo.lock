@@ -2105,6 +2105,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "mslnk"
+version = "0.1.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "86c97310150b7f496a93f31690da7822b99d95ff68ca9d30fb09d3ad54375c76"
+dependencies = [
+ "bitflags 1.3.2",
+ "byteorder",
+ "log",
+]
+
+[[package]]
 name = "ndk"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4153,7 +4164,7 @@ dependencies = [
 
 [[package]]
 name = "whiskers-launcher-companion"
-version = "2.0.0"
+version = "2.1.0"
 dependencies = [
  "bincode",
  "freedesktop-desktop-entry",
@@ -4172,11 +4183,12 @@ dependencies = [
 [[package]]
 name = "whiskers-launcher-rs"
 version = "2.0.0"
-source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#01c8f131628b36148bd6905385cac9603f5b5eb6"
+source = "git+https://github.com/Whiskers-Apps/whiskers-launcher-rs#b0d9ded464f983f840cfdbc1cf30d410522492a3"
 dependencies = [
  "bincode",
  "dirs 5.0.1",
  "fuzzy-matcher",
+ "mslnk",
  "notify-rust",
  "powershell_script",
  "serde",
