@@ -2,8 +2,7 @@ use std::{
     env,
     fs::{self, File},
     io::Write,
-    path::PathBuf,
-    process::Command,
+    path::PathBuf
 };
 
 //Imports only used in windows
@@ -11,7 +10,7 @@ use std::{
 use {mslnk::ShellLink, std::io::stdin, std::path::Path, std::process::exit};
 
 #[cfg(target_os = "linux")]
-use std::os::unix::fs::PermissionsExt;
+use std::{os::unix::fs::PermissionsExt, process::Command};
 
 use rust_embed::Embed;
 use sysinfo::System;
@@ -207,17 +206,6 @@ fn main() {
 
         link.create_lnk(shortcut_path.into_os_string().into_string().unwrap())
             .expect("Error creating link");
-
-        let mut companion_path = app_dir.to_owned();
-        companion_path.push("whiskers-launcher-companion.exe");
-
-        std::thread::spawn(move || {
-            Command::new("cmd")
-                .arg("/c")
-                .arg(companion_path.into_os_string().into_string().unwrap())
-                .spawn()
-                .expect("Error opening companion app");
-        });
     }
 
     for file in Icons::iter() {
