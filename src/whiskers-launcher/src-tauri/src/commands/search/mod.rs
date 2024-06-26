@@ -1,5 +1,6 @@
 use std::{env, fs, path::Path};
 
+use eval::eval;
 use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
 use tauri::{AppHandle, Manager, Window, WindowBuilder};
 
@@ -29,7 +30,10 @@ use std::process::Command;
 use crate::get_os;
 
 #[cfg(target_os = "windows")]
-use {std::os::windows::process::CommandExt, std::process::Command, whiskers_launcher_rs::utils::FLAG_NO_WINDOW};
+use {
+    std::os::windows::process::CommandExt, std::process::Command,
+    whiskers_launcher_rs::utils::FLAG_NO_WINDOW,
+};
 
 #[tauri::command]
 pub async fn get_results(text: String) -> Vec<WLResult> {
@@ -37,8 +41,7 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     let mut results = Vec::<WLResult>::new();
 
     if text.is_empty() {
-
-        if get_os() == "windows"{
+        if get_os() == "windows" {
             return vec![];
         }
 
@@ -182,6 +185,29 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     }
 
     if results.is_empty() {
+        if let Ok(result) = eval(&text) {
+            if result.is_number() {
+                let mut calc_icon = get_app_resources_icons_dir();
+                calc_icon.push("calculator.svg");
+
+                results.push(WLResult::new_text(
+                    TextResult::new(
+                        result.to_string(),
+                        Action::new_copy(CopyAction::new(result.to_string())),
+                    )
+                    .icon(
+                        calc_icon
+                            .into_os_string()
+                            .into_string()
+                            .expect("Error getting icon path"),
+                    )
+                    .tint("accent"),
+                ));
+
+                return results;
+            }
+        }
+
         for engine in &settings.search_engines {
             if engine.id == settings.default_search_engine {
                 results.push(get_engine_result(engine.to_owned(), &text));
