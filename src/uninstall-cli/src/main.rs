@@ -1,16 +1,11 @@
 use sysinfo::System;
-use whiskers_launcher_rs::paths::get_indexing_dir;
+use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir, get_indexing_dir};
 
 use std::fs;
-#[cfg(target_os = "linux")]
-use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir};
 
 //Imports only used in windows
 #[cfg(target_os = "windows")]
-use {
-    std::{env, io::stdin, path::Path, process::exit},
-    whiskers_launcher_rs::paths::get_indexing_dir,
-};
+use std::{env, io::stdin, path::Path, process::exit};
 
 //Imports only used in linux
 #[cfg(target_os = "linux")]
