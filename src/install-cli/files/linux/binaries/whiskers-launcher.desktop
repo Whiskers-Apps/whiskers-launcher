@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Whiskers Launcher
+Comment=Whiskers Launcher companion tray app
+Terminal=false
+StartupNotify=false
+Icon=/usr/share/pixmaps/whiskers-launcher.png
+Exec=whiskers-launcher-companion
