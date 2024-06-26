@@ -8,6 +8,7 @@ edition = "2021"
 whiskers-launcher-rs = { git = "https://github.com/Whiskers-Apps/whiskers-launcher-rs" }
 fs_extra = "1.3.0"
 rust-embed = { version = "8.4.0", features = ["interpolate-folder-path"] }
+sysinfo = "0.30.12"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 winres = "0.1.12"

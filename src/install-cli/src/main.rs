@@ -2,16 +2,19 @@ use std::{
     env,
     fs::{self, File},
     io::Write,
-    os::unix::fs::PermissionsExt,
     path::PathBuf,
     process::Command,
 };
 
 //Imports only used in windows
 #[cfg(target_os = "windows")]
-use {mslnk::ShellLink, std::io::stdin, std::process::exit, std::path::Path};
+use {mslnk::ShellLink, std::io::stdin, std::path::Path, std::process::exit};
+
+#[cfg(target_os = "linux")]
+use os::unix::fs::PermissionsExt;
 
 use rust_embed::Embed;
+use sysinfo::System;
 use whiskers_launcher_rs::paths::{
     get_app_dir, get_app_resources_dir, get_app_resources_icons_dir,
 };
@@ -72,6 +75,10 @@ fn run_command(command: &str) {
 }
 
 fn main() {
+    for process in System::new_all().processes_by_name("whiskers-launcher") {
+        process.kill();
+    }
+
     let app_dir = get_app_dir();
     let resources_dir = get_app_resources_dir();
     let icons_dir = get_app_resources_icons_dir();
@@ -204,11 +211,13 @@ fn main() {
         let mut companion_path = app_dir.to_owned();
         companion_path.push("whiskers-launcher-companion.exe");
 
-        Command::new("cmd")
-            .arg("/c")
-            .arg(companion_path.into_os_string().into_string().unwrap())
-            .spawn()
-            .expect("Error opening companion app");
+        std::thread::spawn(move || {
+            Command::new("cmd")
+                .arg("/c")
+                .arg(companion_path.into_os_string().into_string().unwrap())
+                .spawn()
+                .expect("Error opening companion app");
+        });
     }
 
     for file in Icons::iter() {
