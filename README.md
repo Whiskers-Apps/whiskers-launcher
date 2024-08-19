@@ -1,5 +1,5 @@
 
-![Whiskers-Launcher-Cover](previews/cover.webp)
+![Banner](banner.webp)
 
 # About
 Whiskers Launcher is a keyboard app launcher for 🐧Linux and 🪟Windows that aims to be easily customizable and support extensions. 
