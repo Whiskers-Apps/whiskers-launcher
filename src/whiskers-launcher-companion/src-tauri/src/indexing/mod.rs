@@ -1,5 +1,4 @@
 use std::fs;
-use tux_icons::icon_fetcher::IconFetcher;
 use whiskers_launcher_rs::{
     indexing::App,
     paths::{get_indexing_apps_path, get_indexing_dir},
@@ -9,7 +8,7 @@ use whiskers_launcher_rs::{
 use whiskers_launcher_rs::paths::{get_app_dir, get_app_resources_dir};
 
 #[cfg(target_os = "linux")]
-use freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter};
+use {freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter},tux_icons::icon_fetcher::IconFetcher};
 
 /// Gets the apps from the system and indexes them into a file
 pub fn index_apps() {

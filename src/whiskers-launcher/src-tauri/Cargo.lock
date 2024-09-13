@@ -4023,9 +4023,9 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "sniffer-rs"
-version = "1.0.0"
+version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aaf787d16a82447fe2f5e0881ccd46e9f0b01576621664b6d326e64dbe1de868"
+checksum = "70b9681456a1771624aac76b144e1802c4725e55d68c73e055c1abce3d9c7da1"
 
 [[package]]
 name = "socket2"

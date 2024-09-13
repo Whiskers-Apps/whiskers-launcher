@@ -31,10 +31,10 @@ tokio = { version = "1.37.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 bincode = "1.3.3"
 walkdir = "2.5.0"
-tux-icons = "0.1.1"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 freedesktop-desktop-entry = "0.5.0"
+tux-icons = "0.1.1"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 lnk = "0.5.1"
