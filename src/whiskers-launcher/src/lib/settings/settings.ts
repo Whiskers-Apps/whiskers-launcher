@@ -1,5 +1,6 @@
 import type { SelectValue } from '$lib/components/classes';
 import { invoke } from '@tauri-apps/api';
+import { convertFileSrc } from '@tauri-apps/api/tauri';
 import CssFilterConverter from 'css-filter-converter';
 
 export interface Settings {
@@ -26,6 +27,7 @@ export interface Settings {
 	default_search_engine: number;
 	theme: Theme;
 	extensions: ExtensionSetting[];
+	wallpaper: string | null;
 }
 
 export interface SearchEngine {
@@ -289,6 +291,13 @@ export function getThemeCss(settings: Settings): string {
 	--result-confirm-size: ${settings.scaling * 40}px;
 }
 
+.wallpaper{
+	background-image: url(${settings.wallpaper ? convertFileSrc(settings.wallpaper) : 'none'});
+	width: 100vw;
+	height: 100vh;
+	background-size: cover;
+	background-position: center;
+}
 
 .bg-background{
     background-color: var(--background);
