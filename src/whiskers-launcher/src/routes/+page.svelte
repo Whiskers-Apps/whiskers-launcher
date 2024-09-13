@@ -195,7 +195,7 @@
 		{@html css}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class="h-screen overflow-hidden flex justify-center text-text pt-16" on:click={handleBlur}>
+		<div class={`h-screen overflow-hidden flex justify-center text-text pt-16 wallpaper`} on:click={handleBlur}>
 			<div
 				class={`search-box-width h-fit search-round overflow-hidden ${settings.split_results ? '' : 'search-border bg-background'}`}
 			>

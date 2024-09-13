@@ -22,7 +22,7 @@ async fn main() {
         .add_item(CustomMenuItem::new("show", "Show"))
         .add_item(CustomMenuItem::new("settings", "Settings"))
         .add_item(CustomMenuItem::new("restart", "Restart"))
-        .add_item(CustomMenuItem::new("stop", "Stop"));
+        .add_item(CustomMenuItem::new("quit", "Quit"));
 
     tauri::Builder::default()
         .system_tray(SystemTray::new().with_menu(tray_menu))
@@ -37,7 +37,7 @@ async fn main() {
                 "restart" => {
                     tauri::api::process::restart(&app.env());
                 }
-                "stop" => {
+                "quit" => {
                     exit(0);
                 }
                 _ => {}

@@ -43,7 +43,8 @@ fn main() {
             get_extensions_store,
             write_extensions_store,
             get_themes_store,
-            write_themes_store
+            write_themes_store,
+            wallpaper_exists
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();

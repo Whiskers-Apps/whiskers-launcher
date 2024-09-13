@@ -115,6 +115,11 @@
 		writeSettings(settings!!);
 	}
 
+	async function updateWallpaper(event: CustomEvent<string | null>){
+		settings!!.wallpaper = event.detail;
+		writeSettings(settings!!);
+	}
+
 	async function updateHighlightBackground(event: CustomEvent<boolean>) {
 		settings!!.highlight_selected_background = event.detail;
 		writeSettings(settings!!);
@@ -188,6 +193,7 @@
 						on:updateHideOnBlur={updateHideOnBlur}
 						on:updateBorderRadius={updateBorderRadius}
 						on:updateBorderWidth={updateBorderWidth}
+						on:updateWallpaper={updateWallpaper}
 					/>
 				{/if}
 				{#if selectedTab === 2}

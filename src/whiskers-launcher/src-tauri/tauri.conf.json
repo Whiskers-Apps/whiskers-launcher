@@ -37,7 +37,7 @@
 			"protocol": {
 				"all": true,
 				"asset": true,
-				"assetScope": ["**", "**/*", "$HOME", "$HOME/**", "$HOME/.config/**", "$HOME/.local/**"]
+				"assetScope": ["**", "**/*", "$HOME", "$HOME/**", "$HOME/.config/**", "$HOME/.local/**", "$HOME/.icons/**"]
 			}
 		},
 		"bundle": {

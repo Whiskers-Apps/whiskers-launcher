@@ -1,7 +1,7 @@
-use std::{env, fs, path::Path};
+use std::{env, fs, path::{Path, PathBuf}};
 
 use eval::eval;
-use fuzzy_matcher::{skim::SkimMatcherV2, FuzzyMatcher};
+use sniffer_rs::sniffer::Sniffer;
 use tauri::{AppHandle, Manager, Window, WindowBuilder};
 
 use tokio::time::sleep;
@@ -34,6 +34,11 @@ use {
     std::os::windows::process::CommandExt, std::process::Command,
     whiskers_launcher_rs::utils::FLAG_NO_WINDOW,
 };
+
+#[tauri::command]
+pub fn wallpaper_exists(path: PathBuf) -> bool{
+    return path.exists()
+}
 
 #[tauri::command]
 pub async fn get_results(text: String) -> Vec<WLResult> {
@@ -72,6 +77,15 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
         }
 
         return results;
+    }
+
+    if text == "*" {
+        let app_results: Vec<WLResult> = get_apps()
+            .iter()
+            .map(|a| get_app_result(a.clone()))
+            .collect();
+
+        return app_results
     }
 
     let search = get_search(&text);
@@ -150,36 +164,15 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
         }
     }
 
-    let matcher = SkimMatcherV2::default();
+    let sniffer = Sniffer::new();
 
     let apps = get_apps();
     let blacklist = settings.blacklist;
 
     for app in apps {
         if !blacklist.contains(&app.id) {
-            if matcher
-                .fuzzy_match(&app.title, &search.search_text)
-                .is_some()
-            {
-                let open_app_action = Action::new_open_app(OpenAppAction::new(&app.id));
-                let mut text_result = TextResult::new(&app.title, open_app_action);
-
-                if app.icon.is_some() {
-                    text_result.icon(app.icon.unwrap());
-                } else {
-                    let mut icon_path = get_app_resources_icons_dir();
-                    icon_path.push("question.svg");
-
-                    text_result.icon(
-                        icon_path
-                            .into_os_string()
-                            .into_string()
-                            .expect("Error getting icon path"),
-                    );
-                    text_result.tint("accent");
-                }
-
-                results.push(WLResult::new_text(text_result))
+            if sniffer.clone().matches(&app.title, &search.search_text) {
+                results.push(get_app_result(app))
             }
         }
     }
@@ -216,6 +209,28 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     }
 
     results
+}
+
+fn get_app_result(app: App) -> WLResult {
+    let open_app_action = Action::new_open_app(OpenAppAction::new(&app.id));
+    let mut text_result = TextResult::new(&app.title, open_app_action);
+
+    if app.icon.is_some() {
+        text_result.icon(app.icon.unwrap());
+    } else {
+        let mut icon_path = get_app_resources_icons_dir();
+        icon_path.push("question.svg");
+
+        text_result.icon(
+            icon_path
+                .into_os_string()
+                .into_string()
+                .expect("Error getting icon path"),
+        );
+        text_result.tint("accent");
+    }
+
+    WLResult::new_text(text_result)
 }
 
 fn get_engine_result(engine: SearchEngine, search_text: impl Into<String>) -> WLResult {

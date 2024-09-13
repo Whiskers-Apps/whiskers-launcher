@@ -56,9 +56,8 @@
 			maximizable: false
 		});
 
-		const unlisten = await listen('refresh-extensions', async () => {
+		listen('refresh-extensions', async () => {
 			await reloadExtensions();
-			unlisten();
 		});
 	}
 
