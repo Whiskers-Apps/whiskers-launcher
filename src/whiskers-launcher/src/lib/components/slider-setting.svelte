@@ -16,7 +16,7 @@
 	}
 </script>
 
-<div class=" card space-y-2">
+<div class="space-y-2">
 	<div>
 		<p class=" text-xl font-medium">{title}</p>
 		<p class=" text-sub-text">{description}</p>

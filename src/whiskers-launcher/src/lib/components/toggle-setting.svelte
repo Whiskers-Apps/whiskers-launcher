@@ -13,7 +13,7 @@
 	}
 </script>
 
-<div class="card flex items-start gap-4">
+<div class="flex items-start gap-4">
 	<div class=" flex-grow">
 		<p class=" text-xl font-medium">{title}</p>
 		<p class=" text-sub-text">{description}</p>

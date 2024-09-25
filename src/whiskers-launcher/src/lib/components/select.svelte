@@ -35,7 +35,7 @@
 		<div class=" flex flex-col">
 			{#each values as value}
 				<button
-					class={`w-full flex items-start p-2 hover-bg-secondary ${selectedValue === value.id ? ' bg-secondary' : ''}`}
+					class={`w-full flex items-start p-2 hover-bg-tertiary ${selectedValue === value.id ? ' bg-secondary' : ''}`}
 					on:click={() => {
 						selectValue(value);
 					}}>{value.value}</button
@@ -47,7 +47,7 @@
 
 <style>
 	.select {
-		background-color: var(--background);
+		background-color: var(--secondary);
 		border: 1px solid var(--tertiary);
 		border-radius: 6px;
 		width: 100%;

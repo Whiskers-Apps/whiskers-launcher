@@ -1,6 +1,6 @@
 [package]
 name = "whiskers-launcher-companion"
-version = "2.2.0"
+version = "2.2.1"
 description = "Whiskers Launcher companion"
 authors = ["Whiskers-Apps", "lighttigerXIV"]
 license = "MIT"
@@ -34,7 +34,7 @@ walkdir = "2.5.0"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 freedesktop-desktop-entry = "0.5.0"
-tux-icons = "0.1.1"
+tux-icons = "0.2.2"
 
 [target.'cfg(target_os = "windows")'.dependencies]
 lnk = "0.5.1"

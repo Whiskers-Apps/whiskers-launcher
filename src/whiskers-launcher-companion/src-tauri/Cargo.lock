@@ -3905,9 +3905,9 @@ dependencies = [
 
 [[package]]
 name = "tux-icons"
-version = "0.1.1"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d7ea39c0a754c74074674f2322e33b6098788aeb482ce438609ed17d64ca80e9"
+checksum = "7df287568e75185493dbfa276ca8b0360f45065899385ab4b3f6b11b31606c7e"
 dependencies = [
  "dirs 5.0.1",
  "freedesktop-desktop-entry",
@@ -4199,7 +4199,7 @@ dependencies = [
 
 [[package]]
 name = "whiskers-launcher-companion"
-version = "2.2.0"
+version = "2.2.1"
 dependencies = [
  "bincode",
  "freedesktop-desktop-entry",

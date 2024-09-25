@@ -1,208 +1,33 @@
 <script lang="ts">
 	import SettingsIcon from '$lib/icons/settings.svg?component';
 	import SearchIcon from '$lib/icons/search.svg?component';
-	import {
-		getCssFilter,
-		getSettings,
-		getThemeCss,
-		type Settings,
-		type WLResult
-	} from '$lib/settings/settings';
-	import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-	import { appWindow } from '@tauri-apps/api/window';
+	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
+	import { getColorFilter, getIconPath, init, onBlur, onOpenSettings, onRunAction, onSearchInput, onSetSelectedIndex, state } from './search-vm';
 
-	let settings: Settings | null = null;
-	let css = '';
-
-	let searchText = '';
-	let results: WLResult[] = [];
-	let displayedResults: WLResult[] = [];
-	$: selectedIndex = 0;
-	let resultOffset = 0;
-	let showConfirmationBox = false;
+	$: uiState = $state;
 
 	onMount(async () => {
-		settings = await getSettings();
-		css = getThemeCss(settings);
-
-		search();
+		init();
 	});
-
-	window.addEventListener('keydown', (event) => {
-		switch (event.key) {
-			case 'Escape': {
-				appWindow.close();
-				break;
-			}
-			case 'ArrowUp': {
-				event.preventDefault();
-				goToPreviousResult();
-				break;
-			}
-			case 'ArrowDown': {
-				event.preventDefault();
-				goToNextResult();
-				break;
-			}
-
-			case 'Enter': {
-				runAction();
-				break;
-			}
-		}
-
-		if (event.ctrlKey && event.key === 's') {
-			openSettings();
-		}
-
-		if (event.altKey && ['1', '2', '3', '4', '5', '6', '7', '8', '9'].includes(event.key)) {
-			selectAltResult(+event.key - 1);
-		}
-	});
-
-	async function handleBlur() {
-		if (settings?.hide_on_blur) {
-			appWindow.close();
-		}
-	}
-
-	async function openSettings(event: Event | undefined = undefined) {
-		event?.stopPropagation();
-
-		invoke('open_settings_window');
-
-		setTimeout(() => {
-			appWindow.close();
-		}, 200);
-	}
-
-	async function searchWithInput(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
-		searchText = event.currentTarget.value;
-		search();
-	}
-
-	async function search() {
-
-		results = await invoke('get_results', { text: searchText });
-
-
-		selectedIndex = 0;
-		resultOffset = 0;
-
-		cutResults();
-	}
-
-	async function cutResults() {
-		displayedResults = [...results.slice(resultOffset, resultOffset + settings!!.results_count)];
-	}
-
-	async function goToPreviousResult() {
-		showConfirmationBox = false;
-
-		if (selectedIndex > 0) {
-			selectedIndex--;
-			return;
-		}
-
-		if (resultOffset - 1 > 0) {
-			resultOffset--;
-			cutResults();
-			return;
-		}
-
-		if (resultOffset === 0) {
-			if (results.length < settings!!.results_count) {
-				selectedIndex = results.length - 1;
-				return;
-			}
-		}
-
-		resultOffset = results.length - settings!!.results_count;
-		selectedIndex = settings!!.results_count - 1;
-		cutResults();
-	}
-
-	async function goToNextResult() {
-		showConfirmationBox = false;
-
-		if (selectedIndex < displayedResults.length - 1) {
-			selectedIndex++;
-			return;
-		}
-
-		if (resultOffset + selectedIndex < results.length - 1) {
-			resultOffset++;
-			cutResults();
-			return;
-		}
-
-		if (results.length < settings!!.results_count) {
-			if (selectedIndex + 1 === results.length) {
-				selectedIndex = 0;
-				return;
-			}
-		}
-
-		resultOffset = 0;
-		selectedIndex = 0;
-		cutResults();
-	}
-
-	async function selectAltResult(index: number) {
-		if (index > displayedResults.length) {
-			return;
-		}
-
-		selectedIndex = index;
-		runAction();
-	}
-
-	async function runAction() {
-		let result = displayedResults[selectedIndex];
-
-		if (!showConfirmationBox) {
-			if (
-				(result.result_type === 'Text' && result.text?.action.ask_confirmation) ||
-				(result.result_type === 'TitleAndDescription' &&
-					result.title_and_description?.action.ask_confirmation)
-			) {
-				showConfirmationBox = true;
-			} else {
-				invoke('run_action', { result: displayedResults[selectedIndex] });
-			}
-		} else {
-			showConfirmationBox = false;
-			invoke('run_action', { result: displayedResults[selectedIndex] });
-		}
-	}
-
-	function getColorFilter(tint: string | null): string {
-		if (tint === null) {
-			return 'none';
-		}
-
-		if (tint === 'accent') {
-			return getCssFilter(settings!!.theme.accent);
-		}
-
-		return getCssFilter(tint);
-	}
 </script>
 
 <div>
-	{#if settings !== null}
-		{@html css}
+	{#if !uiState.loading}
+		{@html uiState.css}
 		<!-- svelte-ignore a11y-click-events-have-key-events -->
 		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div class={`h-screen overflow-hidden flex justify-center text-text pt-16 wallpaper`} on:click={handleBlur}>
+		<div
+			class={`h-screen overflow-hidden flex justify-center text-text pt-16 wallpaper`}
+			on:click={onBlur}
+		>
 			<div
-				class={`search-box-width h-fit search-round overflow-hidden ${settings.split_results ? '' : 'search-border bg-background'}`}
+				class={`search-box-width h-fit search-round overflow-hidden ${uiState.settings.split_results ? '' : 'search-border bg-background'}`}
 			>
 				<div
-					class={`flex p-3 gap-2 search-round ${settings.split_results ? 'search-border bg-background' : ''}`}
+					class={`flex p-3 gap-2 search-round ${uiState.settings.split_results ? 'search-border bg-background' : ''}`}
 				>
-					{#if settings.show_search_icon}
+					{#if uiState.settings.show_search_icon}
 						<SearchIcon class=" search-icon-size text-accent" />
 					{/if}
 
@@ -210,17 +35,17 @@
 					<input
 						class=" w-full outline-none flex-grow bg-transparent search-text"
 						type="text"
-						placeholder={settings.show_placeholder ? 'Search apps, extensions, web' : ''}
-						value={searchText}
-						on:input={searchWithInput}
+						placeholder={uiState.settings.show_placeholder ? 'Search apps, extensions, web' : ''}
+						value={uiState.searchText}
+						on:input={onSearchInput}
 						autofocus
 					/>
 
-					{#if settings.show_settings_icon}
+					{#if uiState.settings.show_settings_icon}
 						<button
 							class=" hover-bg-tertiary rounded-full"
 							on:click={(event) => {
-								openSettings(event);
+								onOpenSettings(event);
 							}}
 						>
 							<SettingsIcon class=" search-icon-size text-accent" />
@@ -228,40 +53,40 @@
 					{/if}
 				</div>
 
-				{#if settings.split_results}
+				{#if uiState.settings.split_results}
 					<div class="split-divider"></div>
 				{/if}
 
 				<div
-					class={`overflow-hidden ${settings.split_results ? ` bg-background search-round  ${displayedResults.length > 0 ? 'search-border' : ''}` : ''}`}
+					class={`overflow-hidden ${uiState.settings.split_results ? ` bg-background search-round  ${uiState.displayedResults.length > 0 ? 'search-border' : ''}` : ''}`}
 				>
-					{#each displayedResults as result, index}
+					{#each uiState.displayedResults as result, index}
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 						<button
-							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === selectedIndex ? 'highlight-result' : ''}`}
-							on:mouseover={() => (selectedIndex = index)}
-							on:focus={() => (selectedIndex = index)}
-							on:click={runAction}
+							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === uiState.selectedIndex ? 'highlight-result' : ''}`}
+							on:mouseover={() => (onSetSelectedIndex(index))}
+							on:focus={() => (onSetSelectedIndex(index))}
+							on:click={onRunAction}
 						>
 							{#if result.result_type === 'Text'}
 								<div class="flex-grow flex gap-4 p-3 items-center">
-									{#if result.text?.icon !== null}
+									{#if getIconPath(result.text?.icon) !== null}
 										<img
 											class={`icon-size ${result.text?.tint}`}
-											src={convertFileSrc(result.text?.icon ?? '')}
+											src={getIconPath(result.text?.icon)}
 											alt=""
 											style="filter: {getColorFilter(result.text?.tint ?? null)}"
 										/>
 									{/if}
 									<div
-										class={`flex-grow one-line text-start result-title ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title ${uiState.selectedIndex === index ? 'text-accent' : ' text-text'}`}
 									>
 										{result.text?.text}
 									</div>
-									{#if settings.show_alt_hint}
+									{#if uiState.settings.show_alt_hint}
 										<div
-											class={`result-alt ${selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
+											class={`result-alt ${uiState.selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
 										>
 											Alt + {index + 1}
 										</div>
@@ -279,16 +104,16 @@
 										/>
 									{/if}
 									<div
-										class={`flex-grow one-line text-start result-title flex flex-col ${selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title flex flex-col ${uiState.selectedIndex === index ? 'text-accent' : ' text-text'}`}
 									>
 										<p class="result-title one-line">{result.title_and_description?.title}</p>
 										<p class="result-description one-line">
 											{result.title_and_description?.description}
 										</p>
 									</div>
-									{#if settings.show_alt_hint}
+									{#if uiState.settings.show_alt_hint}
 										<div
-											class={`result-alt ${selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
+											class={`result-alt ${uiState.selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
 										>
 											Alt + {index + 1}
 										</div>
@@ -298,11 +123,11 @@
 							{#if result.result_type === 'Divider'}
 								<div class="p-2 pt-4 pb-4 w-full">
 									<div
-										class={`result-divider rounded-full ${selectedIndex === index ? 'bg-accent' : 'bg-tertiary'}`}
+										class={`result-divider rounded-full ${uiState.selectedIndex === index ? 'bg-accent' : 'bg-tertiary'}`}
 									></div>
 								</div>
 							{/if}
-							{#if showConfirmationBox && selectedIndex === index}
+							{#if uiState.showConfirmationBox && uiState.selectedIndex === index}
 								<div
 									class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2"
 								>
