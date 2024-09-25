@@ -21,6 +21,7 @@ async fn main() {
     let tray_menu = SystemTrayMenu::new()
         .add_item(CustomMenuItem::new("show", "Show"))
         .add_item(CustomMenuItem::new("settings", "Settings"))
+        .add_item(CustomMenuItem::new("refresh-apps", "Refresh Apps"))
         .add_item(CustomMenuItem::new("restart", "Restart"))
         .add_item(CustomMenuItem::new("quit", "Quit"));
 
@@ -33,6 +34,11 @@ async fn main() {
                 }
                 "settings" => {
                     open_settings_window();
+                }
+                "refresh-apps" =>{
+                    tokio::spawn(async move{
+                        index_apps();
+                    });
                 }
                 "restart" => {
                     tauri::api::process::restart(&app.env());

@@ -546,7 +546,7 @@ dependencies = [
 
 [[package]]
 name = "install"
-version = "2.2.0"
+version = "2.2.1"
 dependencies = [
  "fs_extra",
  "mslnk",

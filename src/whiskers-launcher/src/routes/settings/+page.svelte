@@ -8,72 +8,44 @@
 		type ExtensionSetting
 	} from '$lib/settings/settings';
 	import { onMount } from 'svelte';
-	import Navbar from './navbar.svelte';
-	import GeneralTab from './tabs/general.svelte';
-	import SearchBoxTab from './tabs/search-box.svelte';
-	import SearchResultsTab from './tabs/search-results.svelte';
-	import SearchEnginesTab from './tabs/search-engines.svelte';
-	import ThemingTab from './tabs/theming.svelte';
-	import ExtensionsTab from './tabs/extensions.svelte';
-	import AboutTab from './tabs/about.svelte';
+	import MainFrame from './main-frame.svelte';
+	import {
+		state,
+		init,
+		onSetScaling,
+		onSetShowRecentApps,
+		onSetAutoStart,
 
-	// ===========================
-	// UI
-	// ===========================
-	let settings: Settings | null = null;
-	let css = '';
-	let tabContent: HTMLDivElement;
+		onSetFirstKey,
 
-	let selectedTab = 0;
+		onSetSecondKey,
 
-	// ===========================
-	// UI Functions
-	// ===========================
-	onMount(async () => {
-		settings = await getSettings();
-		css = getThemeCss(settings);
+		onSetThirdKey
+
+
+
+	} from './general-settings-page-vm';
+	import SliderSetting from '$lib/components/slider-setting.svelte';
+	import ToggleSetting from '$lib/components/toggle-setting.svelte';
+	import Warning from '$lib/icons/warning.svg?component';
+	import Select from '$lib/components/select.svelte';
+
+	$: uiState = $state;
+
+	onMount(() => {
+		init();
 	});
 
-	// ===========================
-	// UI Events
-	// ===========================
-	function selectTab(event: CustomEvent<number>) {
-		selectedTab = event.detail;
-		tabContent.scrollTop = 0;
-	}
+	let settings: Settings | null = null;
+	let css = '';
+
+	onMount(async () => {
+		settings = await getSettings();
+	});
 
 	// ==========================
 	// Settings Events
 	// ==========================
-	async function updateFirstKey(event: CustomEvent<string>) {
-		settings!!.first_key = event.detail;
-		writeSettings(settings!!);
-	}
-
-	async function updateSecondKey(event: CustomEvent<string | null>) {
-		settings!!.second_key = event.detail;
-		writeSettings(settings!!);
-	}
-
-	async function updateThirdKey(event: CustomEvent<string>) {
-		settings!!.third_key = event.detail;
-		writeSettings(settings!!);
-	}
-
-	async function updateScaling(event: CustomEvent<number>) {
-		settings!!.scaling = event.detail;
-		writeSettings(settings!!);
-	}
-
-	async function updateAutoStart(event: CustomEvent<boolean>) {
-		settings!!.auto_start = event.detail;
-		writeSettings(settings!!);
-	}
-
-	async function updateShowRecentApps(event: CustomEvent<boolean>) {
-		settings!!.show_recent_apps = event.detail;
-		writeSettings(settings!!);
-	}
 
 	async function updateSplitResults(event: CustomEvent<boolean>) {
 		settings!!.split_results = event.detail;
@@ -115,7 +87,7 @@
 		writeSettings(settings!!);
 	}
 
-	async function updateWallpaper(event: CustomEvent<string | null>){
+	async function updateWallpaper(event: CustomEvent<string | null>) {
 		settings!!.wallpaper = event.detail;
 		writeSettings(settings!!);
 	}
@@ -164,68 +136,83 @@
 	}
 </script>
 
-{#if settings !== null}
-	{@html css}
-	<div class=" bg-background min-h-screen h-screen text-text flex">
-		<Navbar on:tabSelected={selectTab} />
-
-		<div bind:this={tabContent} class="  p-4 flex-grow flex justify-center overflow-auto">
-			<div class=" w-full max-w-[800px]">
-				{#if selectedTab === 0}
-					<GeneralTab
-						{settings}
-						on:updateFirstKey={updateFirstKey}
-						on:updateSecondKey={updateSecondKey}
-						on:updateThirdKey={updateThirdKey}
-						on:updateScaling={updateScaling}
-						on:updateAutoStart={updateAutoStart}
-						on:updateShowRecentApps={updateShowRecentApps}
-					/>
-				{/if}
-				{#if selectedTab === 1}
-					<SearchBoxTab
-						{settings}
-						on:updateSplitResults={updateSplitResults}
-						on:updateShowSearchIcon={updateShowSearchIcon}
-						on:updateShowSettingsIcon={updateShowSettingsIcon}
-						on:updateShowPlaceholder={updateShowPlaceholder}
-						on:updateAccentSearchBorder={updateAccentSearchBorder}
-						on:updateHideOnBlur={updateHideOnBlur}
-						on:updateBorderRadius={updateBorderRadius}
-						on:updateBorderWidth={updateBorderWidth}
-						on:updateWallpaper={updateWallpaper}
-					/>
-				{/if}
-				{#if selectedTab === 2}
-					<SearchResultsTab
-						{settings}
-						on:updateHighlightBackground={updateHighlightBackground}
-						on:updateShowAltHint={updateShowAltHint}
-						on:updateResultsCount={updateResultsCount}
-						on:refreshBlacklist={refreshBlacklist}
-					/>
-				{/if}
-				{#if selectedTab === 3}
-					<SearchEnginesTab
-						{settings}
-						on:updateSearchKeyword={updateSearchKeyword}
-						on:refreshSearchEngines={refreshSearchEngines}
-					/>
-				{/if}
-				{#if selectedTab === 4}
-					<ThemingTab {settings} on:updateTheme={updateTheme} />
-				{/if}
-				{#if selectedTab === 5}
-					<ExtensionsTab
-						{settings}
-						on:refresh-extensions={refreshExtensions}
-						on:updateExtensionsSettings={updateExtensionsSettings}
-					/>
-				{/if}
-				{#if selectedTab === 6}
-					<AboutTab />
+<MainFrame>
+	{#if !uiState.loading}
+		<div class=" space-y-8">
+			<div>
+				{#if !uiState.isWayland}
+					<p class=" text-xl font-medium">Shortcut Keys</p>
+					<p class=" text-sub-text">The shortcut to spawn the search window.</p>
+					<div class=" space-y-2">
+						<div>
+							<p class="">First Key</p>
+							<Select
+								values={uiState.firstKeyOptions}
+								selectedValue={uiState.settings.first_key}
+								on:selection={onSetFirstKey}
+							/>
+						</div>
+						<div>
+							<p class="">Second Key</p>
+							<Select
+								values={uiState.secondKeyOptions}
+								selectedValue={uiState.settings.second_key ?? '-'}
+								on:selection={onSetSecondKey}
+							/>
+						</div>
+						<div>
+							<p class="">Third Key</p>
+							<Select
+								values={uiState.thirdKeyOptions}
+								selectedValue={uiState.settings.third_key}
+								on:selection={onSetThirdKey}
+							/>
+						</div>
+					</div>
+					{#if uiState.showShortcutWarnings}
+						<div class=" flex items-center text-warning">
+							<Warning class="w-6 h-6 mr-2" />
+							<p>
+								The launcher needs a restart to apply this setting. Please restart using the system
+								tray app
+							</p>
+						</div>
+					{/if}
+				{:else}
+					<div class=" flex items-center text-warning">
+						<Warning class="w-6 h-6 mr-2" />
+						<p>
+							Wayland detected. Please add the shortcut to run "whiskers-launcher" manually from
+							your DE/WM settings.
+						</p>
+					</div>
 				{/if}
 			</div>
+			<SliderSetting
+				title={`Scaling (${uiState.settings.scaling.toFixed(2)})`}
+				description="This scaling is applied in the search window"
+				min={0.5}
+				max={2}
+				step={0.1}
+				value={uiState.settings.scaling}
+				on:slide={onSetScaling}
+			/>
+
+			{#if uiState.os !== 'windows'}
+				<ToggleSetting
+					title="Recent Apps"
+					description="When enabled, it shows the most recent opened apps when opening the launcher"
+					toggled={uiState.settings.show_recent_apps}
+					on:toggle={onSetShowRecentApps}
+				/>
+			{/if}
+
+			<ToggleSetting
+				title="Auto Start"
+				description="When enabled, it auto starts the app at login"
+				toggled={uiState.settings.auto_start}
+				on:toggle={onSetAutoStart}
+			/>
 		</div>
-	</div>
-{/if}
+	{/if}
+</MainFrame>

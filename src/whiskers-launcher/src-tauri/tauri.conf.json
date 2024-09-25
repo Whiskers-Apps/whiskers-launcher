@@ -8,7 +8,7 @@
 	},
 	"package": {
 		"productName": "whiskers-launcher",
-		"version": "2.2.0"
+		"version": "2.2.1"
 	},
 	"tauri": {
 		"allowlist": {
@@ -37,7 +37,7 @@
 			"protocol": {
 				"all": true,
 				"asset": true,
-				"assetScope": ["**", "**/*", "$HOME", "$HOME/**", "$HOME/.config/**", "$HOME/.local/**", "$HOME/.icons/**"]
+				"assetScope": ["**", "**/*", "$HOME", "$HOME/**", "$HOME/.config/**", "$HOME/.local/**", "$HOME/.icons/**", "$APPDATA/assets/*"]
 			}
 		},
 		"bundle": {

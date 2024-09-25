@@ -8,7 +8,10 @@ use whiskers_launcher_rs::{
 use whiskers_launcher_rs::paths::{get_app_dir, get_app_resources_dir};
 
 #[cfg(target_os = "linux")]
-use {freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter},tux_icons::icon_fetcher::IconFetcher};
+use {
+    freedesktop_desktop_entry::{default_paths, DesktopEntry, Iter},
+    tux_icons::icon_fetcher::IconFetcher,
+};
 
 /// Gets the apps from the system and indexes them into a file
 pub fn index_apps() {
@@ -16,7 +19,7 @@ pub fn index_apps() {
     if cfg!(target_os = "linux") {
         let mut apps_indexing = Vec::<App>::new();
         let mut ids = Vec::<String>::new();
-        let fetcher = IconFetcher::new();
+        let fetcher = IconFetcher::new().set_return_target_path(true);
 
         //Gets All Apps
         for path in Iter::new(default_paths()) {
@@ -36,10 +39,14 @@ pub fn index_apps() {
 
                             let mut app_indexing = App::new(&exec_path, &title, &exec_path);
 
-                            match icon {
+                            match icon.clone() {
                                 Some(path) => {
-                                    app_indexing
-                                        .icon(&path.into_os_string().into_string().unwrap());
+                                    let icon_path_str =
+                                        &path.into_os_string().into_string().unwrap();
+
+                                    if !icon_path_str.ends_with(".svgz") {
+                                        app_indexing.icon(icon_path_str);
+                                    }
                                 }
                                 None => {}
                             }
