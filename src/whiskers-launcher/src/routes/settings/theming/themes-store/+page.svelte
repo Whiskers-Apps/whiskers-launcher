@@ -3,6 +3,7 @@
 	import Select from '$lib/components/select.svelte';
 	import ChevronRightIcon from '$lib/icons/chevron-right.svg?component';
 	import ChevronLeftIcon from '$lib/icons/chevron-left.svg?component';
+	import PaletteIcon from '$lib/icons/palette.svg?component';
 	import { open } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
@@ -30,8 +31,9 @@
 	{#if !uiState.loading}
 		<div class=" bg-background p-4 h-screen w-full text-text space-y-4 flex flex-col">
 			{#if uiState.applyingTheme}
-				<div class="flex items-center justify-center">
-					<p>Applying theme. Do <b>NOT</b> close this window</p>
+				<div class="flex flex-col items-center w-full justify-center h-screen">
+					<PaletteIcon class="h-14 mb-8" />
+					<p>Applying theme. Do <b>NOT</b> close this window.</p>
 				</div>
 			{:else}
 				<Input value={uiState.searchText} placeholder="Search themes" on:input={onSearchInput} />
