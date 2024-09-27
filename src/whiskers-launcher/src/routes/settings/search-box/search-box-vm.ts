@@ -13,7 +13,7 @@ export async function init() {
 	currentState.settings = await getSettings();
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =================== Intents ====================
@@ -21,7 +21,7 @@ export async function init() {
 export function onSetSplitResults(split: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.split_results = split.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -29,7 +29,7 @@ export function onSetSplitResults(split: CustomEvent<boolean>) {
 export function onSetShowSearchIcon(show: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.show_search_icon = show.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -37,7 +37,7 @@ export function onSetShowSearchIcon(show: CustomEvent<boolean>) {
 export function onSetShowSettingsIcon(show: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.show_settings_icon = show.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -45,7 +45,7 @@ export function onSetShowSettingsIcon(show: CustomEvent<boolean>) {
 export function onSetShowPlaceholder(show: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.show_placeholder = show.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -53,7 +53,7 @@ export function onSetShowPlaceholder(show: CustomEvent<boolean>) {
 export function onSetAccentSearchBorder(set_accent: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.accent_search_border = set_accent.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -61,7 +61,7 @@ export function onSetAccentSearchBorder(set_accent: CustomEvent<boolean>) {
 export function onSetHideOnBlur(hide: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.hide_on_blur = hide.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -69,7 +69,7 @@ export function onSetHideOnBlur(hide: CustomEvent<boolean>) {
 export function onSetBorderRadius(radius: CustomEvent<number>) {
 	let currentState = get(state);
 	currentState.settings.border_radius = radius.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -77,7 +77,7 @@ export function onSetBorderRadius(radius: CustomEvent<number>) {
 export function onSetBorderWidth(width: CustomEvent<number>) {
 	let currentState = get(state);
 	currentState.settings.border_width = width.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -96,7 +96,7 @@ export async function onSelectWallpaper() {
 	if (path) {
         let currentState = get(state);
         currentState.settings.wallpaper = path as string;
-        state.update(() => currentState);
+        state.set(currentState);
 
         writeSettings(currentState.settings);
 	}
@@ -105,7 +105,7 @@ export async function onSelectWallpaper() {
 export function onClearWallpaper() {
     let currentState = get(state);
     currentState.settings.wallpaper = null;
-    state.update(() => currentState);
+    state.set(currentState);
 
     writeSettings(currentState.settings);
 }

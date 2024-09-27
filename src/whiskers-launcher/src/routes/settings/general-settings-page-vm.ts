@@ -38,7 +38,7 @@ export async function init() {
 		];
 	}
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // ================= Intents ======================
@@ -47,7 +47,7 @@ export async function init() {
 export function onSetFirstKey(key: CustomEvent<string>){
     let currentState = get(state);
     currentState.settings.first_key = key.detail;
-    state.update(() => currentState);
+    state.set(currentState);
 
     writeSettings(currentState.settings);
 }
@@ -56,7 +56,7 @@ export function onSetFirstKey(key: CustomEvent<string>){
 export function onSetSecondKey(key: CustomEvent<string | null>){
     let currentState = get(state);
     currentState.settings.second_key = key.detail;
-    state.update(() => currentState);
+    state.set(currentState);
 
     writeSettings(currentState.settings);
 }
@@ -65,7 +65,7 @@ export function onSetSecondKey(key: CustomEvent<string | null>){
 export function onSetThirdKey(key: CustomEvent<string>){
     let currentState = get(state);
     currentState.settings.third_key = key.detail;
-    state.update(() => currentState);
+    state.set(currentState);
 
     writeSettings(currentState.settings);
 }
@@ -74,7 +74,7 @@ export function onSetThirdKey(key: CustomEvent<string>){
 export function onSetScaling(scaling: CustomEvent<number>) {
 	let currentState = get(state);
 	currentState.settings.scaling = scaling.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -83,7 +83,7 @@ export function onSetScaling(scaling: CustomEvent<number>) {
 export function onSetShowRecentApps(show: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.show_recent_apps = show.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -92,7 +92,7 @@ export function onSetShowRecentApps(show: CustomEvent<boolean>) {
 export function onSetAutoStart(autoStart: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.auto_start = autoStart.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }

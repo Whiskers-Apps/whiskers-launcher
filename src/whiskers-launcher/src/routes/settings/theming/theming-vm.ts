@@ -24,7 +24,7 @@ export async function init() {
 	currentState.settings = await getSettings();
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =================== Intents ====================
@@ -35,7 +35,7 @@ async function refreshSettings() {
 
 	setFrameCSS(getThemeCss(currentState.settings));
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onOpenStore() {
@@ -63,7 +63,7 @@ export async function onImportTheme() {
 		invoke('get_theme_from_file', { path: path }).then(async (theme) => {
 			let currentState = get(state);
 			currentState.settings.theme = theme as Theme;
-			state.update(() => currentState);
+			state.set(currentState);
 
 			writeSettings(currentState.settings);
 			setFrameCSS(getThemeCss(currentState.settings));
@@ -88,7 +88,7 @@ export function onSetBackgroundColor(
 	let currentState = get(state);
 	currentState.settings.theme.background = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -100,7 +100,7 @@ export function onSetSecondaryColor(
 	let currentState = get(state);
 	currentState.settings.theme.secondary = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -112,7 +112,7 @@ export function onSetTertiaryColor(
 	let currentState = get(state);
 	currentState.settings.theme.tertiary = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -122,7 +122,7 @@ export function onSetAccentColor(event: Event & { currentTarget: EventTarget & H
 	let currentState = get(state);
 	currentState.settings.theme.accent = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -134,7 +134,7 @@ export function onSetWarningColor(
 	let currentState = get(state);
 	currentState.settings.theme.warning = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -144,7 +144,7 @@ export function onSetDangerColor(event: Event & { currentTarget: EventTarget & H
 	let currentState = get(state);
 	currentState.settings.theme.danger = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -156,7 +156,7 @@ export function onSetOnAccentColor(
 	let currentState = get(state);
 	currentState.settings.theme.on_accent = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -168,7 +168,7 @@ export function onSetOnDangerColor(
 	let currentState = get(state);
 	currentState.settings.theme.on_danger = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -178,7 +178,7 @@ export function onSetTextColor(event: Event & { currentTarget: EventTarget & HTM
 	let currentState = get(state);
 	currentState.settings.theme.text = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);
@@ -190,7 +190,7 @@ export function onSetSubTextColor(
 	let currentState = get(state);
 	currentState.settings.theme.sub_text = event.currentTarget.value;
 
-	state.update(() => currentState);
+	state.set(currentState);
 	setFrameCSS(getThemeCss(currentState.settings));
 
 	writeSettings(currentState.settings);

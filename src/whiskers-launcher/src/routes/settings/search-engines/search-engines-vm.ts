@@ -14,7 +14,7 @@ export async function init() {
 	currentState.settings = await getSettings();
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =================== Intents ====================
@@ -22,7 +22,7 @@ export async function init() {
 export function onSetSearchKeyword(keyword: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.settings.search_keyword = keyword.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -30,7 +30,7 @@ export function onSetSearchKeyword(keyword: CustomEvent<string>) {
 async function refreshSettings() {
 	let currentState = get(state);
 	currentState.settings = await getSettings();
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onAddSearchEngine() {
@@ -73,7 +73,7 @@ export function onSetDefaultSearchEngine(id: number) {
 
 	let currentState = get(state);
 	currentState.settings.default_search_engine = id;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }

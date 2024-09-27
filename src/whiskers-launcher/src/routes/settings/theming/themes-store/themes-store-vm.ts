@@ -34,12 +34,12 @@ export async function init() {
 	currentState.filteredStore = currentState.store;
 	currentState.displayedStore = currentState.store.slice(0, 12);
 
-	state.update(() => currentState);
+	state.set(currentState);
 
 	indexSelectValues();
 
 	currentState.loading = false;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	await axios
 		.get(
@@ -50,7 +50,7 @@ export async function init() {
 			currentState.filteredStore = currentState.store;
 			currentState.displayedStore = currentState.store.slice(0, 12);
 
-			state.update(() => currentState);
+			state.set(currentState);
 
 			indexSelectValues();
 
@@ -71,7 +71,7 @@ async function indexSelectValues() {
 	});
 
 	currentState.listingSelectValues = selectValues;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 async function search() {
@@ -81,7 +81,7 @@ async function search() {
 		currentState.filteredStore = currentState.store;
 		currentState.displayedStore = [...currentState.filteredStore.slice(0, 12)];
 
-		state.update(() => currentState);
+		state.set(currentState);
 		return;
 	}
 
@@ -95,7 +95,7 @@ async function search() {
 
 	currentState.displayedStore = currentState.filteredStore;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function getSelectValues(variants: ThemeStoreVariant[]): SelectValue[] {
@@ -126,14 +126,14 @@ export function onSelectAccent(theme_id: string, value_id: string) {
 
 	currentState.listingSelectValues = newListing;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function applyTheme(theme: ThemeStoreItem) {
 	try {
 		let currentState = get(state);
 		currentState.applyingTheme = true;
-		state.update(() => currentState);
+		state.set(currentState);
 
 		let repo = theme.file ? theme.file : getSelectValueId(theme.id);
 
@@ -163,7 +163,7 @@ export async function applyTheme(theme: ThemeStoreItem) {
 			.catch((error) => console.error(error))
 			.finally(() => {
 				currentState.applyingTheme = false;
-				state.update(() => currentState);
+				state.set(currentState);
 			});
 	} catch (error) {
 		console.error(error);
@@ -180,7 +180,7 @@ export async function goToPreviousPage() {
 		(currentState.page + 1) * 12
 	);
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function goToNextPage() {
@@ -193,13 +193,13 @@ export async function goToNextPage() {
 		(currentState.page + 1) * 12
 	);
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSearchInput(searchText: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.searchText = searchText.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	search();
 }

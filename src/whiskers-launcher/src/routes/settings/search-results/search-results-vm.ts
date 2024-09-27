@@ -16,7 +16,7 @@ export async function init() {
 	currentState.blacklist_apps = await invoke('get_blacklisted_apps');
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =================== Intents ====================
@@ -24,7 +24,7 @@ export async function init() {
 export function onSetHighlightSelectedBackground(highlight: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.highlight_selected_background = highlight.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -32,7 +32,7 @@ export function onSetHighlightSelectedBackground(highlight: CustomEvent<boolean>
 export function onSetShowAltHint(show: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.show_alt_hint = show.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -40,7 +40,7 @@ export function onSetShowAltHint(show: CustomEvent<boolean>) {
 export function onSetResultsCount(count: CustomEvent<number>) {
 	let currentState = get(state);
 	currentState.settings.results_count = count.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
@@ -58,7 +58,7 @@ export async function onOpenAddToBlacklistDialog() {
 	const unlisten = await listen('refresh-blacklist', async (_) => {
 		let currentState = get(state);
 		currentState.blacklist_apps = await invoke('get_blacklisted_apps');
-        state.update(() => currentState);
+        state.set(currentState);
         
 		unlisten();
 	});
@@ -77,7 +77,7 @@ export async function onOpenRemoveFromBlacklistDialog(id: string) {
 	const unlisten = await listen('refresh-blacklist', async (_) => {
 		let currentState = get(state);
         currentState.blacklist_apps = await invoke('get_blacklisted_apps');
-        state.update(() => currentState);
+        state.set(currentState);
 
 		unlisten();
 	});

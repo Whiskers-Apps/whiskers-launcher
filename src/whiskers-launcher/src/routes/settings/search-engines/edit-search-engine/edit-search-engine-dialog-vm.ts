@@ -44,7 +44,7 @@ export async function init(id: number) {
 
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // ================ Intents =============================
@@ -66,7 +66,7 @@ export async function getIcon() {
 		currentState.iconPath = path.toString();
 		currentState.convertedIconPath = `${convertFileSrc(path.toString())}?${Math.floor(Math.random() * 696969)}`;
 		
-		state.update(() => currentState);
+		state.set(currentState);
 	}
 }
 
@@ -74,31 +74,31 @@ export function onClearIcon() {
 	let currentState = get(state);
 	currentState.iconPath = null;
 	currentState.convertedIconPath = null;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetTintIcon(tint: CustomEvent<boolean>){
 	let currentState = get(state);
 	currentState.tintIcon = tint.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetKeyword(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.keyword = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetName(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.name = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetSearchQuery(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.searchQuery = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onSave() {
