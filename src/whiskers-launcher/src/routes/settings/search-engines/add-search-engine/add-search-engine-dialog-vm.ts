@@ -39,38 +39,38 @@ export async function onSelectIcon() {
 		currentState.convertedIconPath = `${convertFileSrc(path.toString())}?${Math.floor(Math.random() * 696969)}`;
 	}
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onClearIcon() {
 	let currentState = get(state);
 	currentState.iconPath = null;
 	currentState.convertedIconPath = null;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetTintIcon(event: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.tintIcon = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetKeyword(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.keyword = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetName(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.name = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onSetSearchQuery(event: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.searchQuery = event.detail;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function addSearchEngine() {

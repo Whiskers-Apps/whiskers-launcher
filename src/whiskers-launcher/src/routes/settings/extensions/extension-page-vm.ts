@@ -25,7 +25,7 @@ export async function init() {
 	currentState.extensions = await invoke('get_extensions');
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =================== Intents ====================
@@ -65,7 +65,7 @@ async function reloadExtensions() {
 	await invoke('index_extensions');
 	let currentState = get(state);
 	currentState.extensions = await invoke('get_extensions');
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onReloadExtensions() {
@@ -125,7 +125,7 @@ export async function onUpdateSetting(extensionId: string, settingId: string, va
 	});
 
 	currentState.extensions = await invoke('get_extensions');
-	state.update(() => currentState);
+	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }

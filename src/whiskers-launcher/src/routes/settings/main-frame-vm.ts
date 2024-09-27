@@ -13,11 +13,11 @@ export async function init() {
 
 	currentState.css = getThemeCss(settings);
     currentState.loading = false;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function setFrameCSS(css: string){
 	let currentState = get(state);
     currentState.css = css;
-    state.update(() => currentState);
+    state.set(currentState);
 }

@@ -3,9 +3,31 @@
 	import SearchIcon from '$lib/icons/search.svg?component';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
-	import { getColorFilter, getIconPath, init, onBlur, onOpenSettings, onRunAction, onSearchInput, onSetSelectedIndex, state } from './search-vm';
+	import {
+		displayedResults,
+		getColorFilter,
+		getIconPath,
+		init,
+		onBlur,
+		onOpenSettings,
+		onRunAction,
+		onSearchInput,
+		onSetSelectedIndex,
+		resultOffset,
+		results,
+		searchText,
+		selectedIndex,
+		showConfirmationBox,
+		state
+	} from './search-vm';
 
 	$: uiState = $state;
+	$: resultsState = $results;
+	$: displayedResultsState = $displayedResults;
+	$: resultsOffsetState = $resultOffset;
+	$: selectedIndexState = $selectedIndex;
+	$: searchTextState = $searchText;
+	$: showConfirmationBoxState = $showConfirmationBox;
 
 	onMount(async () => {
 		init();
@@ -36,7 +58,7 @@
 						class=" w-full outline-none flex-grow bg-transparent search-text"
 						type="text"
 						placeholder={uiState.settings.show_placeholder ? 'Search apps, extensions, web' : ''}
-						value={uiState.searchText}
+						value={searchTextState}
 						on:input={onSearchInput}
 						autofocus
 					/>
@@ -58,15 +80,15 @@
 				{/if}
 
 				<div
-					class={`overflow-hidden ${uiState.settings.split_results ? ` bg-background search-round  ${uiState.displayedResults.length > 0 ? 'search-border' : ''}` : ''}`}
+					class={`overflow-hidden ${uiState.settings.split_results ? ` bg-background search-round  ${displayedResultsState.length > 0 ? 'search-border' : ''}` : ''}`}
 				>
-					{#each uiState.displayedResults as result, index}
+					{#each displayedResultsState as result, index}
 						<!-- svelte-ignore a11y-no-static-element-interactions -->
 						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 						<button
-							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === uiState.selectedIndex ? 'highlight-result' : ''}`}
-							on:mouseover={() => (onSetSelectedIndex(index))}
-							on:focus={() => (onSetSelectedIndex(index))}
+							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === selectedIndexState ? 'highlight-result' : ''}`}
+							on:mouseover={() => onSetSelectedIndex(index)}
+							on:focus={() => onSetSelectedIndex(index)}
 							on:click={onRunAction}
 						>
 							{#if result.result_type === 'Text'}
@@ -80,13 +102,13 @@
 										/>
 									{/if}
 									<div
-										class={`flex-grow one-line text-start result-title ${uiState.selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title ${selectedIndexState === index ? 'text-accent' : ' text-text'}`}
 									>
 										{result.text?.text}
 									</div>
 									{#if uiState.settings.show_alt_hint}
 										<div
-											class={`result-alt ${uiState.selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
+											class={`result-alt ${selectedIndexState === index ? 'text-accent' : ' text-sub-text'}`}
 										>
 											Alt + {index + 1}
 										</div>
@@ -104,7 +126,7 @@
 										/>
 									{/if}
 									<div
-										class={`flex-grow one-line text-start result-title flex flex-col ${uiState.selectedIndex === index ? 'text-accent' : ' text-text'}`}
+										class={`flex-grow one-line text-start result-title flex flex-col ${selectedIndexState === index ? 'text-accent' : ' text-text'}`}
 									>
 										<p class="result-title one-line">{result.title_and_description?.title}</p>
 										<p class="result-description one-line">
@@ -113,7 +135,7 @@
 									</div>
 									{#if uiState.settings.show_alt_hint}
 										<div
-											class={`result-alt ${uiState.selectedIndex === index ? 'text-accent' : ' text-sub-text'}`}
+											class={`result-alt ${selectedIndexState === index ? 'text-accent' : ' text-sub-text'}`}
 										>
 											Alt + {index + 1}
 										</div>
@@ -123,11 +145,11 @@
 							{#if result.result_type === 'Divider'}
 								<div class="p-2 pt-4 pb-4 w-full">
 									<div
-										class={`result-divider rounded-full ${uiState.selectedIndex === index ? 'bg-accent' : 'bg-tertiary'}`}
+										class={`result-divider rounded-full ${selectedIndexState === index ? 'bg-accent' : 'bg-tertiary'}`}
 									></div>
 								</div>
 							{/if}
-							{#if uiState.showConfirmationBox && uiState.selectedIndex === index}
+							{#if showConfirmationBoxState && selectedIndexState === index}
 								<div
 									class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2"
 								>

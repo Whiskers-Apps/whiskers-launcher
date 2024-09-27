@@ -31,7 +31,7 @@ export async function init() {
 	currentState.displayedStore = currentState.store.slice(0, 12);
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 
 	axios
 		.get(
@@ -44,7 +44,7 @@ export async function init() {
 
 			invoke('write_extensions_store', { store: currentState.store });
 
-			state.update(() => currentState);
+			state.set(currentState);
 		})
 		.catch((error) => console.error(error));
 }
@@ -59,7 +59,7 @@ function search() {
 		currentState.filteredStore = currentState.store;
 		currentState.displayedStore = currentState.filteredStore.slice(0, 12);
 
-		state.update(() => currentState);
+		state.set(currentState);
 		return;
 	}
 
@@ -77,14 +77,14 @@ function search() {
 
 	currentState.displayedStore = currentState.filteredStore;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onInstallExtension(repo: string) {
 	try {
 		let currentState = get(state);
 		currentState.installingExtension = true;
-		state.update(() => currentState);
+		state.set(currentState);
 
 		await invoke('clone_extension', { url: repo });
 		currentState.installingExtension = false;
@@ -98,7 +98,7 @@ export async function onInstallExtension(repo: string) {
 
 		currentState.store = await invoke('get_extensions_store');
 
-		state.update(() => currentState);
+		state.set(currentState);
 
 		search();
 
@@ -113,7 +113,7 @@ export function onSearchInput(search_text: CustomEvent<string>) {
 
 	currentState.searchText = search_text.detail;
 
-	state.update(() => currentState);
+	state.set(currentState);
 
 	search();
 }
@@ -128,7 +128,7 @@ export async function onGoToPreviousPage() {
 		(currentState.page + 1) * 12
 	);
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onGoToNextPage() {
@@ -141,5 +141,5 @@ export async function onGoToNextPage() {
 		(currentState.page + 1) * 12
 	);
 
-	state.update(() => currentState);
+	state.set(currentState);
 }

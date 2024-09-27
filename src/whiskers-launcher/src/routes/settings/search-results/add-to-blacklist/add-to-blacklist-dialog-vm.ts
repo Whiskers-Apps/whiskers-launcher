@@ -14,7 +14,7 @@ export async function init() {
 	let currentState = get(state);
 	currentState.whiteListedApps = await invoke('get_whitelisted_apps');
 	currentState.loading = false;
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export function onAppClick(app: App) {
@@ -26,7 +26,7 @@ export function onAppClick(app: App) {
 		currentState.selectedApps.push(app.id);
 	}
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onAddAppsToBlacklist() {

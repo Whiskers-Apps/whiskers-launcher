@@ -20,7 +20,7 @@ export async function init() {
 	currentState.extensionsCount = extensions.length;
 	currentState.loading = false;
 
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 // =============== Intents ===================== //

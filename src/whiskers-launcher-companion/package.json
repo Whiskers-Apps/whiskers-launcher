@@ -1,6 +1,6 @@
 {
   "name": "whiskers-launcher-companion",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "private": true,
   "scripts": {
     "dev": "vite dev",

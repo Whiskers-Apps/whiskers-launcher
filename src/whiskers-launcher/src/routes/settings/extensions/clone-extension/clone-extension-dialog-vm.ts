@@ -18,14 +18,14 @@ export function onSetUrl(url: CustomEvent<string>) {
 	let currentState = get(state);
 	currentState.url = url.detail;
 	currentState.disableCloneButton = !urlRegex.test(currentState.url);
-	state.update(() => currentState);
+	state.set(currentState);
 }
 
 export async function onClone() {
 	let currentState = get(state);
 	currentState.disableCloneButton = true;
 	currentState.cloning = true;
-	state.update(() => currentState);
+	state.set(currentState);
 
 	await invoke('clone_extension', { url: currentState.url });
 
