@@ -459,7 +459,7 @@ async fn open_dialog(action: DialogAction, window: Window, app: AppHandle) {
     WindowBuilder::new(
         &app,
         "extension-dialog",
-        tauri::WindowUrl::App("/dialogs/extension-dialog".parse().unwrap()),
+        tauri::WindowUrl::App("/extension-dialog".parse().unwrap()),
     )
     .title(&action.title)
     .inner_size(800.0, 700.0)
