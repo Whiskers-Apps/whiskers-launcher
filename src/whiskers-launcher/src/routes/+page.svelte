@@ -13,8 +13,6 @@
 		onRunAction,
 		onSearchInput,
 		onSetSelectedIndex,
-		resultOffset,
-		results,
 		searchText,
 		selectedIndex,
 		showConfirmationBox,
@@ -22,14 +20,12 @@
 	} from './search-vm';
 
 	$: uiState = $state;
-	$: resultsState = $results;
 	$: displayedResultsState = $displayedResults;
-	$: resultsOffsetState = $resultOffset;
 	$: selectedIndexState = $selectedIndex;
 	$: searchTextState = $searchText;
 	$: showConfirmationBoxState = $showConfirmationBox;
 
-	onMount(async () => {
+	onMount(() => {
 		init();
 	});
 </script>

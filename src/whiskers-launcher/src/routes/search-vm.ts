@@ -16,18 +16,20 @@ export const state = writable({
 	settings: {} as Settings
 });
 
-export const results = writable<WLResult[]>([]);
+let results: WLResult[] = [];
 export const displayedResults = writable<WLResult[]>([]);
-export const resultOffset = writable(0);
+let resultOffset = 0;
 export const selectedIndex = writable(0);
 export const searchText = writable('');
 export const showConfirmationBox = writable(false);
 
 export async function init() {
 	let currentState = get(state);
+
 	currentState.settings = await getSettings();
 	currentState.css = getThemeCss(currentState.settings);
 	currentState.loading = false;
+	
 	state.set(currentState);
 
 	onSearch();
@@ -70,11 +72,10 @@ window.addEventListener('keydown', (event) => {
 // =============== Intents ===================
 
 export async function onSearch() {
-	let currentSearchText = get(searchText);
+	results = await invoke('get_results', { text: get(searchText) });
 
-	results.set(await invoke('get_results', { text: currentSearchText }));
 	selectedIndex.set(0);
-	resultOffset.set(0);
+	resultOffset = 0;
 
 	cutResults();
 }
@@ -87,12 +88,10 @@ export async function onSearchInput(
 }
 
 export async function cutResults() {
-	let currentOffset = get(resultOffset);
-	let currentResults = get(results);
 	let currentSettings = get(state).settings;
 
 	displayedResults.set(
-		currentResults.slice(currentOffset, currentOffset + currentSettings.results_count)
+		results.slice(resultOffset, resultOffset + currentSettings.results_count)
 	);
 }
 
@@ -116,8 +115,6 @@ export async function onOpenSettings(event: Event | undefined = undefined) {
 
 export async function onGoToPreviousResult() {
 	let currentSelectedIndex = get(selectedIndex);
-	let currentResultOffset = get(resultOffset);
-	let currentResults = get(results);
 	let currentSettings = get(state).settings;
 
 	showConfirmationBox.set(false);
@@ -127,20 +124,20 @@ export async function onGoToPreviousResult() {
 		return;
 	}
 
-	if (currentResultOffset - 1 > 0) {
-		resultOffset.set(currentResultOffset - 1);
+	if (resultOffset - 1 > 0) {
+		resultOffset--;
 		cutResults();
 		return;
 	}
 
-	if (currentResultOffset === 0) {
-		if (currentResults.length < currentSettings.results_count) {
-			selectedIndex.set(currentResults.length - 1);
+	if (resultOffset === 0) {
+		if (results.length < currentSettings.results_count) {
+			selectedIndex.set(results.length - 1);
 			return;
 		}
 	}
 
-	resultOffset.set(currentResults.length - currentSettings.results_count);
+	resultOffset = results.length - currentSettings.results_count;
 	selectedIndex.set(currentSettings.results_count - 1);
 
 	cutResults();
@@ -149,8 +146,6 @@ export async function onGoToPreviousResult() {
 export async function onGoToNextResult() {
 	let currentSelectedIndex = get(selectedIndex);
 	let currentDisplayedResults = get(displayedResults);
-	let currentResultOffset = get(resultOffset);
-	let currentResults = get(results);
 	let currentSettings = get(state).settings;
 
 	showConfirmationBox.set(false);
@@ -160,20 +155,20 @@ export async function onGoToNextResult() {
 		return;
 	}
 
-	if (currentResultOffset + currentSelectedIndex < currentResults.length - 1) {
-		resultOffset.set(currentResultOffset + 1);
+	if (resultOffset + currentSelectedIndex < results.length - 1) {
+		resultOffset++;
 		cutResults();
 		return;
 	}
 
-	if (currentResults.length < currentSettings.results_count) {
-		if (currentSelectedIndex + 1 === currentResults.length) {
+	if (results.length < currentSettings.results_count) {
+		if (currentSelectedIndex + 1 === results.length) {
 			selectedIndex.set(0);
 			return;
 		}
 	}
 
-	resultOffset.set(0);
+	resultOffset = 0;
 	selectedIndex.set(0);
 
 	cutResults();
@@ -216,8 +211,6 @@ export async function onRunAction() {
 export function onSetSelectedIndex(index: number) {
 	selectedIndex.set(index);
 }
-
-// =============== UI =====================
 
 export function getColorFilter(tint: string | null): string {
 	let currentSettings = get(state).settings;
