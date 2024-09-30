@@ -143,10 +143,10 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
                         .arg("-c")
                         .arg("./linux-extension")
                         .current_dir(&extension_dir)
-                        .output()
+                        .status()
                         .expect("Error running extension");
 
-                    if extension_run.status.success() {
+                    if extension_run.success() {
                         return get_extension_response().results;
                     }
                 }
