@@ -1,4 +1,7 @@
-use std::{env, fs, path::{Path, PathBuf}};
+use std::{
+    env, fs,
+    path::{Path, PathBuf}
+};
 
 use eval::eval;
 use sniffer_rs::sniffer::Sniffer;
@@ -36,11 +39,11 @@ use {
 };
 
 #[tauri::command]
-pub fn wallpaper_exists(path: PathBuf) -> bool{
-    return path.exists()
+pub fn wallpaper_exists(path: PathBuf) -> bool {
+    return path.exists();
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub async fn get_results(text: String) -> Vec<WLResult> {
     let settings = settings::get_settings();
     let mut results = Vec::<WLResult>::new();
@@ -85,7 +88,7 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
             .map(|a| get_app_result(a.clone()))
             .collect();
 
-        return app_results
+        return app_results;
     }
 
     let search = get_search(&text);
@@ -138,10 +141,10 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
                         .arg("-c")
                         .arg("./linux-extension")
                         .current_dir(&extension_dir)
-                        .output()
+                        .status()
                         .expect("Error running extension");
 
-                    if extension_run.status.success() {
+                    if extension_run.success() {
                         return get_extension_response().results;
                     }
                 }
@@ -153,10 +156,10 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
                         .arg("start /min windows-extension.exe")
                         .current_dir(&extension_dir)
                         .creation_flags(FLAG_NO_WINDOW)
-                        .output()
+                        .status()
                         .expect("Error running extension");
 
-                    if extension_run.status.success() {
+                    if extension_run.success() {
                         return get_extension_response().results;
                     }
                 }
@@ -165,6 +168,7 @@ pub async fn get_results(text: String) -> Vec<WLResult> {
     }
 
     let sniffer = Sniffer::new();
+    
 
     let apps = get_apps();
     let blacklist = settings.blacklist;
@@ -459,7 +463,7 @@ async fn open_dialog(action: DialogAction, window: Window, app: AppHandle) {
     WindowBuilder::new(
         &app,
         "extension-dialog",
-        tauri::WindowUrl::App("/dialogs/extension-dialog".parse().unwrap()),
+        tauri::WindowUrl::App("/extension-dialog".parse().unwrap()),
     )
     .title(&action.title)
     .inner_size(800.0, 700.0)

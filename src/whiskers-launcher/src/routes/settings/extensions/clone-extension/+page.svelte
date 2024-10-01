@@ -10,7 +10,7 @@
 
 <DialogFrame>
 	<div class=" gap-4 h-screen w-screen p-4 flex flex-col justify-center overflow-hidden">
-		{#if !uiState.cloning}
+		{#if uiState.cloning}
 			<div class="flex flex-col items-center justify-center h-screen">
 				<DownloadIcon class="h-14 mb-8" />
 				<p>Installing extension. Do <b>NOT</b> close this window.</p>

@@ -15,7 +15,7 @@
 
 <style>
 	.input {
-		background-color: var(--background);
+		background-color: var(--secondary);
 		border: 1px solid var(--tertiary);
 		padding: 8px;
 		border-radius: 6px;
