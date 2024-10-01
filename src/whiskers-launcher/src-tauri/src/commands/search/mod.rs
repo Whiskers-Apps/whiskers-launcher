@@ -1,8 +1,6 @@
 use std::{
     env, fs,
-    path::{Path, PathBuf},
-    thread,
-    time::Instant,
+    path::{Path, PathBuf}
 };
 
 use eval::eval;
