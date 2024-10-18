@@ -1,28 +1,24 @@
-import {
-	getSettings,
-	writeSettings,
-	type Extension,
-	type ExtensionSetting,
-	type Settings
-} from '$lib/settings/settings';
 import { invoke } from '@tauri-apps/api';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { get, writable } from 'svelte/store';
 import { WindowSizes } from '../../../utils';
 import { listen } from '@tauri-apps/api/event';
+import { getSettings, writeSettings, type ExtensionSetting, type Settings } from '$lib/features/settings/Settings';
+import type { ExtensionManifest, ExtensionManifestSelectOption, ExtensionManifestSetting } from '$lib/features/extensions/Extensions';
+import type { SelectValue } from '$lib/components/classes';
 
 export const state = writable({
 	loading: false,
 	settings: {} as Settings,
 	os: '',
-	extensions: [] as Extension[]
+	extensions: [] as ExtensionManifest[]
 });
 
 export async function init() {
 	let currentState = get(state);
 	currentState.settings = await getSettings();
-	currentState.os = await invoke('get_os');
-	currentState.extensions = await invoke('get_extensions');
+	currentState.os = await invoke('run_get_os');
+	currentState.extensions = await invoke('run_get_extensions');
 	currentState.loading = false;
 
 	state.set(currentState);
@@ -62,9 +58,9 @@ export async function onOpenCloneExtensionDialog() {
 }
 
 async function reloadExtensions() {
-	await invoke('index_extensions');
+	await invoke('run_index_extensions');
 	let currentState = get(state);
-	currentState.extensions = await invoke('get_extensions');
+	currentState.extensions = await invoke('run_get_extensions');
 	state.set(currentState);
 }
 
@@ -73,7 +69,7 @@ export function onReloadExtensions() {
 }
 
 export function onOpenExtensionDir(id: string) {
-	invoke('open_extension_dir', { id: id });
+	invoke('run_open_extension_dir', { id: id });
 }
 
 export async function onDeleteExtension(id: string) {
@@ -124,13 +120,13 @@ export async function onUpdateSetting(extensionId: string, settingId: string, va
 		}
 	});
 
-	currentState.extensions = await invoke('get_extensions');
+	currentState.extensions = await invoke('run_get_extensions');
 	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
 
-export function canShowSetting(extensionId: string, setting: ExtensionSetting): boolean {
+export function canShowSetting(extensionId: string, setting: ExtensionManifestSetting): boolean {
 	if (setting.os !== '*' && setting.os.toLowerCase() != get(state).os) {
 		return false;
 	}
@@ -146,4 +142,17 @@ export function canShowSetting(extensionId: string, setting: ExtensionSetting): 
 	}
 
 	return true;
+}
+
+export function getSelectValues(selectOptions: ExtensionManifestSelectOption[]): SelectValue[]{
+	let selectValues: SelectValue[] = [];
+
+	selectOptions.forEach(selectOption => {
+		selectValues.push({
+			id: selectOption.id,
+			value: selectOption.text
+		})
+	});
+
+	return selectValues
 }

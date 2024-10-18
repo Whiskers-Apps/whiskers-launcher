@@ -2,7 +2,6 @@
 	import PrimaryButton from '$lib/components/primary-button.svelte';
 	import QuestionIcon from '$lib/icons/question.svg?component';
 	import { onMount } from 'svelte';
-	import { type App } from '$lib/settings/settings';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import DialogFrame from '../../../dialog-frame.svelte';
 	import {

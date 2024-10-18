@@ -1,11 +1,4 @@
-import {
-	getSettings,
-	LAUNCH_FIRST_KEY_OPTIONS,
-	LAUNCH_SECOND_KEY_OPTIONS,
-	LAUNCH_THIRD_KEY_OPTIONS,
-	writeSettings,
-	type Settings
-} from '$lib/settings/settings';
+import { getSettings, LAUNCH_FIRST_KEY_OPTIONS, LAUNCH_SECOND_KEY_OPTIONS, LAUNCH_THIRD_KEY_OPTIONS, writeSettings, type Settings } from '$lib/features/settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { get, writable } from 'svelte/store';
 
@@ -25,8 +18,8 @@ export const state = writable({
 export async function init() {
 	let currentState = get(state);
 	currentState.settings = await getSettings();
-	currentState.isWayland = await invoke('is_wayland');
-	currentState.os = await invoke('get_os');
+	currentState.isWayland = await invoke('run_on_wayland');
+	currentState.os = await invoke('run_get_os');
 	currentState.loading = false;
 
 	if (currentState.os === 'windows') {
@@ -68,15 +61,6 @@ export function onSetThirdKey(key: CustomEvent<string>){
     state.set(currentState);
 
     writeSettings(currentState.settings);
-}
-
-/** Sets the scaling in settings */
-export function onSetScaling(scaling: CustomEvent<number>) {
-	let currentState = get(state);
-	currentState.settings.scaling = scaling.detail;
-	state.set(currentState);
-
-	writeSettings(currentState.settings);
 }
 
 /** Sets the show recent apps in settings */

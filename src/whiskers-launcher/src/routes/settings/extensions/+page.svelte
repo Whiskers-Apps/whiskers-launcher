@@ -1,7 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import MainFrame from '../main-frame.svelte';
-	import { canShowSetting, getExtensionSettingValue, init, onDeleteExtension, onOpenCloneExtensionDialog, onOpenExtensionDir, onOpenStore, onReloadExtensions, onUpdateSetting, state } from './extension-page-vm';
+	import {
+		canShowSetting,
+		getExtensionSettingValue,
+		getSelectValues,
+		init,
+		onDeleteExtension,
+		onOpenCloneExtensionDialog,
+		onOpenExtensionDir,
+		onOpenStore,
+		onReloadExtensions,
+		onUpdateSetting,
+		state
+	} from './extension-page-vm';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import FolderIcon from '$lib/icons/folder.svg?component';
 	import TrashIcon from '$lib/icons/trash.svg?component';
@@ -86,7 +98,7 @@
 												<div class=" text-sub-text">{setting.description}</div>
 
 												<Select
-													values={setting.select_options ?? []}
+													values={getSelectValues(setting.select_options ?? [])}
 													selectedValue={getExtensionSettingValue(extension.id, setting.id)}
 													on:selection={(event) => {
 														onUpdateSetting(extension.id, setting.id, event.detail.id);

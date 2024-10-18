@@ -1,9 +1,9 @@
-import { getSettings, type SearchEngine } from '$lib/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
 import { get, writable } from 'svelte/store';
 import { open } from '@tauri-apps/api/dialog';
+import { getSettings, type SearchEngine } from '$lib/features/settings/Settings';
 
 export const state = writable<{
 	loading: boolean;
@@ -113,7 +113,7 @@ export async function onSave() {
 		search_query: currentState.searchQuery
 	};
 
-	await invoke('update_search_engine', { engine: engine });
+	await invoke('run_update_search_engine', { engine: engine });
 	await emit('refresh-settings');
 	await emit('refresh-search-engines');
 

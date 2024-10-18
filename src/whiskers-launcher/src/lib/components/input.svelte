@@ -18,7 +18,7 @@
 		background-color: var(--secondary);
 		border: 1px solid var(--tertiary);
 		padding: 8px;
-		border-radius: 6px;
+		border-radius: 14px;
 		width: 100%;
 	}
 

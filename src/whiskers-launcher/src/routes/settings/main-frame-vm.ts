@@ -1,4 +1,5 @@
-import { getSettings, getThemeCss, type Settings } from '$lib/settings/settings';
+import { getSettings } from '$lib/features/settings/Settings';
+import { getThemeCss } from '$lib/features/theming/Theming';
 import { get, writable } from 'svelte/store';
 
 export const state = writable({

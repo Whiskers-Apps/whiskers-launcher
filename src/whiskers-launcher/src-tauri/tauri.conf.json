@@ -82,13 +82,13 @@
 		"windows": [
 			{
 				"maximizable": true,
-				"resizable": true,
+				"resizable": false,
 				"title": "Whiskers Launcher",
 				"decorations": false,
 				"transparent": true,
 				"alwaysOnTop": true,
-				"width": 1,
-				"height": 1
+				"width": 900,
+				"height": 800
 			}
 		]
 	}

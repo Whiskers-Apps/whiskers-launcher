@@ -1,8 +1,8 @@
 import { get, writable } from 'svelte/store';
-import { type App } from '$lib/settings/settings';
 import { invoke } from '@tauri-apps/api';
 import { emit } from '@tauri-apps/api/event';
 import { appWindow } from '@tauri-apps/api/window';
+import type { App } from '$lib/features/settings/Settings';
 
 export const state = writable({
 	loading: true,
@@ -12,7 +12,7 @@ export const state = writable({
 
 export async function init() {
 	let currentState = get(state);
-	currentState.whiteListedApps = await invoke('get_whitelisted_apps');
+	currentState.whiteListedApps = await invoke('run_get_whitelisted_apps');
 	currentState.loading = false;
 	state.set(currentState);
 }
@@ -33,7 +33,7 @@ export async function onAddAppsToBlacklist() {
 	let currentState = get(state);
 
 	for (const id in currentState.selectedApps) {
-		await invoke('add_to_blacklist', { id: currentState.selectedApps[id] });
+		await invoke('run_add_to_blacklist', { id: currentState.selectedApps[id] });
 	}
 
 	await emit('refresh-blacklist');

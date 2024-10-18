@@ -1,10 +1,3 @@
-import {
-	getSettings,
-	getThemeCss,
-	writeSettings,
-	type Settings,
-	type Theme
-} from '$lib/settings/settings';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { get, writable } from 'svelte/store';
 import { WindowSizes } from '../../../utils';
@@ -13,6 +6,8 @@ import { open, save } from '@tauri-apps/api/dialog';
 import { downloadDir } from '@tauri-apps/api/path';
 import { invoke } from '@tauri-apps/api';
 import { setFrameCSS } from '../main-frame-vm';
+import { getSettings, writeSettings, type Settings, type Theme } from '$lib/features/settings/Settings';
+import { getThemeCss } from '$lib/features/theming/Theming';
 
 export const state = writable({
 	loading: true,
@@ -60,7 +55,7 @@ export async function onImportTheme() {
 	});
 
 	if (path) {
-		invoke('get_theme_from_file', { path: path }).then(async (theme) => {
+		invoke('run_get_theme_from_file', { path: path }).then(async (theme) => {
 			let currentState = get(state);
 			currentState.settings.theme = theme as Theme;
 			state.set(currentState);
@@ -78,7 +73,7 @@ export async function onExportTheme() {
 	});
 
 	if (path) {
-		invoke('export_theme', { path: path });
+		invoke('run_export_theme', { path: path });
 	}
 }
 

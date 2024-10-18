@@ -1,9 +1,9 @@
 import { get, writable } from 'svelte/store';
 import { open } from '@tauri-apps/api/dialog';
 import { convertFileSrc, invoke } from '@tauri-apps/api/tauri';
-import type { SearchEngine } from '$lib/settings/settings';
 import { emit } from '@tauri-apps/api/event';
 import { appWindow } from '@tauri-apps/api/window';
+import type { SearchEngine } from '$lib/features/settings/Settings';
 
 export const state = writable<{
 	iconPath: string | null;
@@ -77,7 +77,7 @@ export async function addSearchEngine() {
 	let currentState = get(state);
 
 	let engine: SearchEngine = {
-		id: await invoke('get_new_search_engine_id'),
+		id: await invoke('run_get_new_search_engine_id'),
 		icon_path: currentState.iconPath,
 		tint_icon: currentState.tintIcon,
 		keyword: currentState.keyword,
@@ -85,7 +85,7 @@ export async function addSearchEngine() {
 		search_query: currentState.searchQuery
 	};
 
-	await invoke('add_search_engine', { engine: engine });
+	await invoke('run_add_search_engine', { engine: engine });
 
 	await emit('refresh-search-engines');
 

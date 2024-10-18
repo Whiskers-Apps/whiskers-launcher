@@ -1,4 +1,4 @@
-import { getSettings, type Extension, type Settings } from '$lib/settings/settings';
+import type { ExtensionManifest } from '$lib/features/extensions/Extensions';
 import { invoke } from '@tauri-apps/api';
 import { getVersion } from '@tauri-apps/api/app';
 import { open } from '@tauri-apps/api/shell';
@@ -13,7 +13,7 @@ export const state = writable({
 });
 
 export async function init() {
-	let extensions: Extension[] = await invoke('get_extensions');
+	let extensions: ExtensionManifest[] = await invoke('run_get_extensions');
 
 	let currentState = get(state);
 	currentState.appVersion = await getVersion();
