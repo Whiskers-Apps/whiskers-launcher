@@ -230,7 +230,10 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
 
         for engine in &settings.search_engines {
             if engine.id == settings.default_search_engine {
-                results.push(get_engine_result(engine.to_owned(), search_text));
+                return SearchResults::new_list_results(vec![get_engine_result(
+                    engine.to_owned(),
+                    search_text,
+                )]);
             }
         }
     }
