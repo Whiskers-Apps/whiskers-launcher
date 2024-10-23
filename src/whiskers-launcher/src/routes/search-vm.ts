@@ -319,6 +319,8 @@ function onGoLeft() {
 	let currentState = get(state);
 	let column = getIndexColumn(currentState.selectedIndex);
 
+	currentState.askConfirmation = false;
+
 	if (column - 1 >= 0) {
 		currentState.selectedIndex = currentState.selectedIndex - 1;
 		state.set(currentState);
@@ -331,6 +333,8 @@ function onGoRight() {
 	let currentState = get(state);
 	let column = getIndexColumn(currentState.selectedIndex);
 
+	currentState.askConfirmation = false;
+
 	if (column + 1 < 4 && currentState.selectedIndex + 1 < currentState.results.length) {
 		currentState.selectedIndex = currentState.selectedIndex + 1;
 		state.set(currentState);
@@ -340,7 +344,9 @@ function onGoRight() {
 }
 
 export async function onSelectResult(index: number) {
-	let currentState = get(state);
+	let newState = get(state);
+	newState.selectedIndex = index;
+	state.set(newState);
 
 	onRunAction();
 }

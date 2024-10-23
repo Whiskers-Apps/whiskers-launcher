@@ -1,4 +1,9 @@
-use std::{fs, path::PathBuf};
+use std::{
+    fs::{self},
+    path::PathBuf,
+    thread::sleep,
+    time::Duration,
+};
 
 use eval::eval;
 use sniffer_rs::sniffer::Sniffer;
@@ -12,7 +17,9 @@ use whiskers_launcher_core::{
         },
         extensions::{get_extension_dir, ExtensionRequest},
     },
-    paths::{get_api_dir, get_app_resources_icons_dir, get_recent_apps_path},
+    paths::{
+        get_api_dir, get_app_resources_icons_dir, get_extension_response_path, get_recent_apps_path,
+    },
     results::{
         CopyTextAction, OpenAppAction, OpenLinkAction, ResultAction, SearchResult, SearchResults,
     },
@@ -25,7 +32,7 @@ use std::process::Command;
 #[cfg(target_os = "windows")]
 use {
     std::os::windows::process::CommandExt, std::process::Command,
-    whiskers_launcher_rs::utils::FLAG_NO_WINDOW,
+    whiskers_launcher_core::utils::FLAG_NO_WINDOW,
 };
 
 #[tauri::command]
@@ -134,10 +141,10 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
                     fs::create_dir_all(get_api_dir()).expect("Error creating api directory");
                 }
 
-                write_extension_request(request);
-
                 let extension_dir = get_extension_dir(&extension_setting.extension_id)
                     .expect("Error getting extension directory");
+
+                write_extension_request(request);
 
                 #[cfg(target_os = "linux")]
                 {
@@ -166,15 +173,20 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
                         .arg("start /min windows-extension.exe")
                         .current_dir(&extension_dir)
                         .creation_flags(FLAG_NO_WINDOW)
-                        .status()
-                        .expect("Error running extension");
+                        .spawn()
+                        .expect("Error running extension")
+                        .wait()
+                        .expect("Error waiting");
 
                     if extension_run.success() {
-                        let json: String =
-                            String::from_utf8_lossy(&extension_run.stdout).to_string();
+                    
+                        // Add slight delay for windows to have time to actually read the new content
+                        sleep(Duration::from_millis(60));
+
+                        let bytes = fs::read(get_extension_response_path()).unwrap();
 
                         let extension_results: SearchResults =
-                            serde_json::from_str(&json).expect("Error parsing extension results");
+                            bincode::deserialize(&bytes).unwrap();
 
                         return extension_results;
                     }

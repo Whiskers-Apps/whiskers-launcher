@@ -100,7 +100,7 @@
 								>
 									{#if uiState.askConfirmation && uiState.selectedIndex === resultIndex}
 										<div
-											class="bg-accent text-on-accent font-semibold h-full w-full pl-2 pr-2 flex items-center justify-center"
+											class="bg-accent text-on-accent font-semibold h-full w-full pl-2 pr-2 flex items-center justify-center rounded-full"
 										>
 											<p>Confirm</p>
 										</div>

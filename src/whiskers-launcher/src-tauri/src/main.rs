@@ -4,14 +4,18 @@
 pub mod features;
 use std::env;
 
+//#[cfg(target_os = "windows")]
+//{}
+
 use features::actions::*;
+use features::form::*;
 use features::search::*;
 use features::settings::*;
 use features::window_managing::*;
-use features::form::*;
 
 use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
+use tauri::PhysicalPosition;
 use tauri::{Manager, RunEvent, WindowBuilder, WindowEvent};
 use whiskers_launcher_core::features::core::settings::get_settings;
 
@@ -79,7 +83,7 @@ fn main() {
 
             // Opens the window in the monitor where the cursor is and centers it
 
-            let monitors = main_window
+            let mut monitors = main_window
                 .available_monitors()
                 .expect("Error getting monitors");
 
@@ -88,17 +92,26 @@ fn main() {
                 .location()
                 .expect("Error getting cursor location");
 
-            println!("Cursor: {} {}", cursor_x, _cursor_y);
+            monitors.sort_by(|a, b| b.position().x.cmp(&a.position().x));
 
             for monitor in monitors.iter() {
-                let settings = get_settings();
-                
-                if settings.wallpaper.is_some() {
-                    main_window.set_fullscreen(true).unwrap();
-                    main_window.maximize().expect("Error maximizing window");
-                }
+                if monitor.position().x <= cursor_x {
+                    let settings = get_settings();
 
-                main_window.show().unwrap();
+                    main_window
+                        .set_position(PhysicalPosition::new(monitor.position().x, 0))
+                        .expect("Error moving window");
+
+                    if settings.wallpaper.is_some() {
+                        main_window.set_fullscreen(true).unwrap();
+                        main_window.maximize().expect("Error maximizing window");
+                    } else {
+                        main_window.center().expect("Error centering window");
+                    }
+
+                    main_window.show().unwrap();
+                    break;
+                }
             }
 
             main_window.show().expect("Error showing window");

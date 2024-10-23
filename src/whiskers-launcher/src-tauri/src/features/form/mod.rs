@@ -1,12 +1,10 @@
 use whiskers_launcher_core::{
     features::{
-        core::extensions::{get_form_request, write_extension_request, write_form_response},
-        extensions::{ExtensionRequest, FormResponse},
+        core::extensions::{get_form_request, write_form_response},
+        extensions::FormResponse,
     },
-    results::{OpenFormAction, RunExtensionAction},
+    results::OpenFormAction,
 };
-
-use crate::run_extension_action;
 
 #[tauri::command()]
 pub fn run_get_form_request() -> OpenFormAction {

@@ -1,3 +1,4 @@
+import type { SelectValue } from '$lib/components/classes';
 import { getSettings, LAUNCH_FIRST_KEY_OPTIONS, LAUNCH_SECOND_KEY_OPTIONS, LAUNCH_THIRD_KEY_OPTIONS, writeSettings, type Settings } from '$lib/features/settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { get, writable } from 'svelte/store';
@@ -37,27 +38,27 @@ export async function init() {
 // ================= Intents ======================
 
 /** Sets the first key in settings */
-export function onSetFirstKey(key: CustomEvent<string>){
+export function onSetFirstKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.first_key = key.detail;
+    currentState.settings.first_key = key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);
 }
 
 /** Sets the second key in settings */
-export function onSetSecondKey(key: CustomEvent<string | null>){
+export function onSetSecondKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.second_key = key.detail;
+    currentState.settings.second_key = key.detail.id === "-" ? null : key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);
 }
 
 /** Sets the third key in settings */
-export function onSetThirdKey(key: CustomEvent<string>){
+export function onSetThirdKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.third_key = key.detail;
+    currentState.settings.third_key = key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);

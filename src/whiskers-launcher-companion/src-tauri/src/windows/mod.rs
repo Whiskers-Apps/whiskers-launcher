@@ -6,7 +6,7 @@ use {
     std::os::windows::process::CommandExt,
     std::process::Command,
     std::thread,
-    whiskers_launcher_rs::{paths::get_app_dir, utils::FLAG_NO_WINDOW},
+    whiskers_launcher_core::{paths::get_app_dir, utils::FLAG_NO_WINDOW},
 };
 
 pub fn open_launcher_window() {

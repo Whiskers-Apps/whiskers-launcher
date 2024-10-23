@@ -14,12 +14,21 @@ use whiskers_launcher_core::{
         CopyImageAction, CopyTextAction, OpenAppAction, OpenFormAction, OpenLinkAction,
         ResultAction, RunExtensionAction,
     },
-    utils::{on_hyprland, on_linux, on_wayland},
+    utils::on_linux,
 };
+
+#[cfg(target_os = "windows")]
+use {
+    std::os::windows::process::CommandExt,
+    whiskers_launcher_core::utils::FLAG_NO_WINDOW
+};
+
+#[cfg(target_os = "linux")] 
+use whiskers_launcher_core::utils::{on_hyprland, on_wayland};
 
 use crate::get_recent_apps;
 
-#[tauri::command]
+ #[tauri::command]
 pub fn run_action(action: ResultAction, app: AppHandle, window: Window) {
     thread::spawn(move || match action.action_type {
         whiskers_launcher_core::results::ActionType::CopyText => {
@@ -88,7 +97,7 @@ fn copy_image(action: CopyImageAction) {
         let script = r#"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.Clipboard]::SetImage([System.Drawing.Image]::FromFile("%path%"))"#
-            .replace("%path%", &clip_path_str);
+            .replace("%path%", &action.image_path);
 
         powershell_script::run(&script).expect("Error executing copy command");
     }
