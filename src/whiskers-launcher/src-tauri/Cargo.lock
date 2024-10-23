@@ -4236,9 +4236,9 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "sniffer-rs"
-version = "1.0.3"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07e0d7bc947199e8711fe77791396184578a19238c826b81dfdcde4a8b5e405b"
+checksum = "d171566391d5e07f1b695956306f1548af64943e332195b58e7d66ebb7c49895"
 
 [[package]]
 name = "socket2"
@@ -5425,6 +5425,8 @@ checksum = "53a85b86a771b1c87058196170769dd264f66c0782acf1ae6cc51bfd64b39082"
 [[package]]
 name = "whiskers-launcher-core"
 version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b41769c27da3e516c8092a4d1c25cf39320fdafa8a98638d02537d1a5df087a9"
 dependencies = [
  "bincode",
  "dirs 5.0.1",

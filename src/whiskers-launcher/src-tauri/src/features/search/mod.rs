@@ -1,8 +1,6 @@
 use std::{
     fs::{self},
     path::PathBuf,
-    thread::sleep,
-    time::Duration,
 };
 
 use eval::eval;
@@ -17,9 +15,7 @@ use whiskers_launcher_core::{
         },
         extensions::{get_extension_dir, ExtensionRequest},
     },
-    paths::{
-        get_api_dir, get_app_resources_icons_dir, get_extension_response_path, get_recent_apps_path,
-    },
+    paths::{get_api_dir, get_app_resources_icons_dir, get_recent_apps_path},
     results::{
         CopyTextAction, OpenAppAction, OpenLinkAction, ResultAction, SearchResult, SearchResults,
     },
@@ -31,7 +27,10 @@ use std::process::Command;
 
 #[cfg(target_os = "windows")]
 use {
-    std::os::windows::process::CommandExt, std::process::Command,
+    std::os::windows::process::CommandExt,
+    std::process::Command,
+    std::{thread::sleep, time::Duration},
+    whiskers_launcher_core::paths::get_extension_response_path,
     whiskers_launcher_core::utils::FLAG_NO_WINDOW,
 };
 
@@ -179,7 +178,6 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
                         .expect("Error waiting");
 
                     if extension_run.success() {
-                    
                         // Add slight delay for windows to have time to actually read the new content
                         sleep(Duration::from_millis(60));
 
