@@ -1,6 +1,6 @@
 [package]
 name = "whiskers-launcher-companion"
-version = "2.2.3"
+version = "3.0.0"
 description = "Whiskers Launcher companion"
 authors = ["Whiskers-Apps", "lighttigerXIV"]
 license = "MIT"
@@ -22,7 +22,7 @@ tauri = { version = "1.7.2", features = [
     "protocol-all",
 ] }
 
-whiskers-launcher-core = "0.3.0"
+whiskers-launcher-core = "0.3.1"
 
 tokio = { version = "1.37.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }

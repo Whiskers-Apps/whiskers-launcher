@@ -4,6 +4,7 @@
 	import ChevronRightIcon from '$lib/icons/chevron-right.svg?component';
 	import ChevronLeftIcon from '$lib/icons/chevron-left.svg?component';
 	import PaletteIcon from '$lib/icons/palette.svg?component';
+	import CatIcon from '$lib/icons/cat.svg?component';
 	import { open } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
@@ -92,6 +93,9 @@
 			{/if}
 		</div>
 	{:else}
-		<div>Loading...</div>
+		<div class="bg-background h-screen w-full flex flex-col items-center justify-center">
+			<CatIcon class="h-20 w-20"/>
+			<p>Loading Store</p>
+		</div>
 	{/if}
 </DialogFrame>

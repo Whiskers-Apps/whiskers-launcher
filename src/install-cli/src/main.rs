@@ -14,9 +14,7 @@ use std::{os::unix::fs::PermissionsExt, process::Command};
 
 use rust_embed::Embed;
 use sysinfo::System;
-use whiskers_launcher_rs::paths::{
-    get_app_dir, get_app_resources_dir, get_app_resources_icons_dir,
-};
+use whiskers_launcher_core::paths::{get_app_dir, get_app_resources_dir, get_app_resources_icons_dir};
 
 //Imports only used in linux
 
