@@ -38,8 +38,8 @@
 			/>
 			
 			<ToggleSetting
-				title="Show Alt Hint"
-				description="When enabled, it shows the 'alt + key' hint in the results."
+				title="Show Shortcut Hint"
+				description="When enabled, it shows the 'alt/ctrl + key' hint in the results."
 				toggled={uiState.settings.show_launch_hint}
 				on:toggle={onSetShowLaunchHint}
 			/>
