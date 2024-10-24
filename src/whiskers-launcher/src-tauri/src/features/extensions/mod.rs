@@ -1,10 +1,10 @@
-use git2::{build::CheckoutBuilder, FetchOptions, RemoteCallbacks, Repository};
+use git2::Repository;
 use whiskers_launcher_core::features::extensions::get_extension_dir;
 
 #[tauri::command(async)]
 pub async fn update_extension(id: String) {
     let extension_dir = get_extension_dir(&id).expect("Error getting extension directory");
-    let repo = git2::Repository::discover(extension_dir).expect("Error getting repository");
+    let repo = Repository::discover(extension_dir).expect("Error getting repository");
 
     let branch_name = repo
         .head()
