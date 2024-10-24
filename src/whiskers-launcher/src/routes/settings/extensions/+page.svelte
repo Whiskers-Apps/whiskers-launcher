@@ -11,11 +11,13 @@
 		onOpenExtensionDir,
 		onOpenStore,
 		onReloadExtensions,
+		onUpdateExtension,
 		onUpdateSetting,
 		state
 	} from './extension-page-vm';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import FolderIcon from '$lib/icons/folder.svg?component';
+	import UpdateIcon from '$lib/icons/update.svg?component';
 	import TrashIcon from '$lib/icons/trash.svg?component';
 	import Input from '$lib/components/input.svelte';
 	import TextArea from '$lib/components/text-area.svelte';
@@ -46,13 +48,19 @@
 								class=" p-2 hover-bg-tertiary text-accent rounded-full hover-text-on-accent hover-bg-accent"
 								on:click={() => onOpenExtensionDir(extension.id)}
 							>
-								<FolderIcon class=" " width="24" height="24" />
+								<FolderIcon width="24" height="24" />
+							</button>
+							<button
+								class=" p-2 hover-bg-tertiary text-accent rounded-full hover-text-on-accent hover-bg-accent"
+								on:click={() => onUpdateExtension(extension.id)}
+							>
+								<UpdateIcon width="24" height="24" />
 							</button>
 							<button
 								class=" p-2 hover-bg-tertiary text-danger rounded-full hover-text-on-danger hover-bg-danger"
 								on:click={() => onDeleteExtension(extension.id)}
 							>
-								<TrashIcon class=" " width="24" height="24" />
+								<TrashIcon width="24" height="24" />
 							</button>
 						</div>
 						<p class=" text-sub-text">{extension.description}</p>

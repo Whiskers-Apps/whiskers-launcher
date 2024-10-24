@@ -12,6 +12,7 @@ use features::form::*;
 use features::search::*;
 use features::settings::*;
 use features::window_managing::*;
+use features::extensions::*;
 
 use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
@@ -51,7 +52,8 @@ fn main() {
             run_wallpaper_exists,
             run_get_form_request,
             run_write_form_response,
-            run_extension_action
+            run_extension_action,
+            update_extension
         ])
         .setup(|app| {
             let arguments: Vec<String> = env::args().collect();

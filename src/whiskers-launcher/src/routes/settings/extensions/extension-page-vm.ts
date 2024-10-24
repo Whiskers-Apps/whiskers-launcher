@@ -3,8 +3,17 @@ import { WebviewWindow } from '@tauri-apps/api/window';
 import { get, writable } from 'svelte/store';
 import { WindowSizes } from '../../../utils';
 import { listen } from '@tauri-apps/api/event';
-import { getSettings, writeSettings, type ExtensionSetting, type Settings } from '$lib/features/settings/Settings';
-import type { ExtensionManifest, ExtensionManifestSelectOption, ExtensionManifestSetting } from '$lib/features/extensions/Extensions';
+import {
+	getSettings,
+	writeSettings,
+	type ExtensionSetting,
+	type Settings
+} from '$lib/features/settings/Settings';
+import type {
+	ExtensionManifest,
+	ExtensionManifestSelectOption,
+	ExtensionManifestSetting
+} from '$lib/features/extensions/Extensions';
 import type { SelectValue } from '$lib/components/classes';
 
 export const state = writable({
@@ -54,6 +63,20 @@ export async function onOpenCloneExtensionDialog() {
 	const unlisten = await listen('refresh-extensions', async () => {
 		await reloadExtensions();
 		unlisten();
+	});
+}
+
+export function onUpdateExtension(id: string) {
+	invoke('update_extension', { id: id }).then(() => {
+		new WebviewWindow('extension-updated', {
+			url: 'settings/extensions/extension-updated-dialog',
+			title: 'Extension Updated',
+			height: WindowSizes.ConfirmDialog.height,
+			width: WindowSizes.ConfirmDialog.width,
+			resizable: false,
+			maximizable: false,
+			center: true
+		});
 	});
 }
 
@@ -144,15 +167,15 @@ export function canShowSetting(extensionId: string, setting: ExtensionManifestSe
 	return true;
 }
 
-export function getSelectValues(selectOptions: ExtensionManifestSelectOption[]): SelectValue[]{
+export function getSelectValues(selectOptions: ExtensionManifestSelectOption[]): SelectValue[] {
 	let selectValues: SelectValue[] = [];
 
-	selectOptions.forEach(selectOption => {
+	selectOptions.forEach((selectOption) => {
 		selectValues.push({
 			id: selectOption.id,
 			value: selectOption.text
-		})
+		});
 	});
 
-	return selectValues
+	return selectValues;
 }
