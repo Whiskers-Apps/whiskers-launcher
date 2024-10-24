@@ -33,7 +33,7 @@ export async function init() {
 
 	indexSelectValues();
 
-	currentState.loading = false;
+	currentState.loading = currentState.store.length === 0;
 	state.set(currentState);
 
 	await axios
@@ -44,6 +44,7 @@ export async function init() {
 			currentState.store = response.data;
 			currentState.filteredStore = currentState.store;
 			currentState.displayedStore = currentState.store.slice(0, 12);
+			currentState.loading = false;
 
 			state.set(currentState);
 

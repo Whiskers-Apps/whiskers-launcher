@@ -30,7 +30,7 @@ export async function init() {
 	currentState.store = currentState.store.filter((extension) => extension?.os?.includes(os));
 	currentState.filteredStore = currentState.store;
 	currentState.displayedStore = currentState.store.slice(0, 12);
-	currentState.loading = false;
+	currentState.loading = currentState.store.length === 0;
 
 	state.set(currentState);
 
@@ -42,6 +42,7 @@ export async function init() {
 			currentState.store = response.data;
 			currentState.filteredStore = currentState.store;
 			currentState.displayedStore = currentState.store.slice(0, 12);
+			currentState.loading = false;
 
 			invoke('run_write_extensions_store', { store: currentState.store });
 
