@@ -6,6 +6,10 @@ Whiskers Launcher is a keyboard app launcher for 🐧Linux and 🪟Windows that 
 The app is built in 🦀 rust and svelte using tauri to get the best possible performance (as a web app). 
 This app was born to fill the gap between a good launcher that could work with Linux and Windows.
 
+## Screenshots
+<img src="./previews/1.webp" width="400">
+<img src="./previews/2.webp" width="400">
+
 # Install
 ## Dependencies
 If you are using linux, the program requires a few dependencies.
