@@ -31,7 +31,7 @@
 <DialogFrame>
 	{#if !uiState.loading}
 		<div class=" bg-background p-4 h-screen w-full text-text space-y-4 flex flex-col">
-			{#if !uiState.applyingTheme}
+			{#if uiState.applyingTheme}
 				<div class="flex flex-col items-center justify-center h-screen">
 					<PaletteIcon class="h-14 w-14 mb-8" />
 					<p>Applying theme. Do <b>NOT</b> close this window.</p>
