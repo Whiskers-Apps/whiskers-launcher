@@ -19,6 +19,7 @@
 	import FolderIcon from '$lib/icons/folder.svg?component';
 	import UpdateIcon from '$lib/icons/update.svg?component';
 	import TrashIcon from '$lib/icons/trash.svg?component';
+	import CatIcon from '$lib/icons/cat.svg?component';
 	import Input from '$lib/components/input.svelte';
 	import TextArea from '$lib/components/text-area.svelte';
 	import Toggle from '$lib/components/toggle.svelte';
@@ -33,12 +34,18 @@
 
 <MainFrame>
 	{#if !uiState.loading}
-		<div class="space-y-8">
+		<div class="space-y-8 flex flex-col">
 			<div class="flex">
 				<SecondaryButton text="Extensions Store" on:click={onOpenStore} />
 				<SecondaryButton text="Git Clone" on:click={onOpenCloneExtensionDialog} />
 				<SecondaryButton text="Reload" on:click={onReloadExtensions} />
 			</div>
+			{#if uiState.extensions.length === 0}
+				<div class="w-full flex flex-col items-center pt-8">
+					<CatIcon class="h-20 w-20"/>
+					<p>No Extensions</p>
+				</div>
+			{/if}
 			<div class=" space-y-8">
 				{#each uiState.extensions as extension}
 					<div>

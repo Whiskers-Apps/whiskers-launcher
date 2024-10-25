@@ -193,14 +193,17 @@ pub async fn run_export_theme(path: String) {
 #[tauri::command]
 pub async fn run_clone_extension(url: String) {
     let url_split: Vec<&str> = url.split("/").collect();
+    let user = url_split[3].to_lowercase();
     let mut repo_name = url_split[url_split.len() - 1].to_owned();
 
     if repo_name.ends_with(".git") {
         repo_name = repo_name.trim_end_matches(".git").to_owned();
     }
 
+    let folder_name = format!("{user}-{repo_name}");
+
     let mut path = get_extensions_dir();
-    path.push(repo_name);
+    path.push(folder_name);
 
     Repository::clone(&url, path).expect("Error cloning repo");
 
