@@ -11,7 +11,7 @@
 
 {#if !uiState.loading}
 	{@html uiState.css}
-    <div class="bg-background text-text">
+    <div class="bg-background text-text ">
         <slot></slot>
     </div>
 {/if}

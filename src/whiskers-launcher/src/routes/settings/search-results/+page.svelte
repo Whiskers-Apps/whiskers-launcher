@@ -2,20 +2,21 @@
 	import { onMount } from 'svelte';
 	import MainFrame from '../main-frame.svelte';
 	import {
+	getLaunchKeys,
 		init,
 		onOpenAddToBlacklistDialog,
 		onOpenRemoveFromBlacklistDialog,
-		onSetHighlightSelectedBackground,
-		onSetResultsCount,
-		onSetShowAltHint,
+		onSetLaunchKey,
+		onSetShowAppsAsGrid,
+		onSetShowLaunchHint,
 		state
 	} from './search-results-vm';
 	import ToggleSetting from '$lib/components/toggle-setting.svelte';
-	import SliderSetting from '$lib/components/slider-setting.svelte';
 	import PlusIcon from '$lib/icons/plus.svg?component';
 	import MinusIcon from '$lib/icons/minus.svg?component';
 	import QuestionIcon from '$lib/icons/question.svg?component';
 	import { convertFileSrc } from '@tauri-apps/api/tauri';
+	import SelectSetting from '$lib/components/select-setting.svelte';
 
 	$: uiState = $state;
 
@@ -27,28 +28,27 @@
 <MainFrame>
 	{#if !uiState.loading}
 		<div class="space-y-8">
+
+			<SelectSetting
+				values={getLaunchKeys()}
+				title="Launch Key"
+				description="Shortcut key"
+				selectedValue={uiState.settings.launch_key}
+				on:selection={onSetLaunchKey}
+			/>
+			
 			<ToggleSetting
-				title="Highlight Background"
-				description="When enabled, it changes the background color of the selected result."
-				toggled={uiState.settings.highlight_selected_background}
-				on:toggle={onSetHighlightSelectedBackground}
+				title="Show Shortcut Hint"
+				description="When enabled, it shows the 'alt/ctrl + key' hint in the results."
+				toggled={uiState.settings.show_launch_hint}
+				on:toggle={onSetShowLaunchHint}
 			/>
 
 			<ToggleSetting
-				title="Show Alt Hint"
-				description="When enabled, it shows the 'alt + key' hint in the results."
-				toggled={uiState.settings.show_alt_hint}
-				on:toggle={onSetShowAltHint}
-			/>
-
-			<SliderSetting
-				title={`Results Count (${uiState.settings.results_count})`}
-				description="The amount of results to show."
-				min={2}
-				max={9}
-				step={1}
-				value={uiState.settings.results_count}
-				on:slide={onSetResultsCount}
+				title="Grid"
+				description="Show apps as a grid"
+				toggled={uiState.settings.show_apps_as_grid}
+				on:toggle={onSetShowAppsAsGrid}
 			/>
 
 			<div class="card">

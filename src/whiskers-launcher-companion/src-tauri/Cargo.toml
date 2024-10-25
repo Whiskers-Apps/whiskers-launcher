@@ -1,6 +1,6 @@
 [package]
 name = "whiskers-launcher-companion"
-version = "2.2.3"
+version = "3.0.0"
 description = "Whiskers Launcher companion"
 authors = ["Whiskers-Apps", "lighttigerXIV"]
 license = "MIT"
@@ -8,37 +8,25 @@ repository = "https://github.com/Whiskers-Apps/whiskers-launcher/"
 edition = "2021"
 rust-version = "1.60"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.5.2", features = [] }
+tauri-build = { version = "1.5.5", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.3", features = [
+tauri = { version = "1.7.2", features = [
     "global-shortcut-all",
     "system-tray",
     "fs-all",
     "protocol-all",
 ] }
 
-#whiskers-launcher-rs = { path = "/home/lighttigerxiv/Projects/Cli/whiskers-launcher-rs" }
-#whiskers-launcher-rs = { path = "C:\\Users\\lighttigerXIV\\Projects\\WhiskersApps\\whiskers-launcher-rs" }
-whiskers-launcher-rs = { git = "https://github.com/Whiskers-Apps/whiskers-launcher-rs" }
-
+whiskers-launcher-core = "0.3.2"
 tokio = { version = "1.37.0", features = ["full"] }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 bincode = "1.3.3"
 walkdir = "2.5.0"
-
-[target.'cfg(target_os = "linux")'.dependencies]
-freedesktop-desktop-entry = "0.5.0"
-tux-icons = "0.2.2"
-
-[target.'cfg(target_os = "windows")'.dependencies]
-lnk = "0.5.1"
-powershell_script = "1.1.0"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem and the built-in dev server is disabled.

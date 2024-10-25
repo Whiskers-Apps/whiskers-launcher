@@ -1,11 +1,5 @@
-import {
-	getSettings,
-	LAUNCH_FIRST_KEY_OPTIONS,
-	LAUNCH_SECOND_KEY_OPTIONS,
-	LAUNCH_THIRD_KEY_OPTIONS,
-	writeSettings,
-	type Settings
-} from '$lib/settings/settings';
+import type { SelectValue } from '$lib/components/classes';
+import { getSettings, LAUNCH_FIRST_KEY_OPTIONS, LAUNCH_SECOND_KEY_OPTIONS, LAUNCH_THIRD_KEY_OPTIONS, writeSettings, type Settings } from '$lib/features/settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { get, writable } from 'svelte/store';
 
@@ -25,8 +19,8 @@ export const state = writable({
 export async function init() {
 	let currentState = get(state);
 	currentState.settings = await getSettings();
-	currentState.isWayland = await invoke('is_wayland');
-	currentState.os = await invoke('get_os');
+	currentState.isWayland = await invoke('run_on_wayland');
+	currentState.os = await invoke('run_get_os');
 	currentState.loading = false;
 
 	if (currentState.os === 'windows') {
@@ -44,39 +38,30 @@ export async function init() {
 // ================= Intents ======================
 
 /** Sets the first key in settings */
-export function onSetFirstKey(key: CustomEvent<string>){
+export function onSetFirstKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.first_key = key.detail;
+    currentState.settings.first_key = key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);
 }
 
 /** Sets the second key in settings */
-export function onSetSecondKey(key: CustomEvent<string | null>){
+export function onSetSecondKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.second_key = key.detail;
+    currentState.settings.second_key = key.detail.id === "-" ? null : key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);
 }
 
 /** Sets the third key in settings */
-export function onSetThirdKey(key: CustomEvent<string>){
+export function onSetThirdKey(key: CustomEvent<SelectValue>){
     let currentState = get(state);
-    currentState.settings.third_key = key.detail;
+    currentState.settings.third_key = key.detail.id;
     state.set(currentState);
 
     writeSettings(currentState.settings);
-}
-
-/** Sets the scaling in settings */
-export function onSetScaling(scaling: CustomEvent<number>) {
-	let currentState = get(state);
-	currentState.settings.scaling = scaling.detail;
-	state.set(currentState);
-
-	writeSettings(currentState.settings);
 }
 
 /** Sets the show recent apps in settings */

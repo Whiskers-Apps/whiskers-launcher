@@ -1,29 +1,22 @@
 <script lang="ts">
-	import SettingsIcon from '$lib/icons/settings.svg?component';
-	import SearchIcon from '$lib/icons/search.svg?component';
-	import { convertFileSrc } from '@tauri-apps/api/tauri';
 	import { onMount } from 'svelte';
 	import {
-		displayedResults,
+		colorFilter,
 		getColorFilter,
 		getIconPath,
+		getMainClasses,
 		init,
-		onBlur,
 		onOpenSettings,
-		onRunAction,
 		onSearchInput,
-		onSetSelectedIndex,
-		searchText,
-		selectedIndex,
-		showConfirmationBox,
+		onSelectResult,
 		state
 	} from './search-vm';
+	import SearchIcon from '$lib/icons/search.svg?component';
+	import SettingsIcon from '$lib/icons/settings.svg?component';
+	import CatIcon from '$lib/icons/cat.svg?component';
 
 	$: uiState = $state;
-	$: displayedResultsState = $displayedResults;
-	$: selectedIndexState = $selectedIndex;
-	$: searchTextState = $searchText;
-	$: showConfirmationBoxState = $showConfirmationBox;
+	$: accentColorFilter = $colorFilter;
 
 	onMount(() => {
 		init();
@@ -33,128 +26,107 @@
 <div>
 	{#if !uiState.loading}
 		{@html uiState.css}
-		<!-- svelte-ignore a11y-click-events-have-key-events -->
-		<!-- svelte-ignore a11y-no-static-element-interactions -->
-		<div
-			class={`h-screen overflow-hidden flex justify-center text-text pt-16 wallpaper`}
-			on:click={onBlur}
-		>
+		<div class={getMainClasses()}>
 			<div
-				class={`search-box-width h-fit search-round overflow-hidden ${uiState.settings.split_results ? '' : 'search-border bg-background'}`}
+				class="bg-background p-3 w-full h-screen text-text flex flex-col max-w-[900px] max-h-[800px] round search-border"
 			>
-				<div
-					class={`flex p-3 gap-2 search-round ${uiState.settings.split_results ? 'search-border bg-background' : ''}`}
-				>
+				<div class="p-4 bg-secondary w-full rounded-full flex items-center">
 					{#if uiState.settings.show_search_icon}
-						<SearchIcon class=" search-icon-size text-accent" />
+						<SearchIcon class="w-5 h-5 mr-4" />
 					{/if}
-
 					<!-- svelte-ignore a11y-autofocus -->
 					<input
-						class=" w-full outline-none flex-grow bg-transparent search-text"
-						type="text"
-						placeholder={uiState.settings.show_placeholder ? 'Search apps, extensions, web' : ''}
-						value={searchTextState}
-						on:input={onSearchInput}
+						class=" flex-grow bg-secondary outline-none"
+						placeholder={uiState.settings.show_placeholder ? 'Search apps, web, extensions' : ''}
+						value={uiState.searchText}
+						on:input={(e) => onSearchInput(e)}
 						autofocus
 					/>
-
 					{#if uiState.settings.show_settings_icon}
-						<button
-							class=" hover-bg-tertiary rounded-full"
-							on:click={(event) => {
-								onOpenSettings(event);
-							}}
-						>
-							<SettingsIcon class=" search-icon-size text-accent" />
+						<button on:click={() => onOpenSettings()}>
+							<SettingsIcon class="w-5 h-5" />
 						</button>
 					{/if}
 				</div>
-
-				{#if uiState.settings.split_results}
-					<div class="split-divider"></div>
-				{/if}
-
-				<div
-					class={`overflow-hidden ${uiState.settings.split_results ? ` bg-background search-round  ${displayedResultsState.length > 0 ? 'search-border' : ''}` : ''}`}
-				>
-					{#each displayedResultsState as result, index}
-						<!-- svelte-ignore a11y-no-static-element-interactions -->
-						<!-- svelte-ignore a11y-mouse-events-have-key-events -->
-						<button
-							class={`flex w-full items-center overflow-hidden cursor-pointer ${index === selectedIndexState ? 'highlight-result' : ''}`}
-							on:mouseover={() => onSetSelectedIndex(index)}
-							on:focus={() => onSetSelectedIndex(index)}
-							on:click={onRunAction}
-						>
-							{#if result.result_type === 'Text'}
-								<div class="flex-grow flex gap-4 p-3 items-center">
-									{#if getIconPath(result.text?.icon) !== null}
-										<img
-											class={`icon-size ${result.text?.tint}`}
-											src={getIconPath(result.text?.icon)}
-											alt=""
-											style="filter: {getColorFilter(result.text?.tint ?? null)}"
-										/>
-									{/if}
-									<div
-										class={`flex-grow one-line text-start result-title ${selectedIndexState === index ? 'text-accent' : ' text-text'}`}
+				<div class="mt-4 flex-grow flex flex-col">
+					{#if uiState.results.length === 0}
+						<div class="flex flex-col flex-grow justify-center items-center">
+							<CatIcon class=" h-20 w-20" />
+							<p>This feels kinda empty 🫤</p>
+						</div>
+					{:else if uiState.resultsType == 'List'}
+						{#each uiState.results as result, resultIndex}
+							<button
+								class={`flex items-center w-full h-[60px] p-2 pl-4 pr-4 hover-bg-tertiary rounded-full ${resultIndex === uiState.selectedIndex ? 'bg-tertiary' : ''}`}
+								on:click={() => onSelectResult(resultIndex)}
+							>
+								{#if result.icon !== null}
+									<img
+										src={getIconPath(result.icon)}
+										alt="Result Icon"
+										class={`h-9 w-9 mr-4`}
+										style="filter: {result.icon_tint === 'accent'
+											? accentColorFilter
+											: getColorFilter(result.icon_tint)}"
+									/>
+								{/if}
+								<div class="flex-grow one-line justify-start">
+									<p
+										class={`one-line text-start ${resultIndex === uiState.selectedIndex ? 'text-accent' : ''}`}
 									>
-										{result.text?.text}
-									</div>
-									{#if uiState.settings.show_alt_hint}
-										<div
-											class={`result-alt ${selectedIndexState === index ? 'text-accent' : ' text-sub-text'}`}
-										>
-											Alt + {index + 1}
-										</div>
+										{result.title}
+									</p>
+									{#if result.description !== null}
+										<p class="text-sm text-start one-line">{result.description}</p>
 									{/if}
 								</div>
-							{/if}
-							{#if result.result_type === 'TitleAndDescription'}
-								<div class="flex-grow flex gap-4 p-3 items-center">
-									{#if result.title_and_description?.icon !== null}
-										<img
-											class={`icon-size ${result.title_and_description?.tint}`}
-											src={convertFileSrc(result.title_and_description?.icon ?? '')}
-											alt=""
-											style="filter: {getColorFilter(result.title_and_description?.tint ?? null)}"
-										/>
-									{/if}
+								{#if uiState.settings.show_launch_hint}
+									<p class="text-accent">{uiState.settings.launch_key} + {resultIndex + 1}</p>
+								{/if}
+								{#if uiState.askConfirmation && uiState.selectedIndex === resultIndex}
 									<div
-										class={`flex-grow one-line text-start result-title flex flex-col ${selectedIndexState === index ? 'text-accent' : ' text-text'}`}
+										class="bg-accent text-on-accent font-semibold rounded-full h-full pl-2 pr-2 ml-4 flex items-center"
 									>
-										<p class="result-title one-line">{result.title_and_description?.title}</p>
-										<p class="result-description one-line">
-											{result.title_and_description?.description}
-										</p>
+										<p>Confirm</p>
 									</div>
-									{#if uiState.settings.show_alt_hint}
-										<div
-											class={`result-alt ${selectedIndexState === index ? 'text-accent' : ' text-sub-text'}`}
-										>
-											Alt + {index + 1}
-										</div>
-									{/if}
-								</div>
-							{/if}
-							{#if result.result_type === 'Divider'}
-								<div class="p-2 pt-4 pb-4 w-full">
-									<div
-										class={`result-divider rounded-full ${selectedIndexState === index ? 'bg-accent' : 'bg-tertiary'}`}
-									></div>
-								</div>
-							{/if}
-							{#if showConfirmationBoxState && selectedIndexState === index}
-								<div
-									class="flex bg-accent result-confirm rounded-l-md text-on-accent w-fit items-center p-2"
+								{/if}
+							</button>
+						{/each}
+					{:else}
+						<div class="grid grid-cols-4 w-full">
+							{#each uiState.results as result, resultIndex}
+								<button
+									class={`flex flex-col p-4 items-center justify-center one-line h-[160px] hover-bg-tertiary rounded-2xl overflow-hidden ${resultIndex === uiState.selectedIndex ? 'bg-tertiary' : ''}`}
 								>
-									Confirm Action
-								</div>
-							{/if}
-						</button>
-					{/each}
+									{#if uiState.askConfirmation && uiState.selectedIndex === resultIndex}
+										<div
+											class="bg-accent text-on-accent font-semibold h-full w-full pl-2 pr-2 flex items-center justify-center rounded-full"
+										>
+											<p>Confirm</p>
+										</div>
+									{:else}
+										{#if result.icon !== null}
+											<img
+												src={getIconPath(result.icon)}
+												alt="Result Icon"
+												class={`h-14 w-14`}
+												style="filter: {getColorFilter(result.icon_tint)}"
+											/>
+										{/if}
+										<p
+											class={`one-line w-full mt-4 ${resultIndex === uiState.selectedIndex ? 'text-accent' : ''}`}
+										>
+											{result.title}
+										</p>
+									{/if}
+								</button>
+							{/each}
+						</div>
+					{/if}
 				</div>
+				{#if uiState.results.length > 0}
+					<div class="flex justify-center">Total Results {uiState.resultsCount}</div>
+				{/if}
 			</div>
 		</div>
 	{/if}

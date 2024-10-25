@@ -6,14 +6,13 @@
 		init,
 		onClearWallpaper,
 		onSelectWallpaper,
-		onSetAccentSearchBorder,
+		onSetAccentBorder,
 		onSetBorderRadius,
 		onSetBorderWidth,
 		onSetHideOnBlur,
 		onSetShowPlaceholder,
 		onSetShowSearchIcon,
 		onSetShowSettingsIcon,
-		onSetSplitResults,
 		state
 	} from './search-box-vm';
 	import SliderSetting from '$lib/components/slider-setting.svelte';
@@ -31,49 +30,36 @@
 	{#if !uiState.loading}
 		<div class="space-y-8">
 			<ToggleSetting
-				title="Split Results"
-				description="When enabled, it splits the search bar and results."
-				toggled={uiState.settings.split_results}
-				on:toggle={onSetSplitResults}
-			/>
-			<ToggleSetting
 				title="Search Icon"
-				description="When enabled, it shows the search icon."
+				description="Show the search icon."
 				toggled={uiState.settings.show_search_icon}
 				on:toggle={onSetShowSearchIcon}
 			/>
 
 			<ToggleSetting
 				title="Settings Icon"
-				description="When enabled, it shows the settings icon."
+				description="Show the settings icon."
 				toggled={uiState.settings.show_settings_icon}
 				on:toggle={onSetShowSettingsIcon}
 			/>
 
 			<ToggleSetting
 				title="Placeholder"
-				description="When enabled, it shows the placeholder text."
+				description="Show the search placeholder."
 				toggled={uiState.settings.show_placeholder}
 				on:toggle={onSetShowPlaceholder}
 			/>
 
 			<ToggleSetting
-				title="Accent Border"
-				description="When enabled, it uses the accent color as the border color."
-				toggled={uiState.settings.accent_search_border}
-				on:toggle={onSetAccentSearchBorder}
-			/>
-
-			<ToggleSetting
 				title="Hide On Blur"
-				description="When enabled, the search window closes when clicked outside the box."
+				description="Close the launcher when clicking outside the search box. Only applies when wallpaper is set."
 				toggled={uiState.settings.hide_on_blur}
 				on:toggle={onSetHideOnBlur}
 			/>
 
 			<SliderSetting
 				title={`Border Radius (${uiState.settings.border_radius})`}
-				description="Applies a border radius to the search box."
+				description="Search box corner radius."
 				min={0}
 				max={48}
 				step={1}
@@ -83,13 +69,21 @@
 
 			<SliderSetting
 				title={`Border Width (${uiState.settings.border_width})`}
-				description="Applies a border width to the search box."
+				description="Search box border width."
 				min={0}
 				max={10}
 				step={1}
 				value={uiState.settings.border_width}
 				on:slide={onSetBorderWidth}
 			/>
+
+			<ToggleSetting
+				title="Accent Border"
+				description="Use accent color for the search box border."
+				toggled={uiState.settings.accent_border}
+				on:toggle={onSetAccentBorder}
+			/>
+
 			<div class="space-y-2">
 				<div>
 					<p class=" text-xl font-medium">Wallpaper</p>

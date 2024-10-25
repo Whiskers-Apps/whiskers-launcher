@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { getSettings, getThemeCss, type Settings } from '$lib/settings/settings';
 	import { goToRoute } from '$lib/utils/routing';
 	import InfoIcon from '$lib/icons/info.svg?component';
 	import HomeIcon from '$lib/icons/home.svg?component';
@@ -34,7 +33,7 @@
 		<div class="h-screen w-full bg-secondary flex p-4 text-text">
 			<div class=" items-start space-y-2 overflow-auto pl-2 pr-6 w-fit min-w-[240px]">
 				<button
-					class={`text-lg flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('')}`}
+					class={`text-lg flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('')}`}
 					on:click={() => {
 						goToRoute('/settings');
 					}}
@@ -43,7 +42,7 @@
 					<p>General</p>
 				</button>
 				<button
-					class={`text-lg flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/search-box')}`}
+					class={`text-lg flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/search-box')}`}
 					on:click={() => {
 						goToRoute('/settings/search-box');
 					}}
@@ -53,7 +52,7 @@
 				</button>
 
 				<button
-					class={`text-lg flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/search-results')}`}
+					class={`text-lg flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/search-results')}`}
 					on:click={() => {
 						goToRoute('/settings/search-results');
 					}}
@@ -63,7 +62,7 @@
 				</button>
 
 				<button
-					class={`text-lg flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/search-engines')}`}
+					class={`text-lg flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/search-engines')}`}
 					on:click={() => {
 						goToRoute('/settings/search-engines');
 					}}
@@ -73,7 +72,7 @@
 				</button>
 
 				<button
-					class={`text-lg  flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/theming')}`}
+					class={`text-lg  flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/theming')}`}
 					on:click={() => {
 						goToRoute('/settings/theming');
 					}}
@@ -83,7 +82,7 @@
 				</button>
 
 				<button
-					class={`text-lg flex items-center rounded-lg hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/extensions')}`}
+					class={`text-lg flex items-center rounded-full hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/extensions')}`}
 					on:click={() => {
 						goToRoute('/settings/extensions');
 					}}
@@ -93,7 +92,7 @@
 				</button>
 
 				<button
-					class={`text-lg rounded-lg flex items-center hover-bg-tertiary w-full text-start p-2 ${getHighlightClasses('/about')}`}
+					class={`text-lg rounded-full flex items-center hover-bg-tertiary w-full text-start p-4 ${getHighlightClasses('/about')}`}
 					on:click={() => {
 						goToRoute('/settings/about');
 					}}

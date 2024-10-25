@@ -1,7 +1,7 @@
-import { getSettings, writeSettings, type Settings } from '$lib/settings/settings';
 import { get, writable } from 'svelte/store';
 import { open } from '@tauri-apps/api/dialog';
 import { pictureDir } from '@tauri-apps/api/path';
+import { getSettings, writeSettings, type Settings } from '$lib/features/settings/Settings';
 
 export const state = writable({
 	loading: true,
@@ -17,14 +17,6 @@ export async function init() {
 }
 
 // =================== Intents ====================
-
-export function onSetSplitResults(split: CustomEvent<boolean>) {
-	let currentState = get(state);
-	currentState.settings.split_results = split.detail;
-	state.set(currentState);
-
-	writeSettings(currentState.settings);
-}
 
 export function onSetShowSearchIcon(show: CustomEvent<boolean>) {
 	let currentState = get(state);
@@ -50,14 +42,6 @@ export function onSetShowPlaceholder(show: CustomEvent<boolean>) {
 	writeSettings(currentState.settings);
 }
 
-export function onSetAccentSearchBorder(set_accent: CustomEvent<boolean>) {
-	let currentState = get(state);
-	currentState.settings.accent_search_border = set_accent.detail;
-	state.set(currentState);
-
-	writeSettings(currentState.settings);
-}
-
 export function onSetHideOnBlur(hide: CustomEvent<boolean>) {
 	let currentState = get(state);
 	currentState.settings.hide_on_blur = hide.detail;
@@ -74,13 +58,21 @@ export function onSetBorderRadius(radius: CustomEvent<number>) {
 	writeSettings(currentState.settings);
 }
 
-export function onSetBorderWidth(width: CustomEvent<number>) {
+export function onSetBorderWidth(radius: CustomEvent<number>){
 	let currentState = get(state);
-	currentState.settings.border_width = width.detail;
+	currentState.settings.border_width = radius.detail;
 	state.set(currentState);
 
 	writeSettings(currentState.settings);
-}
+};
+
+export function onSetAccentBorder(setAccent: CustomEvent<boolean>){
+	let currentState = get(state);
+	currentState.settings.accent_border = setAccent.detail;
+	state.set(currentState);
+
+	writeSettings(currentState.settings);
+};
 
 export async function onSelectWallpaper() {
 	const path = await open({

@@ -3,6 +3,7 @@
 	import ChevronRightIcon from '$lib/icons/chevron-right.svg?component';
 	import ChevronLeftIcon from '$lib/icons/chevron-left.svg?component';
 	import DownloadIcon from '$lib/icons/download.svg?component';
+	import CatIcon from '$lib/icons/cat.svg?component';
 	import { open } from '@tauri-apps/api/shell';
 	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
@@ -27,8 +28,8 @@
 	{#if !uiState.loading}
 		<div class=" bg-background p-4 h-screen w-full text-text space-y-4 flex flex-col">
 			{#if uiState.installingExtension}
-				<div class="flex flex-col items-center w-full justify-center h-screen">
-					<DownloadIcon class="h-14 mb-8" />
+				<div class="flex flex-col items-center justify-center h-screen">
+					<DownloadIcon class="h-14 w-14 mb-8" />
 					<p>Installing extension. Do <b>NOT</b> close this window.</p>
 				</div>
 			{:else}
@@ -88,6 +89,11 @@
 					</button>
 				</div>
 			{/if}
+		</div>
+	{:else}
+		<div class="bg-background h-screen w-full flex flex-col items-center justify-center">
+			<CatIcon class="h-20 w-20" />
+			<p>Loading Store</p>
 		</div>
 	{/if}
 </DialogFrame>

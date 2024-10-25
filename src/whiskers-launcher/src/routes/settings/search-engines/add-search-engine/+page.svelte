@@ -4,9 +4,8 @@
 	import PrimaryButton from '$lib/components/primary-button.svelte';
 	import {
 		getSettings,
-		getThemeCss,
 		type Settings
-	} from '$lib/settings/settings';
+	} from '$lib/features/settings/Settings';
 	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import {
@@ -20,6 +19,7 @@
 	} from './add-search-engine-dialog-vm';
 	import DialogFrame from '../../../dialog-frame.svelte';
 	import { onAddSearchEngine } from '../search-engines-vm';
+	import { getThemeCss } from '$lib/features/theming/Theming';
 
 	let settings: Settings | null = null;
 	let css = '';

@@ -25,9 +25,9 @@
 	<button class=" w-full items-center flex gap-4 p-2" on:click={toggleShowOptions}>
 		<p class=" flex-grow text-start">{value.value}</p>
 		{#if showOptions}
-			<ChevronUp class=" h-3 w-3" />
+			<ChevronUp class=" h-4 w-4" />
 		{:else}
-			<ChevronDown class=" h-3 w-3" />
+			<ChevronDown class=" h-4 w-4" />
 		{/if}
 	</button>
 	{#if showOptions}
@@ -49,7 +49,7 @@
 	.select {
 		background-color: var(--secondary);
 		border: 1px solid var(--tertiary);
-		border-radius: 6px;
+		border-radius: 14px;
 		width: 100%;
 	}
 </style>

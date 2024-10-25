@@ -1,5 +1,5 @@
 use sysinfo::System;
-use whiskers_launcher_rs::paths::{get_app_dir, get_autostart_dir, get_indexing_dir};
+use whiskers_launcher_core::paths::{get_app_dir, get_autostart_dir, get_indexing_dir};
 
 use std::fs;
 

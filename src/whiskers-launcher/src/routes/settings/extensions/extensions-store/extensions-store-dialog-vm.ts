@@ -1,4 +1,5 @@
-import type { Extension, ExtensionStoreItem } from '$lib/settings/settings';
+import type { ExtensionManifest } from '$lib/features/extensions/Extensions';
+import type { ExtensionStoreItem } from '$lib/features/settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { emit } from '@tauri-apps/api/event';
 import axios from 'axios';
@@ -18,18 +19,18 @@ export const state = writable({
 export async function init() {
 	let currentState = get(state);
 
-	let extensions: Extension[] = await invoke('get_extensions');
+	let extensions: ExtensionManifest[] = await invoke('run_get_extensions');
 	extensions.forEach((extension) => {
 		currentState.installedExtensions.push(extension.id);
 	});
 
-	let os: string = await invoke('get_os');
+	let os: string = await invoke('run_get_os');
 
-	currentState.store = await invoke('get_extensions_store');
+	currentState.store = await invoke('run_get_extensions_store');
 	currentState.store = currentState.store.filter((extension) => extension?.os?.includes(os));
 	currentState.filteredStore = currentState.store;
 	currentState.displayedStore = currentState.store.slice(0, 12);
-	currentState.loading = false;
+	currentState.loading = currentState.store.length === 0;
 
 	state.set(currentState);
 
@@ -41,8 +42,9 @@ export async function init() {
 			currentState.store = response.data;
 			currentState.filteredStore = currentState.store;
 			currentState.displayedStore = currentState.store.slice(0, 12);
+			currentState.loading = false;
 
-			invoke('write_extensions_store', { store: currentState.store });
+			invoke('run_write_extensions_store', { store: currentState.store });
 
 			state.set(currentState);
 		})
@@ -86,17 +88,17 @@ export async function onInstallExtension(repo: string) {
 		currentState.installingExtension = true;
 		state.set(currentState);
 
-		await invoke('clone_extension', { url: repo });
+		await invoke('run_clone_extension', { url: repo });
 		currentState.installingExtension = false;
 
 		currentState.installedExtensions = [];
 
-		let extensions: Extension[] = await invoke('get_extensions');
+		let extensions: ExtensionManifest[] = await invoke('run_get_extensions');
 		extensions.forEach((extension) => {
 			currentState.installedExtensions.push(extension.id);
 		});
 
-		currentState.store = await invoke('get_extensions_store');
+		currentState.store = await invoke('run_get_extensions_store');
 
 		state.set(currentState);
 

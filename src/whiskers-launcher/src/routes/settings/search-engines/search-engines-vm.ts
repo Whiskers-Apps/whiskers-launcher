@@ -1,8 +1,8 @@
-import { getSettings, writeSettings, type Settings } from '$lib/settings/settings';
 import { WebviewWindow } from '@tauri-apps/api/window';
 import { get, writable } from 'svelte/store';
 import { WindowSizes } from '../../../utils';
 import { listen } from '@tauri-apps/api/event';
+import { getSettings, writeSettings, type Settings } from '$lib/features/settings/Settings';
 
 export const state = writable({
 	loading: true,

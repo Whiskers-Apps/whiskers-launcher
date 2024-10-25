@@ -9,7 +9,7 @@
   },
   "package": {
     "productName": "whiskers-launcher-companion",
-    "version": "2.2.3"
+    "version": "3.0.0"
   },
   "tauri": {
     "allowlist": {

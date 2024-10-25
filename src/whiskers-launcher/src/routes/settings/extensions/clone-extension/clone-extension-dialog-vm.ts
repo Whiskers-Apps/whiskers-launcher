@@ -27,7 +27,7 @@ export async function onClone() {
 	currentState.cloning = true;
 	state.set(currentState);
 
-	await invoke('clone_extension', { url: currentState.url });
+	await invoke('run_clone_extension', { url: currentState.url });
 
 	await emit('refresh-extensions');
 

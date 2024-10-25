@@ -1,16 +1,11 @@
 import type { SelectValue } from '$lib/components/classes';
-import {
-	getSettings,
-	getThemeCss,
-	writeSettings,
-	type ThemeStoreItem,
-	type ThemeStoreVariant
-} from '$lib/settings/settings';
 import { invoke } from '@tauri-apps/api';
 import axios from 'axios';
 import { get, writable } from 'svelte/store';
 import { setDialogFrameCSS } from '../../../dialog-frame-vm';
 import { emit } from '@tauri-apps/api/event';
+import { getSettings, writeSettings, type ThemeStoreItem, type ThemeStoreVariant } from '$lib/features/settings/Settings';
+import { getThemeCss } from '$lib/features/theming/Theming';
 
 export const state = writable({
 	loading: true,
@@ -30,7 +25,7 @@ interface ListingSelectValue {
 
 export async function init() {
 	let currentState = get(state);
-	currentState.store = await invoke('get_themes_store');
+	currentState.store = await invoke('run_get_themes_store');
 	currentState.filteredStore = currentState.store;
 	currentState.displayedStore = currentState.store.slice(0, 12);
 
@@ -38,7 +33,7 @@ export async function init() {
 
 	indexSelectValues();
 
-	currentState.loading = false;
+	currentState.loading = currentState.store.length === 0;
 	state.set(currentState);
 
 	await axios
@@ -49,12 +44,13 @@ export async function init() {
 			currentState.store = response.data;
 			currentState.filteredStore = currentState.store;
 			currentState.displayedStore = currentState.store.slice(0, 12);
+			currentState.loading = false;
 
 			state.set(currentState);
 
 			indexSelectValues();
 
-			invoke('write_themes_store', { store: currentState.store });
+			invoke('run_write_themes_store', { store: currentState.store });
 		})
 		.catch((error) => console.error(error));
 }

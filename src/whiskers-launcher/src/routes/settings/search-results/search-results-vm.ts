@@ -1,4 +1,10 @@
-import { getSettings, writeSettings, type Settings, type App } from '$lib/settings/settings';
+import type { SelectValue } from '$lib/components/classes';
+import {
+	getSettings,
+	writeSettings,
+	type App,
+	type Settings
+} from '$lib/features/settings/Settings';
 import { invoke } from '@tauri-apps/api';
 import { listen } from '@tauri-apps/api/event';
 import { WebviewWindow } from '@tauri-apps/api/window';
@@ -13,7 +19,7 @@ export const state = writable({
 export async function init() {
 	let currentState = get(state);
 	currentState.settings = await getSettings();
-	currentState.blacklist_apps = await invoke('get_blacklisted_apps');
+	currentState.blacklist_apps = await invoke('run_get_blacklisted_apps');
 	currentState.loading = false;
 
 	state.set(currentState);
@@ -21,28 +27,41 @@ export async function init() {
 
 // =================== Intents ====================
 
-export function onSetHighlightSelectedBackground(highlight: CustomEvent<boolean>) {
+export function onSetShowLaunchHint(show: CustomEvent<boolean>) {
 	let currentState = get(state);
-	currentState.settings.highlight_selected_background = highlight.detail;
+	currentState.settings.show_launch_hint = show.detail;
 	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
 
-export function onSetShowAltHint(show: CustomEvent<boolean>) {
+export function onSetLaunchKey(launchKey: CustomEvent<SelectValue>) {
 	let currentState = get(state);
-	currentState.settings.show_alt_hint = show.detail;
+	currentState.settings.launch_key = launchKey.detail.id;
 	state.set(currentState);
 
 	writeSettings(currentState.settings);
 }
 
-export function onSetResultsCount(count: CustomEvent<number>) {
+export function onSetShowAppsAsGrid(show: CustomEvent<boolean>){
 	let currentState = get(state);
-	currentState.settings.results_count = count.detail;
+	currentState.settings.show_apps_as_grid = show.detail;
 	state.set(currentState);
 
 	writeSettings(currentState.settings);
+}
+
+export function getLaunchKeys(): SelectValue[] {
+	return [
+		{
+			id: "Alt",
+			value: "Alt"
+		},
+		{
+			id: "Ctrl",
+			value: "Ctrl"
+		}
+	];
 }
 
 export async function onOpenAddToBlacklistDialog() {
@@ -57,9 +76,9 @@ export async function onOpenAddToBlacklistDialog() {
 
 	const unlisten = await listen('refresh-blacklist', async (_) => {
 		let currentState = get(state);
-		currentState.blacklist_apps = await invoke('get_blacklisted_apps');
-        state.set(currentState);
-        
+		currentState.blacklist_apps = await invoke('run_get_blacklisted_apps');
+		state.set(currentState);
+
 		unlisten();
 	});
 }
@@ -76,8 +95,8 @@ export async function onOpenRemoveFromBlacklistDialog(id: string) {
 
 	const unlisten = await listen('refresh-blacklist', async (_) => {
 		let currentState = get(state);
-        currentState.blacklist_apps = await invoke('get_blacklisted_apps');
-        state.set(currentState);
+		currentState.blacklist_apps = await invoke('run_get_blacklisted_apps');
+		state.set(currentState);
 
 		unlisten();
 	});
