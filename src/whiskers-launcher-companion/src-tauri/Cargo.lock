@@ -4270,7 +4270,7 @@ dependencies = [
 
 [[package]]
 name = "whiskers-launcher-companion"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "bincode",
  "serde",
