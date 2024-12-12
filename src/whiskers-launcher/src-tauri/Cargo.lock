@@ -125,7 +125,7 @@ checksum = "86fdf8605db99b54d3cd748a44c6d04df638eb5dafb219b135d0149bd0db01f6"
 
 [[package]]
 name = "app"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "bincode",
  "enigo",

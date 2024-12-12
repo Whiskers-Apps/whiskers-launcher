@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "3.0.0"
+version = "3.1.0"
 description = "Whiskers Launcher"
 authors = ["Whiskers Apps"]
 license = "MIT"
