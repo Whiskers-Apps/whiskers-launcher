@@ -2,11 +2,6 @@
 	import InputSetting from '$lib/components/input-setting.svelte';
 	import ToggleSetting from '$lib/components/toggle-setting.svelte';
 	import PrimaryButton from '$lib/components/primary-button.svelte';
-	import {
-		getSettings,
-		type Settings
-	} from '$lib/features/settings/Settings';
-	import { onMount } from 'svelte';
 	import SecondaryButton from '$lib/components/secondary-button.svelte';
 	import {
 		onClearIcon,
@@ -15,22 +10,14 @@
 		onSetName,
 		onSetSearchQuery,
 		onSetTintIcon,
+		onAddSearchEngine,
 		state
 	} from './add-search-engine-dialog-vm';
 	import DialogFrame from '../../../dialog-frame.svelte';
-	import { onAddSearchEngine } from '../search-engines-vm';
-	import { getThemeCss } from '$lib/features/theming/Theming';
-
-	let settings: Settings | null = null;
-	let css = '';
 
 	$: uiState = $state;
 	$: disableButton = uiState.keyword === '' || uiState.name === '' || uiState.searchQuery === '';
 
-	onMount(async () => {
-		settings = await getSettings();
-		css = getThemeCss(settings);
-	});
 </script>
 
 <DialogFrame>

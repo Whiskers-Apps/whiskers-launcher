@@ -73,7 +73,7 @@ export function onSetSearchQuery(event: CustomEvent<string>) {
 	state.set(currentState);
 }
 
-export async function addSearchEngine() {
+export async function onAddSearchEngine() {
 	let currentState = get(state);
 
 	let engine: SearchEngine = {
