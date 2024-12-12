@@ -11,7 +11,7 @@ use whiskers_launcher_core::{
         core::{
             apps::{get_apps, App},
             extensions::write_extension_request,
-            settings::{get_settings, SearchEngine},
+            settings::{get_settings, SearchEngine, Settings},
         },
         extensions::{get_extension_dir, ExtensionRequest},
     },
@@ -53,25 +53,8 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
         if settings.show_recent_apps {
             let recent_apps = get_recent_apps();
 
-            for app in recent_apps {
-                let open_app_action =
-                    ResultAction::new_open_app_action(OpenAppAction::new(&app.id));
-
-                let icon = if let Some(icon) = &app.icon {
-                    PathBuf::from(icon)
-                } else {
-                    let mut icon_path = get_app_resources_icons_dir();
-                    icon_path.push("question.svg");
-                    icon_path
-                };
-
-                let mut text_result = SearchResult::new(&app.title, open_app_action).set_icon(icon);
-
-                if !app.icon.is_some() {
-                    text_result = text_result.set_accent_icon_tint()
-                }
-
-                results.push(text_result)
+            for app in &recent_apps {
+                results.push(get_app_result(app, &settings))
             }
         }
 
@@ -85,7 +68,7 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
     if search_text.trim() == "*" {
         let app_results: Vec<SearchResult> = get_apps()
             .iter()
-            .map(|a| get_app_result(a.clone()))
+            .map(|a| get_app_result(a, &settings))
             .collect();
 
         return if show_apps_as_grid {
@@ -102,6 +85,7 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
     if let Some(keyword) = keyword {
         if keyword == settings.search_keyword {
             if let Some(engine) = settings
+                .to_owned()
                 .search_engines
                 .iter()
                 .find(|e| e.id == settings.default_search_engine)
@@ -116,6 +100,7 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
         }
 
         if let Some(engine) = settings
+            .to_owned()
             .search_engines
             .iter()
             .find(|e| e.keyword == keyword)
@@ -124,10 +109,11 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
                 engine.to_owned(),
                 &search_query.search_text,
             ));
+
             return SearchResults::new_list_results(results);
         }
 
-        for extension_setting in settings.extensions {
+        for extension_setting in &settings.extensions {
             if extension_setting.setting_id == "keyword"
                 && extension_setting.setting_value == keyword.to_owned()
             {
@@ -196,15 +182,15 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
     let sniffer = Sniffer::new();
 
     let apps = get_apps();
-    let blacklist = settings.blacklist;
+    let blacklist = settings.to_owned().blacklist;
 
-    for app in apps {
+    for app in &apps {
         if !blacklist.contains(&app.id) {
             if sniffer
                 .clone()
                 .matches(&app.title, &search_query.search_text)
             {
-                results.push(get_app_result(app))
+                results.push(get_app_result(app, &settings))
             }
         }
     }
@@ -245,18 +231,29 @@ pub fn run_get_search_results(search_text: &str) -> SearchResults {
     };
 }
 
-fn get_app_result(app: App) -> SearchResult {
+fn get_app_result(app: &App, settings: &Settings) -> SearchResult {
     let open_app_action = ResultAction::new_open_app_action(OpenAppAction::new(&app.id));
+
+    let mut question_icon_path = get_app_resources_icons_dir();
+    question_icon_path.push("question.svg");
 
     let icon_path = if let Some(icon_path) = &app.icon {
         PathBuf::from(icon_path)
     } else {
-        let mut icon_path = get_app_resources_icons_dir();
-        icon_path.push("question.svg");
-        icon_path
+        question_icon_path.clone()
     };
 
-    let mut result = SearchResult::new(&app.title, open_app_action).set_icon(icon_path);
+    let mut result = SearchResult::new(&app.title, open_app_action);
+
+    if settings.hide_app_icons {
+        if settings.show_apps_as_grid {
+            result = result
+                .set_icon(question_icon_path.clone())
+                .set_accent_icon_tint();
+        }
+    } else {
+        result = result.set_icon(icon_path);
+    }
 
     if app.icon.is_none() {
         result = result.set_accent_icon_tint()

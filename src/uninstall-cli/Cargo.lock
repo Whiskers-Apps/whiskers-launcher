@@ -1388,7 +1388,7 @@ checksum = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe"
 
 [[package]]
 name = "uninstall"
-version = "3.0.0"
+version = "3.1.0"
 dependencies = [
  "fs_extra",
  "sysinfo",
@@ -1425,9 +1425,9 @@ checksum = "9c8d87e72b64a3b4db28d11ce29237c246188f4f51057d65a7eab63b7987e423"
 
 [[package]]
 name = "whiskers-launcher-core"
-version = "0.3.1"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b30ec1ec0ebf1cbfe70003c056d1f68787eb0f6e6e3a929136408ea73d4b8be6"
+checksum = "0fe9ea98acb72f8741dbc2241d827cbe486be4b6393fd9820f6ac8320bfe853a"
 dependencies = [
  "bincode",
  "dirs 5.0.1",

@@ -24,6 +24,7 @@ export interface Settings {
 	extensions: ExtensionSetting[];
 	wallpaper: string | null;
 	show_apps_as_grid: boolean;
+	hide_app_icons: boolean;
 }
 
 export interface SearchEngine {

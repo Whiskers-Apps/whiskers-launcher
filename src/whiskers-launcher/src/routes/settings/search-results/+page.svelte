@@ -6,6 +6,7 @@
 		init,
 		onOpenAddToBlacklistDialog,
 		onOpenRemoveFromBlacklistDialog,
+		onSetHideAppIcons,
 		onSetLaunchKey,
 		onSetShowAppsAsGrid,
 		onSetShowLaunchHint,
@@ -49,6 +50,13 @@
 				description="Show apps as a grid"
 				toggled={uiState.settings.show_apps_as_grid}
 				on:toggle={onSetShowAppsAsGrid}
+			/>
+
+			<ToggleSetting
+				title="Hide App Icons"
+				description="Hide app icons. If using a grid it will show the default icon"
+				toggled={uiState.settings.hide_app_icons}
+				on:toggle={onSetHideAppIcons}
 			/>
 
 			<div class="card">

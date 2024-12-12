@@ -1,6 +1,6 @@
 [package]
 name = "app"
-version = "3.0.0"
+version = "3.1.0"
 description = "Whiskers Launcher"
 authors = ["Whiskers Apps"]
 license = "MIT"
@@ -18,7 +18,7 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 tauri = { version = "1.6.3", features = [ "clipboard-all", "path-all", "dialog-save", "dialog-open", "protocol-all", "fs-all", "shell-all", "window-all"] }
 
-whiskers-launcher-core = "0.3.2"
+whiskers-launcher-core = "0.4.0"
 
 tokio = {version = "1.37.0", features = ["full"] }
 bincode = "*"

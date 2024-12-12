@@ -52,7 +52,7 @@
 					{#if uiState.results.length === 0}
 						<div class="flex flex-col flex-grow justify-center items-center">
 							<CatIcon class=" h-20 w-20" />
-							<p>This feels kinda empty 🫤</p>
+							<p>No Results</p>
 						</div>
 					{:else if uiState.resultsType == 'List'}
 						{#each uiState.results as result, resultIndex}
