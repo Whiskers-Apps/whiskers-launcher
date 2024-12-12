@@ -101,3 +101,11 @@ export async function onOpenRemoveFromBlacklistDialog(id: string) {
 		unlisten();
 	});
 }
+
+export async function onSetHideAppIcons(hide: CustomEvent<boolean>){
+	let currentState = get(state);
+	currentState.settings.hide_app_icons = hide.detail;
+	state.set(currentState);
+
+	writeSettings(currentState.settings);
+}
