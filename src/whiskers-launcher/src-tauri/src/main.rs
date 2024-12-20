@@ -3,24 +3,41 @@
 
 pub mod features;
 use std::env;
+use std::process::exit;
 
 //#[cfg(target_os = "windows")]
 //{}
 
 use features::actions::*;
+use features::extensions::*;
 use features::form::*;
 use features::search::*;
 use features::settings::*;
 use features::window_managing::*;
-use features::extensions::*;
 
-use enigo::{Enigo, Mouse, Settings};
 use serde::Serialize;
-use tauri::PhysicalPosition;
-use tauri::{Manager, RunEvent, WindowBuilder, WindowEvent};
+use tauri::CustomMenuItem;
+use tauri::GlobalShortcutManager;
+use tauri::SystemTray;
+use tauri::SystemTrayEvent;
+use tauri::SystemTrayMenu;
+use tauri::{Manager, RunEvent, WindowEvent};
+use tokio::time::sleep;
+use whiskers_launcher_core::features::core::apps::index_apps;
+use whiskers_launcher_core::features::core::extensions::index_extensions;
 use whiskers_launcher_core::features::core::settings::get_settings;
+use whiskers_launcher_core::utils::on_linux;
+use whiskers_launcher_core::utils::on_wayland;
 
-fn main() {
+#[tokio::main]
+async fn main() {
+    let tray_menu = SystemTrayMenu::new()
+        .add_item(CustomMenuItem::new("show", "Show"))
+        .add_item(CustomMenuItem::new("settings", "Settings"))
+        .add_item(CustomMenuItem::new("refresh-apps", "Refresh Apps"))
+        .add_item(CustomMenuItem::new("restart", "Restart"))
+        .add_item(CustomMenuItem::new("quit", "Quit"));
+
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             run_open_settings_window,
@@ -55,68 +72,48 @@ fn main() {
             run_extension_action,
             update_extension
         ])
+        .system_tray(SystemTray::new().with_menu(tray_menu))
+        .on_system_tray_event(|app, event| match event {
+            SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
+                "show" => {
+                    open_search_window(&app);
+                }
+                "settings" => {
+                    open_settings_window(&app);
+                }
+                "refresh-apps" => {
+                    tokio::spawn(async move {
+                        index_apps();
+                    });
+                }
+                "restart" => {
+                    tauri::api::process::restart(&app.env());
+                }
+                "quit" => {
+                    exit(0);
+                }
+                _ => {}
+            },
+            _ => {}
+        })
         .setup(|app| {
-            let arguments: Vec<String> = env::args().collect();
-            let open_settings = arguments
-                .iter()
-                .any(|arg| arg == "--settings" || arg == "-s");
+            app.get_window("main")
+                .expect("Error getting main window")
+                .close()
+                .expect("Error closing main window");
 
-            let main_window = app
-                .handle()
-                .to_owned()
-                .get_window("main")
-                .expect("Error getting main window");
+            tokio::spawn(async move {
+                let _ = get_settings();
+                index_extensions();
 
-            if open_settings {
-                let app_clone = app.handle().to_owned();
-
-                let window = WindowBuilder::new(
-                    &app_clone,
-                    "settings",
-                    tauri::WindowUrl::App("settings".into()),
-                )
-                .title("Settings")
-                .inner_size(1200.0, 700.0);
-
-                window.build().expect("Error opening settings window");
-
-                return Ok(());
-            }
-
-            // Opens the window in the monitor where the cursor is and centers it
-
-            let mut monitors = main_window
-                .available_monitors()
-                .expect("Error getting monitors");
-
-            let (cursor_x, _cursor_y) = Enigo::new(&Settings::default())
-                .expect("Error initializing enigo")
-                .location()
-                .expect("Error getting cursor location");
-
-            monitors.sort_by(|a, b| b.position().x.cmp(&a.position().x));
-
-            for monitor in monitors.iter() {
-                if monitor.position().x <= cursor_x {
-                    let settings = get_settings();
-
-                    main_window
-                        .set_position(PhysicalPosition::new(monitor.position().x, 0))
-                        .expect("Error moving window");
-
-                    if settings.wallpaper.is_some() {
-                        main_window.set_fullscreen(true).unwrap();
-                        main_window.maximize().expect("Error maximizing window");
-                    } else {
-                        main_window.center().expect("Error centering window");
+                loop {
+                    {
+                        index_apps();
                     }
 
-                    main_window.show().unwrap();
-                    break;
+                    sleep(tokio::time::Duration::from_secs(300)).await;
                 }
-            }
-
-            main_window.show().expect("Error showing window");
+            });
 
             Ok(())
         })
@@ -142,7 +139,7 @@ fn main() {
                                 let settings = get_settings();
 
                                 if settings.hide_on_blur && settings.wallpaper.is_some() {
-                                    let window = app.get_window("main").unwrap();
+                                    let window = &app.get_window("main").unwrap();
                                     window.close().unwrap();
                                 }
                             }
@@ -150,6 +147,35 @@ fn main() {
                         _ => {}
                     }
                 }
+            }
+            RunEvent::Ready => {
+                if on_linux() && on_wayland() {
+                    return;
+                }
+
+                let owned_app = app.to_owned();
+
+                let settings = get_settings();
+                let first_key = settings.first_key;
+                let second_key = settings.second_key;
+                let third_key = settings.third_key;
+
+                let shortcut = match second_key {
+                    Some(second_key) => {
+                        format!("{}+{}+{}", &first_key, &second_key, &third_key)
+                    }
+                    None => format!("{}+{}", &first_key, &third_key),
+                };
+
+                owned_app
+                    .global_shortcut_manager()
+                    .register(&shortcut, move || {
+                        open_search_window(&owned_app);
+                    })
+                    .expect("Error registering shortcut");
+            }
+            RunEvent::ExitRequested { api, .. } => {
+                api.prevent_exit();
             }
             _ => {}
         });

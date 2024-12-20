@@ -37,7 +37,16 @@
 			"protocol": {
 				"all": true,
 				"asset": true,
-				"assetScope": ["**", "**/*", "$HOME", "$HOME/**", "$HOME/.config/**", "$HOME/.local/**", "$HOME/.icons/**", "$APPDATA/assets/*"]
+				"assetScope": [
+					"**",
+					"**/*",
+					"$HOME",
+					"$HOME/**",
+					"$HOME/.config/**",
+					"$HOME/.local/**",
+					"$HOME/.icons/**",
+					"$APPDATA/assets/*"
+				]
 			}
 		},
 		"bundle": {
@@ -90,6 +99,10 @@
 				"width": 900,
 				"height": 800
 			}
-		]
+		],
+		"systemTray": {
+			"iconPath": "icons/icon.png",
+			"iconAsTemplate": true
+		}
 	}
 }

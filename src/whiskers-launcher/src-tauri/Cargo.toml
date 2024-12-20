@@ -16,11 +16,24 @@ tauri-build = { version = "1.5.5", features = [] }
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.6.3", features = [ "clipboard-all", "path-all", "dialog-save", "dialog-open", "protocol-all", "fs-all", "shell-all", "window-all"] }
+tauri = { version = "1.7.2", features = [
+    "clipboard-all",
+    "path-all",
+    "dialog-save",
+    "dialog-open",
+    "global-shortcut-all",
+    "protocol-all",
+    "fs-all",
+    "shell-all",
+    "window-all",
+    "system-tray",
+] }
+
+# "global-shortcut-all"
 
 whiskers-launcher-core = "0.4.0"
 
-tokio = {version = "1.37.0", features = ["full"] }
+tokio = { version = "1.42.0", features = ["full"] }
 bincode = "*"
 open = "5.3.0"
 git2 = "0.19.0"
@@ -35,4 +48,4 @@ powershell_script = "1.1.0"
 
 
 [features]
-custom-protocol = [ "tauri/custom-protocol" ]
+custom-protocol = ["tauri/custom-protocol"]
