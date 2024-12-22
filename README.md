@@ -1,3 +1,4 @@
-> This app is no longer maintained. It's basically impossible to make a good launcher that works on windows because it's a total mess and this worsens the experience on the linux app. The next best thing is the windows power toys run. I really can't compete with closed source apis for getting icons and stuff. 
+> This application is no longer maintained. Developing a good launcher for Windows has proven to be a challenge, which negatively impact the experience on the Linux version of the app. Unfortunately there's no good way or an api to retrieve app icons and communicate between the launcher and extensions without having to artificially slow down the app.
+> As an alternative, you can use [PowerToys](https://learn.microsoft.com/en-us/windows/powertoys/run) Run for Windows.
 
 <img src="https://github.com/user-attachments/assets/5224e894-d68a-47fa-9742-133a80453fc9" width="140">
